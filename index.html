@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CineGBA 创作者工作台 · 界面样本 V1 草案</title>
+<meta name="description" content="按《平台网站界面设计方案 V1.0》第 5/6/9/14 节实现的工作台界面样本：工作台、上传存证、存证信息、收入中心，含深色/浅色双主题与 12 处评审标注。数据全部虚构。">
+<meta property="og:title" content="CineGBA 创作者工作台 · 界面样本">
+<meta property="og:description" content="四个核心页面 · 深浅双主题对比 · 12 处评审标注。数据全部虚构，仅用于界面讨论。">
+<meta property="og:image" content="cover.jpg">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#0A0E17">
+<style>
+/* ============================================================
+   CineGBA IP-Bridge — 工作台界面样本（V1 草案）
+   忠实实现《平台网站界面设计方案 V1.0》第五、六、九、十四节
+   双主题：dark = 方案指定的深色科技风；light = 现有品牌纸色体系
+   ============================================================ */
+
+:root{
+  --f:"Inter","PingFang SC","Microsoft YaHei","Hiragino Sans GB",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --fm:"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
+  --r:10px; --r-lg:14px;
+  --nav-h:56px; --side-w:208px;
+}
+[data-theme="dark"]{
+  --bg:#0A0E17; --bg-2:#0D1320;
+  --surface:#121B29; --surface-2:#172233; --surface-3:#1E2B3E;
+  --line:#22303F; --line-2:#2E4056;
+  --ink:#E9EFF7; --ink-2:#A8B8CC; --muted:#6C7E94;
+  --cyan:#22D3EE; --cyan-d:#0891B2; --cyan-soft:rgba(34,211,238,.12);
+  --gold:#F0B23C; --gold-soft:rgba(240,178,60,.13);
+  --ok:#34D399; --ok-soft:rgba(52,211,153,.13);
+  --warn:#FBBF24; --warn-soft:rgba(251,191,36,.13);
+  --danger:#F87171; --danger-soft:rgba(248,113,113,.13);
+  --accent:#22D3EE;
+  --shadow:0 8px 28px rgba(0,0,0,.38);
+  --grid:rgba(255,255,255,.045);
+}
+[data-theme="light"]{
+  --bg:#F0EAE0; --bg-2:#F7F3EC;
+  --surface:#FFFFFF; --surface-2:#FAF7F2; --surface-3:#F2ECE2;
+  --line:#DAD3C7; --line-2:#C4BDB0;
+  --ink:#252824; --ink-2:#4A4E48; --muted:#68665F;
+  --cyan:#0E7490; --cyan-d:#155E75; --cyan-soft:rgba(14,116,144,.09);
+  --gold:#A9681A; --gold-soft:rgba(169,104,26,.10);
+  --ok:#2E7D4F; --ok-soft:rgba(46,125,79,.10);
+  --warn:#8A5A00; --warn-soft:rgba(138,90,0,.10);
+  --danger:#B5392A; --danger-soft:rgba(181,57,42,.09);
+  --accent:#B5392A;
+  --shadow:0 1px 2px rgba(37,40,36,.04),0 8px 24px rgba(37,40,36,.07);
+  --grid:rgba(37,40,36,.05);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f);font-size:13.5px;
+  line-height:1.6;-webkit-font-smoothing:antialiased;overflow:hidden}
+button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
+a{color:inherit;text-decoration:none}
+ul{list-style:none}
+svg{display:block}
+
+/* ================= 顶栏 ================= */
+.top{position:fixed;top:0;left:0;right:0;height:var(--nav-h);z-index:60;
+  display:flex;align-items:center;gap:16px;padding:0 18px;
+  background:var(--surface);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:9px;flex:0 0 auto;width:calc(var(--side-w) - 18px)}
+.logo{width:27px;height:27px;border-radius:8px;background:var(--accent);
+  color:var(--bg);display:grid;place-items:center;font-weight:800;font-size:12px;
+  letter-spacing:-.5px;flex:0 0 auto}
+.brand b{font-size:13.5px;letter-spacing:-.2px;white-space:nowrap}
+.brand span{font-size:10px;color:var(--muted);display:block;line-height:1;margin-top:1px}
+
+.search{flex:1 1 300px;max-width:380px;position:relative}
+.search input{width:100%;height:32px;border-radius:8px;border:1px solid var(--line);
+  background:var(--bg-2);color:var(--ink);font:inherit;font-size:12.5px;padding:0 10px 0 30px;outline:none}
+.search input:focus{border-color:var(--cyan)}
+.search svg{position:absolute;left:9px;top:8px;width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:1.8}
+
+.top-r{margin-left:auto;display:flex;align-items:center;gap:8px}
+.iconbtn{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;
+  border:1px solid transparent;position:relative;color:var(--ink-2)}
+.iconbtn:hover{background:var(--surface-2);border-color:var(--line)}
+.iconbtn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.7}
+.dot{position:absolute;top:5px;right:6px;width:6px;height:6px;border-radius:50%;
+  background:var(--danger);border:1.5px solid var(--surface)}
+.avatar{width:30px;height:30px;border-radius:50%;background:var(--surface-3);
+  display:grid;place-items:center;font-size:11px;font-weight:700;color:var(--cyan);
+  border:1px solid var(--line-2)}
+
+/* 主题切换 */
+.tgl{display:flex;align-items:center;gap:5px;padding:4px 8px;border-radius:8px;
+  border:1px solid var(--line);font-size:11px;color:var(--ink-2);margin-right:4px}
+.tgl:hover{border-color:var(--line-2)}
+.tgl.on{background:var(--danger-soft);border-color:var(--danger);color:var(--danger)}
+
+/* ================= 侧栏 ================= */
+.side{position:fixed;top:var(--nav-h);left:0;bottom:0;width:var(--side-w);z-index:50;
+  background:var(--bg-2);border-right:1px solid var(--line);
+  padding:14px 10px;overflow-y:auto;display:flex;flex-direction:column;gap:2px}
+.side-lbl{font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);
+  padding:12px 10px 5px;font-weight:600}
+.navi{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:8px;
+  font-size:12.5px;color:var(--ink-2);cursor:pointer;transition:background .12s,color .12s;
+  position:relative}
+.navi:hover{background:var(--surface);color:var(--ink)}
+.navi.on{background:var(--cyan-soft);color:var(--cyan);font-weight:600}
+.navi.on::before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:2.5px;
+  border-radius:2px;background:var(--cyan)}
+.navi svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.7;flex:0 0 auto}
+.navi .cnt{margin-left:auto;font-size:10px;font-weight:700;padding:1px 5px;border-radius:20px;
+  background:var(--danger-soft);color:var(--danger)}
+.side-foot{margin-top:auto;padding:10px;border-radius:var(--r);background:var(--surface);
+  border:1px solid var(--line);font-size:11px;color:var(--muted);line-height:1.5}
+.side-foot b{color:var(--cyan);display:block;font-size:11.5px;margin-bottom:2px}
+
+/* ================= 主区 ================= */
+.main{margin:var(--nav-h) 0 0 var(--side-w);height:calc(100vh - var(--nav-h));
+  overflow-y:auto;padding:20px 24px 40px;position:relative}
+.scr{display:none;max-width:1120px;position:relative}
+.scr.on{display:block}
+
+.ph{display:flex;align-items:flex-start;gap:14px;margin-bottom:16px;flex-wrap:wrap}
+.ph h1{font-size:19px;font-weight:700;letter-spacing:-.3px;line-height:1.3}
+.ph p{font-size:12px;color:var(--muted);margin-top:3px}
+.ph-r{margin-left:auto;display:flex;gap:8px;align-items:center}
+
+.btn{height:32px;padding:0 13px;border-radius:8px;font-size:12.5px;font-weight:600;
+  display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line-2);
+  background:var(--surface);color:var(--ink);white-space:nowrap}
+.btn:hover{border-color:var(--cyan)}
+.btn.pri{background:var(--cyan);border-color:var(--cyan);color:var(--bg)}
+.btn.pri:hover{filter:brightness(1.08)}
+.gold{color:var(--gold)}
+.btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2}
+
+/* 卡片 */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);
+  padding:15px 16px;box-shadow:var(--shadow)}
+.card-h{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.card-h h3{font-size:12.5px;font-weight:700;letter-spacing:.01em}
+.card-h .more{margin-left:auto;font-size:11px;color:var(--muted)}
+.card-h .more:hover{color:var(--cyan)}
+
+/* 指标卡 */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);
+  padding:13px 14px;position:relative;overflow:hidden}
+.kpi::after{content:"";position:absolute;left:0;top:0;bottom:0;width:2.5px;
+  background:var(--line-2)}
+.kpi.gold::after{background:var(--gold)}
+.kpi.cy::after{background:var(--cyan)}
+.kpi.dg::after{background:var(--danger)}
+.kpi .lb{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px}
+.kpi .vl{font-size:23px;font-weight:750;letter-spacing:-.7px;margin:4px 0 2px;
+  font-variant-numeric:tabular-nums;line-height:1.15}
+.kpi .dl{font-size:10.5px;color:var(--muted)}
+.kpi .dl em{font-style:normal;color:var(--ok)}
+.kpi.gold .vl{color:var(--gold)}
+.kpi.dg .vl{color:var(--danger)}
+
+/* 两列布局 */
+.g2{display:grid;grid-template-columns:1.35fr 1fr;gap:12px;margin-bottom:14px}
+.g2e{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+
+/* 待处理事项 */
+.todo{display:flex;flex-direction:column;gap:1px}
+.todo-i{display:flex;align-items:center;gap:10px;padding:9px 8px;border-radius:8px;
+  cursor:pointer;border:1px solid transparent}
+.todo-i:hover{background:var(--surface-2);border-color:var(--line)}
+.todo-i .ic{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;flex:0 0 auto}
+.todo-i .ic svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8}
+.todo-i .tx{flex:1;min-width:0}
+.todo-i .tx b{display:block;font-size:12.5px;font-weight:600}
+.todo-i .tx span{font-size:11px;color:var(--muted)}
+.todo-i .go{font-size:11px;color:var(--cyan);font-weight:600;white-space:nowrap}
+.ic.r{background:var(--danger-soft);color:var(--danger)}
+.ic.w{background:var(--warn-soft);color:var(--warn)}
+.ic.g{background:var(--ok-soft);color:var(--ok)}
+.ic.c{background:var(--cyan-soft);color:var(--cyan)}
+
+/* 排行条 */
+.rank{display:flex;flex-direction:column;gap:9px}
+.rk{display:flex;align-items:center;gap:9px;font-size:12px}
+.rk .no{width:15px;color:var(--muted);font-size:10.5px;font-variant-numeric:tabular-nums}
+.rk .nm{width:112px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink-2)}
+.rk .bar{flex:1;height:6px;border-radius:4px;background:var(--surface-3);overflow:hidden}
+.rk .bar i{display:block;height:100%;border-radius:4px;
+  background:linear-gradient(90deg,var(--cyan-d),var(--cyan))}
+.rk .vv{width:46px;text-align:right;font-size:11px;color:var(--ink);font-variant-numeric:tabular-nums}
+
+/* 图表下摘要 */
+.mini{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;
+  padding-top:11px;border-top:1px solid var(--line)}
+.mini .k{display:block;font-size:10px;color:var(--muted);margin-bottom:1px}
+.mini .v{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums}
+
+/* 动态 */
+.feed{display:flex;flex-direction:column;gap:0}
+.fd{display:flex;gap:9px;padding:8px 0;border-bottom:1px solid var(--line);font-size:11.5px}
+.fd:last-child{border-bottom:none}
+.fd time{color:var(--muted);flex:0 0 42px;font-size:10.5px}
+.fd p{color:var(--ink-2);line-height:1.5}
+
+/* 步骤条 */
+.steps{display:flex;align-items:center;gap:0;margin-bottom:18px;flex-wrap:wrap}
+.st{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted)}
+.st .n{width:21px;height:21px;border-radius:50%;border:1.5px solid var(--line-2);
+  display:grid;place-items:center;font-size:10.5px;font-weight:700;flex:0 0 auto}
+.st.done .n{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
+.st.now .n{background:var(--cyan);border-color:var(--cyan);color:var(--bg)}
+.st.now{color:var(--ink);font-weight:600}
+.st.done{color:var(--ink-2)}
+.steps>.ln{width:30px;height:2px;border-radius:2px;background:var(--line-2);margin:0 9px;flex:0 0 auto}
+
+/* 类型选择 */
+.types{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin-bottom:16px}
+.tp{border:1.5px solid var(--line);border-radius:var(--r);padding:12px 8px;text-align:center;
+  cursor:pointer;transition:.13s}
+.tp:hover{border-color:var(--line-2);background:var(--surface-2)}
+.tp.on{border-color:var(--cyan);background:var(--cyan-soft)}
+.tp svg{width:21px;height:21px;margin:0 auto 6px;stroke:var(--ink-2);fill:none;stroke-width:1.6}
+.tp.on svg{stroke:var(--cyan)}
+.tp b{display:block;font-size:12px;font-weight:600}
+.tp span{font-size:10px;color:var(--muted);display:block;margin-top:2px}
+
+/* 拖拽区 */
+.drop{border:1.5px dashed var(--line-2);border-radius:var(--r-lg);padding:22px;
+  text-align:center;background:var(--surface-2);margin-bottom:14px}
+.drop .file{display:flex;align-items:center;gap:11px;text-align:left;
+  padding:10px;border-radius:var(--r);background:var(--surface);border:1px solid var(--line)}
+.thmb{width:52px;height:38px;border-radius:6px;flex:0 0 auto;
+  background:linear-gradient(135deg,#1b2a3f,#2b3f5c);display:grid;place-items:center;
+  color:var(--cyan);font-size:9px;font-weight:700;border:1px solid var(--line-2)}
+.drop .fi{flex:1;min-width:0}
+.drop .fi b{display:block;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.drop .fi span{font-size:10.5px;color:var(--muted)}
+
+/* 表单 */
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:11px}
+.fld{display:flex;flex-direction:column;gap:4px}
+.fld.full{grid-column:1/-1}
+.fld label{font-size:11.5px;color:var(--ink-2);font-weight:600}
+.fld label i{color:var(--danger);font-style:normal;margin-left:2px}
+.fld input,.fld select,.fld textarea{height:32px;border-radius:7px;border:1px solid var(--line);
+  background:var(--bg-2);color:var(--ink);font:inherit;font-size:12.5px;padding:0 10px;outline:none;width:100%}
+.fld textarea{height:auto;padding:8px 10px;resize:vertical;line-height:1.5}
+.fld select{appearance:none;background-image:none;cursor:pointer}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--cyan)}
+.hint{font-size:10.5px;color:var(--muted)}
+
+/* 单选组 */
+.radios{display:flex;gap:8px;flex-wrap:wrap}
+.rd{padding:6px 11px;border-radius:7px;border:1px solid var(--line);font-size:12px;
+  cursor:pointer;color:var(--ink-2)}
+.rd:hover{border-color:var(--line-2)}
+.rd.on{border-color:var(--cyan);background:var(--cyan-soft);color:var(--cyan);font-weight:600}
+
+/* 存证进度 */
+.prog{display:flex;flex-direction:column;gap:9px}
+.pg{display:flex;align-items:center;gap:10px;font-size:12px}
+.pg .nm{width:96px;color:var(--ink-2);flex:0 0 auto}
+.pg .tr{flex:1;height:5px;border-radius:3px;background:var(--surface-3);overflow:hidden}
+.pg .tr i{display:block;height:100%;background:var(--ok);border-radius:3px}
+.pg .pc{width:34px;text-align:right;font-size:11px;color:var(--ok);font-variant-numeric:tabular-nums}
+
+/* 证据块 */
+.ev{background:var(--bg-2);border:1px solid var(--line);border-radius:var(--r);
+  padding:11px 13px;font-family:var(--fm);font-size:11px;line-height:1.85;color:var(--ink-2);
+  overflow-x:auto;margin-top:10px}
+.ev b{color:var(--muted);font-weight:400;font-family:var(--f);font-size:10.5px;
+  display:inline-block;width:68px}
+.ev em{font-style:normal;color:var(--cyan);font-family:var(--fm)}
+.ev .gl{color:var(--gold)}
+
+/* 证书 */
+.cert{border:1.5px solid var(--gold);border-radius:var(--r-lg);padding:16px 18px;
+  background:
+    radial-gradient(circle at 100% 0%, var(--gold-soft), transparent 62%),
+    var(--surface);position:relative;overflow:hidden}
+.cert::before{content:"存证凭证样本";position:absolute;right:-6px;bottom:14px;
+  font-size:36px;font-weight:800;color:var(--gold);opacity:.032;
+  letter-spacing:.06em;transform:rotate(-9deg);pointer-events:none;white-space:nowrap}
+.cert-h{display:flex;align-items:center;gap:8px;margin-bottom:2px}
+.cert-h svg{width:15px;height:15px;stroke:var(--gold);fill:none;stroke-width:1.8}
+.cert-h b{font-size:12.5px;color:var(--gold);letter-spacing:.02em}
+.cert-sub{font-size:10.5px;color:var(--muted);margin-bottom:11px}
+.cert-grid{display:flex;flex-direction:column;gap:6px;position:relative}
+.cert-grid>div{display:flex;align-items:baseline;gap:10px;font-size:11px}
+.cert-grid .k{color:var(--muted);font-size:10.5px;flex:0 0 58px}
+.cert-grid .v{font-family:var(--fm);font-size:11px;color:var(--ink);
+  text-align:right;flex:1 1 auto;word-break:break-all;line-height:1.45}
+
+/* 提示条 */
+.note{display:flex;gap:8px;padding:9px 11px;border-radius:var(--r);font-size:11px;
+  line-height:1.55;margin-top:11px;border:1px solid}
+.note svg{width:13px;height:13px;flex:0 0 auto;margin-top:2px;stroke:currentColor;
+  fill:none;stroke-width:1.9}
+.note.w{background:var(--warn-soft);border-color:var(--warn);color:var(--warn)}
+.note.c{background:var(--cyan-soft);border-color:var(--cyan);color:var(--cyan)}
+.note.w b,.note.c b{font-weight:700}
+
+/* Tabs */
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin-bottom:16px}
+.tab{padding:8px 13px;font-size:12.5px;color:var(--muted);cursor:pointer;
+  border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab:hover{color:var(--ink-2)}
+.tab.on{color:var(--cyan);border-bottom-color:var(--cyan);font-weight:600}
+
+/* 记录三列 */
+.reg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.rgi{border:1px solid var(--line);border-radius:var(--r);padding:11px 12px;background:var(--surface-2)}
+.rgi .rg-t{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;margin-bottom:7px}
+.rgi .rg-t .bdg{font-size:9px;padding:1px 5px;border-radius:20px;font-weight:700;margin-left:auto}
+.rgi dl{font-size:10.5px;display:flex;flex-direction:column;gap:4px}
+.rgi dl div{display:flex;gap:6px}
+.rgi dt{color:var(--muted);flex:0 0 52px}
+.rgi dd{color:var(--ink-2);font-family:var(--fm);font-size:10px;word-break:break-all}
+.bdg.ok{background:var(--ok-soft);color:var(--ok)}
+.bdg.w{background:var(--warn-soft);color:var(--warn)}
+.bdg.m{background:var(--surface-3);color:var(--muted)}
+
+/* 表格 */
+table{width:100%;border-collapse:collapse;font-size:11.5px}
+th{text-align:left;font-weight:600;font-size:10.5px;color:var(--muted);
+  padding:7px 9px;border-bottom:1px solid var(--line-2);white-space:nowrap}
+td{padding:8px 9px;border-bottom:1px solid var(--line);color:var(--ink-2)}
+tr:hover td{background:var(--surface-2)}
+td.mono{font-family:var(--fm);font-size:10.5px}
+td.num{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--fm);font-size:11px}
+td .amt{color:var(--gold);font-weight:700}
+.pill{font-size:9.5px;padding:1.5px 6px;border-radius:20px;font-weight:600;white-space:nowrap}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.c{background:var(--cyan-soft);color:var(--cyan)}
+.pill.w{background:var(--warn-soft);color:var(--warn)}
+.pill.d{background:var(--danger-soft);color:var(--danger)}
+.pill.m{background:var(--surface-3);color:var(--muted)}
+
+/* 实时流 */
+.live{display:flex;flex-direction:column;gap:0;max-height:252px;overflow-y:auto}
+.lvi{display:flex;align-items:center;gap:9px;padding:7px 6px;border-radius:7px;
+  border-bottom:1px solid var(--line);font-size:11.5px}
+.lvi:last-child{border-bottom:none}
+.lvi.new{background:var(--cyan-soft)}
+@keyframes in{from{opacity:.35;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.lvi time{color:var(--muted);font-family:var(--fm);font-size:10px;flex:0 0 40px}
+.lvi .src{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink-2)}
+.lvi .amt{color:var(--gold);font-weight:700;font-family:var(--fm);font-size:11px;flex:0 0 auto}
+.lvi .way{font-size:9.5px;padding:1px 5px;border-radius:20px;flex:0 0 auto}
+.way.auto{background:var(--cyan-soft);color:var(--cyan)}
+.way.man{background:var(--surface-3);color:var(--muted)}
+.livebar{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--muted);margin-bottom:8px}
+.pulse{width:5px;height:5px;border-radius:50%;background:var(--ok);animation:pl 1.6s infinite}
+@keyframes pl{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(52,211,153,.5)}50%{opacity:.6;box-shadow:0 0 0 4px rgba(52,211,153,0)}}
+
+/* 图例 */
+.legend{display:flex;flex-direction:column;gap:7px;font-size:11px}
+.lg{display:flex;align-items:center;gap:7px;color:var(--ink-2)}
+.lg i{width:8px;height:8px;border-radius:2px;flex:0 0 auto}
+.lg span{margin-left:auto;font-variant-numeric:tabular-nums;color:var(--ink);font-family:var(--fm);font-size:11px}
+
+/* 演示数据角标 */
+.demo{font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;
+  background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn);
+  letter-spacing:.03em;pointer-events:none;white-space:nowrap}
+
+/* ============ 评审标注 ============ */
+.pin{position:absolute;width:19px;height:19px;border-radius:50%;background:var(--danger);
+  color:#fff;font-size:10.5px;font-weight:800;display:none;place-items:center;z-index:80;
+  cursor:help;box-shadow:0 0 0 3px var(--danger-soft);font-family:var(--f)}
+body.marks .pin{display:grid}
+.pin::after{content:attr(data-note);position:absolute;left:26px;top:-4px;width:236px;
+  background:var(--surface);color:var(--ink);border:1px solid var(--danger);border-radius:9px;
+  padding:8px 10px;font-size:11px;font-weight:400;line-height:1.5;text-align:left;
+  opacity:0;pointer-events:none;transition:opacity .15s;box-shadow:var(--shadow);z-index:81}
+.pin:hover::after,.pin.show::after{opacity:1}
+.pin.show{outline:2px solid var(--danger);outline-offset:3px}
+.pin.tt-l::after{left:auto;right:26px}
+
+@media(max-width:1080px){
+  .kpis{grid-template-columns:1fr 1fr}
+  .g2,.g2e,.reg{grid-template-columns:1fr}
+  .types{grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:760px){
+  .pin::after{width:196px;font-size:11px;padding:7px 9px}
+  .pin{width:18px;height:18px;font-size:10px}
+  :root{--side-w:0px}
+  .side{display:none}
+  .main{margin-left:0;padding:16px}
+  .frow{grid-template-columns:1fr}
+  .kpis{grid-template-columns:1fr 1fr}
+  .types{grid-template-columns:1fr 1fr}
+  .cert-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ================= 顶栏 ================= -->
+<header class="top">
+  <div class="brand">
+    <div class="logo">CG</div>
+    <div><b>CineGBA IP-Bridge</b><span>创作者工作台</span></div>
+  </div>
+  <div class="search">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <input placeholder="搜索作品、合约、工单编号…">
+  </div>
+  <div class="top-r">
+    <button class="tgl" id="themeBtn" title="切换主题：方案指定的深色科技风 / 现有品牌纸色体系">
+      <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg>
+      <span id="themeLbl">深色</span>
+    </button>
+    <button class="tgl" id="markBtn" title="叠加评审标注：18 处，红点可见，悬停看说明">
+      <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg>
+      <span>评审标注</span>
+    </button>
+    <button class="iconbtn" title="帮助"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 115 0c0 1.5-2.5 2-2.5 3.5M12 17h.01"/></svg></button>
+    <button class="iconbtn" title="通知"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 10-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10.5 21a2 2 0 003 0"/></svg><i class="dot"></i></button>
+    <div class="demo">演示数据 · 非真实业务</div>
+    <div class="avatar">林</div>
+  </div>
+</header>
+
+<!-- ================= 侧栏 ================= -->
+<aside class="side">
+  <div class="side-lbl">版权方工作区</div>
+  <div class="navi on" data-go="dash"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>工作台</div>
+  <div class="navi" data-go="upload"><svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a2 2 0 002 2h12a2 2 0 002-2v-3"/></svg>上传作品</div>
+  <div class="navi" data-go="evidence"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 012-2h8l6 6v12a2 2 0 01-2 2H6a2 2 0 01-2-2z"/><path d="M14 3v6h6"/><circle cx="12" cy="15" r="2"/></svg>作品库</div>
+  <div class="navi"><svg viewBox="0 0 24 24"><path d="M3 10l9-7 9 7v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 21v-7h6v7"/></svg>授权市场</div>
+  <div class="navi" data-go="revenue"><svg viewBox="0 0 24 24"><path d="M3 17l5-6 4 3 4-6 5 4"/><path d="M3 21h18"/></svg>收入中心</div>
+  <div class="navi"><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>维权中心<span class="cnt">8</span></div>
+  <div class="navi"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>数据洞察</div>
+  <div class="side-lbl">账户</div>
+  <div class="navi"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/></svg>认证与设置</div>
+  <div class="side-foot">
+    <b>企业认证已通过</b>
+    大湾区某动画工作室<br>编号 CG-ENT-0231<br>有效期至 2027-08
+  </div>
+</aside>
+
+<!-- ================= 主区 ================= -->
+<main class="main" id="main">
+
+<!-- ========== 1. 工作台 ========== -->
+<section class="scr on" id="scr-dash">
+
+  <!-- 标注 1：主 CTA 与认证门槛冲突 -->
+
+  <div class="ph">
+    <div>
+      <h1>下午好，林女士</h1>
+      <p>你有 <b style="color:var(--danger)">8 条</b>新的侵权线索待确认，其中 2 条已超过 7 天处置窗口。</p>
+    </div>
+    <div class="ph-r">
+      <button class="btn" data-go="evidence">查看作品库</button>
+      <button class="btn pri" data-go="upload">
+        <svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a2 2 0 002 2h12a2 2 0 002-2v-3"/></svg>
+        上传并存证
+      </button>
+    </div>
+  </div>
+
+  <!-- 标注 2：指标口径 -->
+
+  <div class="kpis">
+    <div class="kpi cy">
+      <div class="lb">已存证作品</div>
+      <div class="vl">12</div>
+      <div class="dl">较上月 <em>+3</em> · 覆盖 5 种类型</div>
+    </div>
+    <div class="kpi dg">
+      <div class="lb">疑似侵权线索</div>
+      <div class="vl">37</div>
+      <div class="dl">本周新增 8 · 待确认 8</div>
+    </div>
+    <div class="kpi gold">
+      <div class="lb">本月授权收入</div>
+      <div class="vl gold">¥48,600</div>
+      <div class="dl">较上月 <em>+24.6%</em> · 已扣佣金</div>
+    </div>
+    <div class="kpi">
+      <div class="lb">累计收入</div>
+      <div class="vl">¥316,200</div>
+      <!-- 标注 3 -->
+      <div class="dl">含待结算 ¥12,400</div>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="card-h">
+        <h3>待处理事项</h3>
+        <a class="more" href="#">全部处理 →</a>
+      </div>
+      <div class="todo">
+        <div class="todo-i">
+          <div class="ic r"><svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9L2.4 18a2 2 0 001.7 3h15.8a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg></div>
+          <div class="tx"><b>新侵权线索 8 条</b><span>《山海绘卷》第 3 集在 2 个短视频平台被搬运，最高相似度 94.2%</span></div>
+          <span class="go">去维权 →</span>
+        </div>
+        <div class="todo-i">
+          <div class="ic w"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 012-2h8l6 6v12a2 2 0 01-2 2H6a2 2 0 01-2-2z"/><path d="M14 3v6h6"/></svg></div>
+          <div class="tx"><b>待签署合约 2 份</b><span>某 AI 公司 × AI 训练数据授权（年度），对方已签，等你签</span></div>
+          <span class="go">去签署 →</span>
+        </div>
+        <div class="todo-i">
+          <div class="ic g"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 11h18"/></svg></div>
+          <div class="tx"><b>待提现 ¥12,400</b><span>已结算，可提现至香港对公账户</span></div>
+          <span class="go">去提现 →</span>
+        </div>
+        <div class="todo-i">
+          <div class="ic c"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+          <div class="tx"><b>即将到期的授权 1 项</b><span>某平台片段引用授权，2026-11-30 到期</span></div>
+          <span class="go">去续约 →</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-h">
+        <h3>收入趋势</h3>
+        <span class="more">近 6 个月</span>
+      </div>
+      <!-- 标注 4 -->
+      <svg viewBox="0 0 320 118" style="width:100%;height:auto">
+        <defs>
+          <linearGradient id="ga" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="var(--cyan)" stop-opacity=".28"/>
+            <stop offset="100%" stop-color="var(--cyan)" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <g stroke="var(--grid)" stroke-width="1">
+          <line x1="0" y1="35" x2="320" y2="35"/>
+          <line x1="0" y1="65" x2="320" y2="65"/>
+          <line x1="0" y1="95" x2="320" y2="95"/>
+        </g>
+        <path d="M10,89.4 L70,74 L130,81.7 L190,53.4 L250,61.1 L310,35.4 L310,110 L10,110 Z" fill="url(#ga)"/>
+        <path d="M10,89.4 L70,74 L130,81.7 L190,53.4 L250,61.1 L310,35.4"
+              fill="none" stroke="var(--cyan)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+        <g fill="var(--cyan)">
+          <circle cx="10" cy="89.4" r="2.6"/><circle cx="70" cy="74" r="2.6"/>
+          <circle cx="130" cy="81.7" r="2.6"/><circle cx="190" cy="53.4" r="2.6"/>
+          <circle cx="250" cy="61.1" r="2.6"/><circle cx="310" cy="35.4" r="3.4"/>
+        </g>
+        <text x="304" y="26" fill="var(--gold)" font-size="10" font-weight="700" text-anchor="end">48.6</text>
+        <g fill="var(--muted)" font-size="8.5" font-family="var(--fm)">
+          <text x="10" y="117" text-anchor="middle">5月</text><text x="70" y="117" text-anchor="middle">6月</text>
+          <text x="130" y="117" text-anchor="middle">7月</text><text x="190" y="117" text-anchor="middle">8月</text>
+          <text x="250" y="117" text-anchor="middle">9月</text><text x="310" y="117" text-anchor="middle">10月</text>
+        </g>
+      </svg>
+      <div class="hint" style="margin-top:6px">单位：千元 · 已扣除平台佣金 · 不含待结算金额</div>
+      <div class="mini">
+        <div><span class="k">环比上月</span><span class="v" style="color:var(--ok)">+24.6%</span></div>
+        <div><span class="k">最大单笔</span><span class="v">¥2,400</span></div>
+        <div><span class="k">平均单笔</span><span class="v">¥1,185</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="g2e">
+    <div class="card">
+      <div class="card-h">
+        <h3>作品被授权 Top 5</h3>
+        <a class="more" href="#">全部 →</a>
+      </div>
+      <!-- 标注 5 -->
+      <div class="rank">
+        <div class="rk"><span class="no">1</span><span class="nm">山海绘卷 · 第3集</span><span class="bar"><i style="width:100%"></i></span><span class="vv">18 次</span></div>
+        <div class="rk"><span class="no">2</span><span class="nm">霓虹湾 · 全片</span><span class="bar"><i style="width:72%"></i></span><span class="vv">13 次</span></div>
+        <div class="rk"><span class="no">3</span><span class="nm">潮汐纪 · 概念设定集</span><span class="bar"><i style="width:55%"></i></span><span class="vv">10 次</span></div>
+        <div class="rk"><span class="no">4</span><span class="nm">小城年夜 · 片段包</span><span class="bar"><i style="width:39%"></i></span><span class="vv">7 次</span></div>
+        <div class="rk"><span class="no">5</span><span class="nm">纸鸢 · 角色模型</span><span class="bar"><i style="width:22%"></i></span><span class="vv">4 次</span></div>
+      </div>
+      <div class="hint" style="margin-top:9px">口径：按有效授权合约数统计，口径说明见「数据洞察」页</div>
+    </div>
+
+    <div class="card">
+      <div class="card-h">
+        <h3>平台动态</h3>
+        <span class="more">近 7 天</span>
+      </div>
+      <div class="feed">
+        <div class="fd"><time>10-24</time><p>新增 <b>2 家</b>采购方完成企业认证，AI 训练数据授权需求上升。</p></div>
+        <div class="fd"><time>10-22</time><p>「AI 训练数据授权」标准合约模板 v1.2 发布，新增训练用途披露条款。</p></div>
+        <div class="fd"><time>10-20</time><p>与你相关的 1 份授权已自动续约，佣金比例不变。</p></div>
+        <div class="fd"><time>10-18</time><p>版权登记对接流程更新：新增 DCI 编码回填字段（可选）。</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 2. 上传作品 ========== -->
+<section class="scr" id="scr-upload">
+  <div class="ph">
+    <div>
+      <h1>上传作品并生成存证</h1>
+      <p>第 3 步 · 指纹已提取完成，等待登记存证</p>
+    </div>
+    <div class="ph-r"><button class="btn" data-go="dash">取消</button></div>
+  </div>
+
+  <div class="steps">
+    <div class="st done"><span class="n">✓</span>选择类型</div><span class="ln"></span>
+    <div class="st done"><span class="n">✓</span>上传文件</div><span class="ln"></span>
+    <div class="st done"><span class="n">✓</span>填写信息</div><span class="ln"></span>
+    <div class="st now"><span class="n">4</span>指纹与存证</div>
+  </div>
+
+  <div class="g2">
+    <div>
+      <div class="card" style="margin-bottom:12px">
+        <div class="card-h"><h3>作品类型</h3><span class="more">已选：视频</span></div>
+        <div class="types">
+          <div class="tp on"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3z"/></svg><b>视频</b><span>MP4/MOV ≤20GB</span></div>
+          <div class="tp"><svg viewBox="0 0 24 24"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg><b>音频</b><span>WAV/FLAC ≤2GB</span></div>
+          <div class="tp"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 15l-5-5-9 9"/></svg><b>图片</b><span>PNG/JPG ≤200MB</span></div>
+          <div class="tp"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 012-2h8l6 6v12a2 2 0 01-2 2H6a2 2 0 01-2-2z"/><path d="M14 3v6h6"/></svg><b>剧本文档</b><span>PDF/DOCX ≤50MB</span></div>
+          <div class="tp"><svg viewBox="0 0 24 24"><path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M12 12l9-5M12 12v10M12 12L3 7"/></svg><b>3D 模型</b><span>GLB/FBX ≤5GB</span></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:12px">
+        <div class="card-h"><h3>已上传文件</h3><span class="more">1 / 1 完成</span></div>
+        <div class="drop" style="padding:0;background:none;border:none">
+          <div class="file">
+            <div class="thmb">PREVIEW</div>
+            <div class="fi">
+              <b>山海绘卷_第3集_master_v7.mp4</b>
+              <span>4K · 24 fps · 22:14 · 3.81 GB</span>
+            </div>
+            <span class="pill ok">已完成</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><h3>作品信息</h3></div>
+        <div class="frow">
+          <div class="fld"><label>作品名称 <i>*</i></label><input value="山海绘卷 · 第 3 集"></div>
+          <div class="fld"><label>创作完成日期 <i>*</i></label><input value="2026-03-18"></div>
+          <div class="fld full"><label>简介</label><textarea rows="2">系列动画第三集，含 6 个原创角色设定与全部场景美术。</textarea></div>
+          <div class="fld"><label>标签</label><input value="动画, 国风, 系列剧"></div>
+          <div class="fld"><label>权利归属声明 <i>*</i></label><select><option>原创（公司全资持有）</option><option>已获授权（需上传授权链文件）</option><option>合作共有</option></select></div>
+          <div class="fld full">
+            <label>是否含真实人物肖像或声音 <i>*</i></label>
+            <div class="radios">
+              <span class="rd on">不含</span><span class="rd">含肖像</span><span class="rd">含声音</span>
+            </div>
+            <!-- 标注 6 -->
+          </div>
+        </div>
+        <div class="note w">
+          <svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9L2.4 18a2 2 0 001.7 3h15.8a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg>
+          <div>若选择「含肖像」或「含声音」，系统将<b>要求上传对应授权文件后才允许上架授权市场</b>；仅存证不受限制。此规则来自方案未覆盖的合规要求，建议补进需求文档。</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card" style="margin-bottom:12px">
+        <div class="card-h"><h3>存证进度</h3><span class="more">已完成 3 / 4</span></div>
+        <div class="prog">
+          <div class="pg"><span class="nm">文件上传</span><span class="tr"><i style="width:100%"></i></span><span class="pc">100%</span></div>
+          <div class="pg"><span class="nm">指纹提取</span><span class="tr"><i style="width:100%"></i></span><span class="pc">100%</span></div>
+          <div class="pg"><span class="nm">哈希生成</span><span class="tr"><i style="width:100%"></i></span><span class="pc">100%</span></div>
+          <div class="pg"><span class="nm">登记存证</span><span class="tr"><i style="width:0%"></i></span><span class="pc" style="color:var(--muted)">待提交</span></div>
+        </div>
+        <!-- 标注 7 -->
+        <div class="ev">
+          <div><b>算法版本</b>CG-FP v0.9.3-multimodal</div>
+          <div><b>画面指纹</b><em>a3f8c1d2…7e4b</em></div>
+          <div><b>音频指纹</b><em>91bc04aa…2f81</em></div>
+          <div><b>提取时间</b>2026-10-25 13:02:41 (+08:00)</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><h3>存证凭证</h3><span class="pill w">提交后生成</span></div>
+        <div class="cert">
+          <div class="cert-h">
+            <svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>
+            <b>CineGBA 存证凭证</b>
+          </div>
+          <div class="cert-sub">Certificate of Deposit · 样本预览，非最终版式</div>
+          <div class="cert-grid">
+            <div><span class="k">凭证编号</span><span class="v">DEP-2026-1025-0417</span></div>
+            <div><span class="k">作品名称</span><span class="v" style="font-family:var(--f)">山海绘卷 · 第 3 集</span></div>
+            <div><span class="k">指纹哈希</span><span class="v">a3f8c1d2e9b74b…7e4b</span></div>
+            <div><span class="k">时间戳</span><span class="v">2026-10-25 13:02:41</span></div>
+            <div><span class="k">存证方式</span><span class="v" style="font-family:var(--f)">链上存证 + 可信时间戳</span></div>
+            <div><span class="k">状态</span><span class="v" style="font-family:var(--f);color:var(--ok)">已生成</span></div>
+          </div>
+        </div>
+        <button class="btn pri" style="width:100%;justify-content:center;margin-top:12px">提交登记存证</button>
+        <div class="note c">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>
+          <div>存证用于<b>提升可追溯性与举证便利</b>，不构成本作品权属的法定推定。如需登记效力，请另行办理作品自愿登记（境内）或按香港适用法律处理。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 3. 作品详情 · 存证信息 ========== -->
+<section class="scr" id="scr-evidence">
+  <div class="ph">
+    <div>
+      <h1>山海绘卷 · 第 3 集</h1>
+      <p>视频 · 4K/24fps · 22:14 · 存证于 2026-04-02 · 作品编号 CG-W-1041</p>
+    </div>
+    <div class="ph-r">
+      <button class="btn">编辑信息</button>
+      <button class="btn">下载凭证</button>
+      <button class="btn pri">发起授权</button>
+    </div>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi cy"><div class="lb">累计授权次数</div><div class="vl">18</div><div class="dl">其中履约中 4</div></div>
+    <div class="kpi gold"><div class="lb">累计收入</div><div class="vl gold">¥86,400</div><div class="dl">已扣佣金</div></div>
+    <div class="kpi dg"><div class="lb">疑似侵权线索</div><div class="vl">11</div><div class="dl">已处置 7 · 待确认 4</div></div>
+    <div class="kpi"><div class="lb">监测覆盖平台</div><div class="vl">26</div><div class="dl">含 4 个 AI 数据集站点</div></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab">总览</div>
+    <div class="tab on">存证信息</div>
+    <div class="tab">维权动态</div>
+    <div class="tab">收入明细</div>
+  </div>
+
+  <!-- 标注 8 -->
+
+  <div class="reg">
+    <div class="rgi">
+      <div class="rg-t">
+        <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--cyan);fill:none;stroke-width:1.8"><path d="M12 2l9 5v10l-9 5-9-5V7z"/></svg>
+        链上存证 <span class="bdg ok">已完成</span>
+      </div>
+      <dl>
+        <div><dt>存证网络</dt><dd>机构联盟链（样本）</dd></div>
+        <div><dt>交易哈希</dt><dd>0x8f3c…d21a</dd></div>
+        <div><dt>区块高度</dt><dd>1,204,887</dd></div>
+        <div><dt>上链时间</dt><dd>2026-04-02 10:41</dd></div>
+        <div><dt>效力说明</dt><dd style="font-family:var(--f);color:var(--warn)">仅证明该时点存在该指纹，不构成权属推定</dd></div>
+      </dl>
+    </div>
+    <div class="rgi">
+      <div class="rg-t">
+        <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--gold);fill:none;stroke-width:1.8"><path d="M4 5a2 2 0 012-2h8l6 6v12a2 2 0 01-2 2H6a2 2 0 01-2-2z"/><path d="M14 3v6h6"/></svg>
+        作品自愿登记 <span class="bdg m">未办理</span>
+      </div>
+      <dl>
+        <div><dt>登记机关</dt><dd style="font-family:var(--f)">—</dd></div>
+        <div><dt>登记号</dt><dd style="font-family:var(--f)">—</dd></div>
+        <div><dt>DCI 编码</dt><dd style="font-family:var(--f)">—</dd></div>
+        <div><dt>效力说明</dt><dd style="font-family:var(--f);color:var(--muted)">法定登记证书，效力最高但需人工办理</dd></div>
+      </dl>
+      <button class="btn" style="width:100%;justify-content:center;margin-top:9px;height:27px;font-size:11.5px">了解如何办理</button>
+    </div>
+    <div class="rgi">
+      <div class="rg-t">
+        <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--ok);fill:none;stroke-width:1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        可信时间戳 <span class="bdg ok">已完成</span>
+      </div>
+      <dl>
+        <div><dt>签发机构</dt><dd style="font-family:var(--f)">第三方 TSA（样本）</dd></div>
+        <div><dt>戳值</dt><dd>TSA-2026-0402-…</dd></div>
+        <div><dt>签发时间</dt><dd>2026-04-02 10:39</dd></div>
+        <div><dt>效力说明</dt><dd style="font-family:var(--f);color:var(--ok)">司法实践中常作为电子数据真实性的辅助证据</dd></div>
+      </dl>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="card-h"><h3>多模态指纹</h3><span class="more">算法版本 CG-FP v0.9.3</span></div>
+      <!-- 标注 9 -->
+      <table>
+        <thead><tr><th>模态</th><th>哈希值</th><th>提取时间</th><th>状态</th></tr></thead>
+        <tbody>
+          <tr><td>画面指纹</td><td class="mono">a3f8c1d2…7e4b</td><td class="mono">04-02 10:38</td><td><span class="pill ok">有效</span></td></tr>
+          <tr><td>音频指纹</td><td class="mono">91bc04aa…2f81</td><td class="mono">04-02 10:38</td><td><span class="pill ok">有效</span></td></tr>
+          <tr><td>文本指纹（字幕）</td><td class="mono">7d20e5f1…c93a</td><td class="mono">04-02 10:39</td><td><span class="pill ok">有效</span></td></tr>
+          <tr><td>水印（参考）</td><td class="mono">—</td><td class="mono">—</td><td><span class="pill w">不采用</span></td></tr>
+        </tbody>
+      </table>
+      <div class="note w">
+        <svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9L2.4 18a2 2 0 001.7 3h15.8a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg>
+        <div>水印不作为存证依据：公开研究显示水印在对抗性攻击下可被低成本去除（单样本即可完成去除与伪造）。指纹是当前唯一经大规模工业验证的方案，但<b>相似度不等于侵权认定</b>。</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><h3>权属文件</h3><span class="more">3 份</span></div>
+      <table>
+        <colgroup><col style="width:58%"><col style="width:26%"><col style="width:16%"></colgroup>
+        <thead><tr><th>文件</th><th>类型</th><th>上传时间</th></tr></thead>
+        <tbody>
+          <tr><td>创作过程_分镜脚本_v1-v7.pdf</td><td><span class="pill c">创作过程</span></td><td class="mono">04-02</td></tr>
+          <tr><td>角色设定合同_2026.pdf</td><td><span class="pill c">授权链</span></td><td class="mono">04-02</td></tr>
+          <tr><td>公司持有声明.pdf</td><td><span class="pill c">权属声明</span></td><td class="mono">04-02</td></tr>
+        </tbody>
+      </table>
+      <button class="btn" style="width:100%;justify-content:center;margin-top:10px">补充上传</button>
+      <div class="hint" style="margin-top:9px;line-height:1.55">建议：权属文件缺失时，平台应自动降低该作品的授权等级（例如不可上架「全版权」授权），而不是让用户自由选择。</div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 4. 收入中心 ========== -->
+<section class="scr" id="scr-revenue">
+  <div class="ph">
+    <div>
+      <h1>收入中心</h1>
+      <p>数据更新至 2026-10-25 13:04 · 结算周期 T+7</p>
+    </div>
+    <div class="ph-r">
+      <button class="btn">导出明细 CSV</button>
+      <button class="btn pri">提现</button>
+    </div>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="lb">今日收入</div><div class="vl">¥1,240</div><div class="dl">较昨日 <em>+8.2%</em></div></div>
+    <div class="kpi gold"><div class="lb">本月收入</div><div class="vl gold">¥48,600</div><div class="dl">已扣佣金 12%</div></div>
+    <div class="kpi"><div class="lb">累计收入</div><div class="vl">¥316,200</div><div class="dl">自 2026-01 起</div></div>
+    <div class="kpi cy"><div class="lb">待结算</div><div class="vl">¥12,400</div><div class="dl">9 笔 · 最晚 11-01 到账</div></div>
+  </div>
+
+  <!-- 标注 10 -->
+
+  <div class="g2" style="grid-template-columns:1.15fr 1fr">
+    <div class="card">
+      <div class="card-h">
+        <h3>实时收入流</h3>
+        <span class="more">最近 20 笔</span>
+      </div>
+      <div class="livebar"><i class="pulse"></i>准实时刷新（页面每 60 秒拉取一次，非链上自动分账）</div>
+      <div class="live">
+        <div class="lvi new"><time>13:04</time><span class="src">山海绘卷 · 第3集 · AI 训练数据</span><span class="way auto">自动</span><span class="amt">+¥320</span></div>
+        <div class="lvi"><time>12:58</time><span class="src">霓虹湾 · 全片 · 片段引用</span><span class="way auto">自动</span><span class="amt">+¥180</span></div>
+        <div class="lvi"><time>12:41</time><span class="src">潮汐纪 · 概念设定集 · 片段引用</span><span class="way auto">自动</span><span class="amt">+¥96</span></div>
+        <div class="lvi"><time>11:52</time><span class="src">山海绘卷 · 第3集 · AI 训练数据</span><span class="way auto">自动</span><span class="amt">+¥320</span></div>
+        <div class="lvi"><time>11:20</time><span class="src">小城年夜 · 片段包 · 改编权</span><span class="way man">人工</span><span class="amt">+¥2,400</span></div>
+        <div class="lvi"><time>10:47</time><span class="src">纸鸢 · 角色模型 · 片段引用</span><span class="way auto">自动</span><span class="amt">+¥140</span></div>
+      </div>
+      <!-- 标注 11 -->
+      <div class="hint" style="margin-top:8px">显示规则：仅展示单笔 ≥¥100 的进账；小额自动汇总为「当日合计」，全量见下方明细表。</div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><h3>收入构成</h3><span class="more">本月</span></div>
+      <div style="display:flex;align-items:center;gap:20px;padding:4px 0 8px">
+        <svg viewBox="0 0 100 100" style="width:112px;height:112px;flex:0 0 auto">
+          <circle cx="50" cy="50" r="40" fill="none" stroke="var(--surface-3)" stroke-width="15"/>
+          <g transform="rotate(-90 50 50)" fill="none" stroke-width="15">
+            <circle cx="50" cy="50" r="40" stroke="var(--cyan)" stroke-dasharray="130.7 251.3" stroke-dashoffset="0"/>
+            <circle cx="50" cy="50" r="40" stroke="var(--gold)" stroke-dasharray="60.3 251.3" stroke-dashoffset="-130.7"/>
+            <circle cx="50" cy="50" r="40" stroke="var(--ok)" stroke-dasharray="45.2 251.3" stroke-dashoffset="-191"/>
+            <circle cx="50" cy="50" r="40" stroke="var(--muted)" stroke-dasharray="15.1 251.3" stroke-dashoffset="-236.2"/>
+          </g>
+          <text x="50" y="47" text-anchor="middle" fill="var(--ink)" font-size="13" font-weight="750" font-family="var(--f)">48.6k</text>
+          <text x="50" y="60" text-anchor="middle" fill="var(--muted)" font-size="7" font-family="var(--f)">本月合计</text>
+        </svg>
+        <div class="legend" style="flex:1">
+          <div class="lg"><i style="background:var(--cyan)"></i>AI 训练数据授权<span>52%</span></div>
+          <div class="lg"><i style="background:var(--gold)"></i>片段引用<span>24%</span></div>
+          <div class="lg"><i style="background:var(--ok)"></i>改编权<span>18%</span></div>
+          <div class="lg"><i style="background:var(--muted)"></i>全版权<span>6%</span></div>
+        </div>
+      </div>
+      <div class="note c" style="margin-top:4px">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>
+        <div>「AI 训练数据授权」占比过半时，应在界面上提示该类授权的<b>不可撤回性与下游扩散风险</b>——这是版权方最容易事后反悔的一类合约。</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-h"><h3>收入明细</h3><span class="more">2026-10-01 ~ 2026-10-25 · 共 41 笔</span></div>
+    <table>
+      <thead>
+        <tr><th>时间</th><th>作品</th><th>授权类型</th><th>来源合约</th><th>结算方式</th><th style="text-align:right">金额</th><th>状态</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="mono">10-25 13:04</td><td>山海绘卷 · 第3集</td><td><span class="pill c">AI 训练数据</span></td><td class="mono">CT-2026-0912</td><td><span class="way auto" style="padding:1px 5px;border-radius:20px">自动</span></td><td class="num"><span class="amt">¥320.00</span></td><td><span class="pill ok">已结算</span></td></tr>
+        <tr><td class="mono">10-25 12:58</td><td>霓虹湾 · 全片</td><td><span class="pill c">片段引用</span></td><td class="mono">CT-2026-0877</td><td><span class="way auto" style="padding:1px 5px;border-radius:20px">自动</span></td><td class="num"><span class="amt">¥180.00</span></td><td><span class="pill ok">已结算</span></td></tr>
+        <tr><td class="mono">10-25 11:20</td><td>小城年夜 · 片段包</td><td><span class="pill w">改编权</span></td><td class="mono">CT-2026-0840</td><td><span class="way man" style="padding:1px 5px;border-radius:20px">人工</span></td><td class="num"><span class="amt">¥2,400.00</span></td><td><span class="pill c">待结算</span></td></tr>
+        <tr><td class="mono">10-24 18:30</td><td>潮汐纪 · 概念设定集</td><td><span class="pill c">片段引用</span></td><td class="mono">CT-2026-0801</td><td><span class="way auto" style="padding:1px 5px;border-radius:20px">自动</span></td><td class="num"><span class="amt">¥96.00</span></td><td><span class="pill ok">已结算</span></td></tr>
+        <tr><td class="mono">10-24 15:11</td><td>霓虹湾 · 全片</td><td><span class="pill c">AI 训练数据</span></td><td class="mono">CT-2026-0912</td><td><span class="way auto" style="padding:1px 5px;border-radius:20px">自动</span></td><td class="num"><span class="amt">¥560.00</span></td><td><span class="pill ok">已结算</span></td></tr>
+      </tbody>
+    </table>
+    <div class="note w" style="margin-top:12px">
+      <svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9L2.4 18a2 2 0 001.7 3h15.8a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg>
+      <div>跨境结算提示：内地 → 香港的资金流适用不同外汇与税务规则，「自动分账」不能替代合规通道。提现页须分别显示两地账户的到账时间、代扣税项与手续费，不能只写一个「提现」按钮。</div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+
+<script>
+/* ---------- 屏幕切换 ---------- */
+const scrOf = {dash:'scr-dash', upload:'scr-upload', evidence:'scr-evidence', revenue:'scr-revenue'};
+function go(key){
+  Object.values(scrOf).forEach(id=>document.getElementById(id).classList.remove('on'));
+  const el = document.getElementById(scrOf[key]);
+  if(el){ el.classList.add('on'); document.getElementById('main').scrollTop = 0; }
+  document.querySelectorAll('.navi').forEach(n=>n.classList.toggle('on', n.dataset.go === key));
+  placeMarks();
+}
+document.querySelectorAll('[data-go]').forEach(b=>{
+  b.addEventListener('click', ()=> go(b.dataset.go));
+});
+
+/* ---------- 评审标注：按目标元素自动定位 ---------- */
+const MARKS = [
+  {n:1, sel:'#scr-dash .ph-r .btn.pri',
+   note:'方案第二节把「免费入驻 / 上传作品存证」设为首屏主按钮，第六节又规定未认证账号不能上传。用户点进去发现做不了事——这是最典型的转化断点。样本改成「上传并存证」，未认证态应替换为「先完成认证」。'},
+  {n:2, sel:'#scr-dash .kpis .kpi.cy',
+   note:'方案第五节只列了 4 张卡，没定义口径：是否含未结算？税前税后？是否已扣佣金？版权方一定会问。样本给每张卡补了口径与对比周期。'},
+  {n:3, sel:'#scr-dash .kpis .kpi:last-child',
+   note:'「累计收入」若含待结算，会和下方「待提现余额」对不上。两个数字必须显式说明关系，否则财务对账必出纠纷。'},
+  {n:4, sel:'#scr-dash .g2 > .card:nth-child(2) svg',
+   note:'方案只写「迷你折线图」。缺单位、缺是否含税、缺能否点击下钻。财务图表这三样缺一样就会被质疑。'},
+  {n:5, sel:'#scr-dash .rank',
+   note:'「被调用」是技术动作次数（可刷），「被授权」是成交合约数，两者含义完全不同。方案把两个词并列，排行条不标单位，内部和客户会各理解一套。'},
+  {n:6, sel:'#scr-upload .radios',
+   note:'方案写「含肖像/声音则提示补充授权文件」，但没说随后怎样：阻断上传？还是允许上传但限制上架？这是真实法律风险点，必须定义阻断条件与降级规则，不能只写「提示」。'},
+  {n:7, sel:'#scr-upload .prog',
+   note:'方案把「哈希上链」作为技术信任核心，全站贯穿。但我们已核实：香港没有区块链存证的法定推定规则。把上链做成唯一凭据，对香港版权方是过度承诺。'},
+  {n:8, sel:'#scr-evidence .reg',
+   note:'方案第九节只列区块链记录。样本改为链上存证 / 作品自愿登记 / 可信时间戳三路并列，逐条写明效力边界——这是香港法域下的正确做法，也是和普通「链改」项目的分水岭。'},
+  {n:9, sel:'#scr-evidence .g2 > .card:first-child',
+   note:'方案第九节列了三个模态的哈希，很内行。但缺两项：① 算法版本是否可复现（换版本后老作品能否重算）；② 指纹检出性能（FNR/FPR）。公开研究显示白盒场景 FNR/FPR 可达 1.0 即完全失效。UI 不标性能，用户会把「相似度 94%」当铁证。'},
+  {n:10, sel:'#scr-revenue .kpis',
+   note:'方案第十四节同时要求「每 30 秒自动刷新」+「智能合约自动分账」+「香港账户提现」。这是三个独立的高成本模块：实时结算需资金通道，自动分账需链上托管，香港提现涉跨境资金合规。MVP 阶段一个都做不了。'},
+  {n:11, sel:'#scr-revenue .live',
+   note:'「新纪录高亮滑入」没定义一笔进账的粒度。按次计费的 AI 训练数据一天可能几千笔，这个流会变成噪声。样本规定：只显示单笔 ≥¥100，小额汇总，全量走明细表。'},
+  {n:12, sel:'#scr-revenue > .card:last-child .note',
+   note:'方案把提现写成「绑定收款账户 + 提现记录 + 手续费说明」三件事，没有区分内地与香港两套管道。跨境资金流的税务与外汇处理不能靠「自动分账」替代。'}
+];
+
+function placeMarks(){
+  document.querySelectorAll('.pin').forEach(p=>p.remove());
+  if(!document.body.classList.contains('marks')) return;
+  MARKS.forEach(m=>{
+    const el = document.querySelector(m.sel);
+    if(!el) return;
+    const scr = el.closest('.scr');
+    if(!scr || !scr.classList.contains('on')) return;
+    const er = el.getBoundingClientRect();
+    if(!er.width) return;
+    const sr = scr.getBoundingClientRect();
+    const pin = document.createElement('div');
+    pin.className = 'pin';
+    pin.textContent = m.n;
+    pin.dataset.note = m.note;
+    pin.addEventListener('click', function(ev){
+      ev.stopPropagation();
+      const open = pin.classList.contains('show');
+      document.querySelectorAll('.pin.show').forEach(x=>x.classList.remove('show'));
+      if(!open) pin.classList.add('show');
+    });
+    let left = er.right - sr.left + 9;
+    let top  = er.top - sr.top + Math.min(er.height/2 - 10, 34);
+    if(left > sr.width - 34){ left = er.left - sr.left - 28; pin.classList.add('tt-l'); }
+    pin.style.left = Math.max(0, left) + 'px';
+    pin.style.top  = Math.max(-6, top) + 'px';
+    scr.appendChild(pin);
+  });
+}
+
+/* ---------- 主题切换 ---------- */
+const themeBtn = document.getElementById('themeBtn');
+const themeLbl = document.getElementById('themeLbl');
+themeBtn.addEventListener('click', ()=>{
+  const cur = document.documentElement.getAttribute('data-theme');
+  const next = cur === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  themeLbl.textContent = next === 'dark' ? '深色' : '浅色';
+});
+
+/* ---------- 评审标注开关 ---------- */
+const markBtn = document.getElementById('markBtn');
+markBtn.addEventListener('click', ()=>{
+  document.body.classList.toggle('marks');
+  markBtn.classList.toggle('on', document.body.classList.contains('marks'));
+  placeMarks();
+});
+
+document.addEventListener('click', ()=>{ document.querySelectorAll('.pin.show').forEach(x=>x.classList.remove('show')); });
+window.addEventListener('resize', ()=>{ clearTimeout(window.__rz); window.__rz = setTimeout(placeMarks,120); });
+window.addEventListener('load', placeMarks);
+
+/* ---------- 类型卡切换 ---------- */
+document.querySelectorAll('.tp').forEach(t=>{
+  t.addEventListener('click', ()=>{
+    document.querySelectorAll('.tp').forEach(x=>x.classList.remove('on'));
+    t.classList.add('on');
+  });
+});
+/* ---------- 单选组 ---------- */
+document.querySelectorAll('.radios').forEach(g=>{
+  g.querySelectorAll('.rd').forEach(r=>{
+    r.addEventListener('click', ()=>{
+      g.querySelectorAll('.rd').forEach(x=>x.classList.remove('on'));
+      r.classList.add('on');
+    });
+  });
+});
+/* ---------- Tabs ---------- */
+document.querySelectorAll('.tabs').forEach(g=>{
+  g.querySelectorAll('.tab').forEach(t=>{
+    t.addEventListener('click', ()=>{
+      g.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+      t.classList.add('on');
+    });
+  });
+});
+
+/* ---------- 实时流：模拟新进账（60 秒一次，与文案一致） ---------- */
+const pool = [
+  ['山海绘卷 · 第3集 · AI 训练数据','+¥320','auto'],
+  ['霓虹湾 · 全片 · 片段引用','+¥180','auto'],
+  ['潮汐纪 · 概念设定集 · 片段引用','+¥120','auto'],
+  ['纸鸢 · 角色模型 · 片段引用','+¥140','auto']
+];
+setInterval(()=>{
+  const live = document.querySelector('.live');
+  if(!live || !document.getElementById('scr-revenue').classList.contains('on')) return;
+  const p = pool[Math.floor(Math.random()*pool.length)];
+  const d = new Date();
+  const hh = String(d.getHours()).padStart(2,'0');
+  const mm = String(d.getMinutes()).padStart(2,'0');
+  const row = document.createElement('div');
+  row.className = 'lvi new';
+  row.innerHTML = `<time>${hh}:${mm}</time><span class="src">${p[0]}</span>`
+    + `<span class="way ${p[2]}">${p[2]==='auto'?'自动':'人工'}</span>`
+    + `<span class="amt">${p[1]}</span>`;
+  live.prepend(row);
+  while(live.children.length > 6) live.lastElementChild.remove();
+}, 60000);
+</script>
+</body>
+</html>
