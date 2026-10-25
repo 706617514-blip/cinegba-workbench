@@ -383,17 +383,61 @@ body.marks .pin{display:grid}
   .g2,.g2e,.reg{grid-template-columns:1fr}
   .types{grid-template-columns:repeat(3,1fr)}
 }
+/* ===== 移动端底部导航（桌面隐藏） ===== */
+.mobnav{display:none;position:fixed;left:0;right:0;bottom:0;z-index:120;
+  background:var(--surface);border-top:1px solid var(--line);
+  padding:6px 4px calc(6px + env(safe-area-inset-bottom));
+  box-shadow:0 -4px 18px rgba(0,0,0,.14)}
+.mobnav button{flex:1 1 0;display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:6px 2px;border-radius:9px;font-size:10px;color:var(--muted);
+  font-weight:600;line-height:1.1}
+.mobnav button svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.8}
+.mobnav button.on{color:var(--cyan);background:var(--cyan-soft)}
+.mobnav button:active{background:var(--surface-2)}
+
 @media(max-width:760px){
-  .pin::after{width:196px;font-size:11px;padding:7px 9px}
+  /* 标注气泡改为点击展开 */
+  .pin::after{width:200px;font-size:11px;padding:7px 9px}
   .pin{width:18px;height:18px;font-size:10px}
+
+  /* 侧栏收起，顶栏精简 */
   :root{--side-w:0px}
   .side{display:none}
-  .main{margin-left:0;padding:16px}
+  .top{gap:8px;padding:0 10px}
+  .brand{width:auto;flex:0 0 auto;gap:7px}
+  .brand b{font-size:12.5px}
+  .brand span{display:none}
+  .logo{width:25px;height:25px;font-size:11px}
+  .search{display:none}
+  .tgl{padding:5px 7px}
+  .tgl span{display:none}
+  .top-r{gap:6px}
+  .iconbtn[title="帮助"]{display:none}
+  .demo{display:none}
+
+  /* 主区让出底部导航高度 */
+  .main{margin-left:0;padding:14px 12px 84px}
+  .scr{max-width:none}
+
   .frow{grid-template-columns:1fr}
-  .kpis{grid-template-columns:1fr 1fr}
+  .kpis{grid-template-columns:1fr 1fr;gap:9px}
+  .kpi{padding:11px 11px}
+  .kpi .vl{font-size:19px}
   .types{grid-template-columns:1fr 1fr}
   .cert-grid{grid-template-columns:1fr}
+  .ph h1{font-size:17px}
+  .ph-r{width:100%}
+  .ph-r .btn{flex:1 1 auto;justify-content:center}
+
+  /* 表格较宽时让卡片横向滚动，不拆表格结构 */
+  .card{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .card>table{min-width:420px}
+
+  /* 移动端底部导航：手机上唯一能切页面的入口 */
+  .mobnav{display:flex}
 }
+
+
 </style>
 </head>
 <body>
@@ -419,7 +463,14 @@ body.marks .pin{display:grid}
     </button>
     <button class="iconbtn" title="帮助"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 115 0c0 1.5-2.5 2-2.5 3.5M12 17h.01"/></svg></button>
     <button class="iconbtn" title="通知"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 10-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10.5 21a2 2 0 003 0"/></svg><i class="dot"></i></button>
-    <div class="demo">演示数据 · 非真实业务</div>
+    <nav class="mobnav">
+  <button data-go="dash" class="on"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>工作台</button>
+  <button data-go="upload"><svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a2 2 0 002 2h12a2 2 0 002-2v-3"/></svg>上传存证</button>
+  <button data-go="evidence"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 012-2h8l6 6v12a2 2 0 01-2 2H6a2 2 0 01-2-2z"/><path d="M14 3v6h6"/><circle cx="12" cy="15" r="2"/></svg>作品详情</button>
+  <button data-go="revenue"><svg viewBox="0 0 24 24"><path d="M3 17l5-6 4 3 4-6 5 4"/><path d="M3 21h18"/></svg>收入中心</button>
+</nav>
+
+<div class="demo">演示数据 · 非真实业务</div>
     <div class="avatar">林</div>
   </div>
 </header>
@@ -913,7 +964,7 @@ function go(key){
   Object.values(scrOf).forEach(id=>document.getElementById(id).classList.remove('on'));
   const el = document.getElementById(scrOf[key]);
   if(el){ el.classList.add('on'); document.getElementById('main').scrollTop = 0; }
-  document.querySelectorAll('.navi').forEach(n=>n.classList.toggle('on', n.dataset.go === key));
+  document.querySelectorAll('.navi,.mobnav button').forEach(n=>n.classList.toggle('on', n.dataset.go === key));
   placeMarks();
 }
 document.querySelectorAll('[data-go]').forEach(b=>{
