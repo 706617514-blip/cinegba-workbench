@@ -213,30 +213,6 @@
       <div class="mktgrid">${hot.map(w => assetCard(w)).join('')}</div>
     </section>
 
-    <section class="hm-sec hm-why">
-      <div class="hm-sec-h"><h2>为什么在这里交易</h2></div>
-      <div class="hm-why-grid">
-        <div class="why">
-          <span class="wi">${I.shield}</span>
-          <b>三路存证，各说各的效力</b>
-          <p>链上存证证明「该时点存在该指纹」，作品自愿登记是法定证书，可信时间戳是辅助证据。
-            三条路并列展示，不把任何一条说成万能的。</p>
-        </div>
-        <div class="why">
-          <span class="wi">${I.file}</span>
-          <b>授权条款写成商品</b>
-          <p>AI 训练、片段引用、改编权、全版权、编辑用途，五种授权各自的范围、期限、
-            能否转授权都写在卡片上，点开就能看清。</p>
-        </div>
-        <div class="why">
-          <span class="wi">${I.chart}</span>
-          <b>收益可追溯</b>
-          <p>每一笔进账都能追到是哪件作品、哪种授权、哪份合约。
-            平台按成交额收 12% 佣金，没有隐藏费用。</p>
-        </div>
-      </div>
-    </section>
-
     <section class="hm-cta">
       <div class="hm-cta-in">
         <h2>把你手上的素材登记进来</h2>
