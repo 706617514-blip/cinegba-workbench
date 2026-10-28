@@ -97,7 +97,7 @@
 
       <div>
         ${list.length ? `<div class="mktgrid">${cards}</div>`
-        : `<div class="empty">${I.empty}<b>没有匹配的作品</b>
+        : `<div class="empty">${CG.emptyArt('search')}<b>没有匹配的作品</b>
            <p>调整左侧筛选条件，或清空筛选看全部</p>
            <button class="btn" data-act="clrf">清空筛选</button></div>`}
       </div>
@@ -185,7 +185,7 @@
   /* ========================================================== 单作品宣发 */
   CG.views.promoteItem = function (args) {
     const w = CG.work(args[0]);
-    if (!w) return `<div class="empty">${I.empty}<b>作品不存在</b>
+    if (!w) return `<div class="empty">${CG.emptyArt('lost')}<b>作品不存在</b>
       <a class="btn" href="#/promote">回宣发中心</a></div>`;
     const mk = w.marketing || { on: false, channels: [], headline: '', exposure: [] };
 
@@ -515,7 +515,7 @@
           ? `<button class="btn xs" data-disp="${d.id}">处置</button>`
           : '<span class="hint">已处理</span>'}</td>
             </tr>`;
-    }).join('')}</tbody></table>` : `<div class="empty">${I.shield}<b>没有侵权线索</b>
+    }).join('')}</tbody></table>` : `<div class="empty">${CG.emptyArt('done')}<b>没有侵权线索</b>
         <p>监测范围内没有发现高相似内容</p></div>`}
       <div class="note w mt12">${I.warn}<div>相似度是<b>指纹匹配度</b>，不等于侵权认定。
         平台不代替你作出法律判断，也不承诺维权成功率。</div></div>

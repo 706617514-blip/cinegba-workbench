@@ -107,7 +107,7 @@
             <div class="tx"><b>${U.esc(t.t)}</b><span>${U.esc(t.d)}</span></div>
             <span class="more" style="color:var(--cyan);font-weight:600">${t.go} →</span>
           </div>`).join('')}</div>`
-        : `<div class="empty" style="padding:26px"><svg>${I.ok.replace(/<\/?svg[^>]*>/g, '')}</svg><b>全部处理完了</b><p>没有待办事项</p></div>`}
+        : `<div class="empty" style="padding:26px"><svg>${CG.emptyArt('done')}</svg><b>全部处理完了</b><p>没有待办事项</p></div>`}
       </div>
 
       <div class="card">
@@ -615,7 +615,7 @@
     </div>
 
     ${list.length ? `<div class="wgrid">${cards}</div>`
-        : `<div class="empty">${I.empty}<b>没有符合条件的作品</b>
+        : `<div class="empty">${CG.emptyArt('search')}<b>没有符合条件的作品</b>
            <p>${q ? '换个关键词试试' : '先上传第一件作品，它会出现在这里'}</p>
            <a class="btn pri" href="#/upload">上传作品</a></div>`}`;
   };

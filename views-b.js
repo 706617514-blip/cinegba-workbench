@@ -22,7 +22,7 @@
   CG.views.work = function (args) {
     const id = args[0], tab = args[1] || 'overview';
     const w = CG.work(id);
-    if (!w) return `<div class="empty">${I.empty}<b>作品不存在</b><p>可能已被删除</p>
+    if (!w) return `<div class="empty">${CG.emptyArt('lost')}<b>作品不存在</b><p>可能已被删除</p>
       <a class="btn" href="#/library">回作品库</a></div>`;
 
     const lic = w.licenses || [];
@@ -805,7 +805,7 @@
     const id = args[0];
     const w = CG.work(id);
     if (!w || w.status !== 'listed') {
-      return `<div class="empty">${I.empty}<b>该作品当前不可采购</b><p>可能已下架或未配置授权</p>
+      return `<div class="empty">${CG.emptyArt('lost')}<b>该作品当前不可采购</b><p>可能已下架或未配置授权</p>
         <a class="btn" href="#/market">回素材市场</a></div>`;
     }
     const onLic = (w.licenses || []).filter(l => l.on);

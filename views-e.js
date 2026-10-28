@@ -475,7 +475,7 @@
 
       <div>
         ${slice.length ? `<div class="mktgrid">${slice.map(w => assetCard(w)).join('')}</div>`
-        : `<div class="empty">${I.empty}<b>没有匹配的素材</b>
+        : `<div class="empty">${CG.emptyArt('search')}<b>没有匹配的素材</b>
            <p>换关键词，或清空筛选看全部 ${CG.virtual.count().toLocaleString()} 件</p>
            <button class="btn" data-act="clrf">清空筛选</button></div>`}
         ${pageNav}
@@ -520,10 +520,10 @@
   CG.views.marketItem = function (args) {
     const id = args[0];
     const w = CG.asset(id);
-    if (!w) return `<div class="empty">${I.empty}<b>素材不存在</b>
+    if (!w) return `<div class="empty">${CG.emptyArt('lost')}<b>素材不存在</b>
       <a class="btn" href="#/market">回市场</a></div>`;
     if (!w.virtual && w.status !== 'listed') {
-      return `<div class="empty">${I.empty}<b>该素材当前不可采购</b>
+      return `<div class="empty">${CG.emptyArt('lost')}<b>该素材当前不可采购</b>
         <p>可能已下架或未配置授权</p><a class="btn" href="#/market">回市场</a></div>`;
     }
     const on = (w.licenses || []).filter(l => l.on);
@@ -790,7 +790,7 @@
         <button class="btn pri lg" data-act="checkout">去结算</button>
       </div>
     </div>` : `
-    <div class="empty">${I.cart}<b>选购车是空的</b>
+    <div class="empty">${CG.emptyArt('cart')}<b>选购车是空的</b>
       <p>去素材市场挑几件，加入选购车后再一起结算</p>
       <a class="btn pri" href="#/market">去市场</a></div>`}`;
   };
@@ -937,7 +937,7 @@
           </div>
         </div>
       </div>`).join('') : `
-      <div class="empty">${I.file}<b>还没有订单</b>
+      <div class="empty">${CG.emptyArt('order')}<b>还没有订单</b>
         <p>在素材市场加入选购车并结算后，订单会出现在这里</p>
         <a class="btn pri" href="#/market">去市场</a></div>`}`;
   };
@@ -1010,9 +1010,9 @@
       ${chip('none', '未分类', counts.none)}
     </div>
     ${items.length ? `<div class="mktgrid">${cards}</div>`
-        : `<div class="empty">${I.empty}<b>这个标签下还没有素材</b>
+        : `<div class="empty">${CG.emptyArt('fav')}<b>这个标签下还没有素材</b>
            <p>换个标签，或去市场多收藏几件</p></div>`}
-    ` : `<div class="empty">${I.shield}<b>还没有收藏</b>
+    ` : `<div class="empty">${CG.emptyArt('fav')}<b>还没有收藏</b>
          <p>在素材卡片或详情页点一下心形，先存着，不用马上决定买不买</p>
          <a class="btn pri" href="#/market">去市场</a></div>`}`;
   };

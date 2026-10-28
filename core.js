@@ -157,6 +157,62 @@
   const idbPut = (st, k, v) => idbTx(st, 'readwrite', s => s.put(v, k));
 
 
+
+  /* ------------------------------------------------------------ 空状态插画
+     统一线稿语言：viewBox 160x110，currentColor 描边，强调色只点一处 */
+  CG.emptyArt = function (kind) {
+    const S = 'fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"';
+    const D = 'fill="none" stroke="currentColor" stroke-width="1.4" stroke-dasharray="4 5" stroke-linecap="round"';
+    const A = 'fill="none" stroke="var(--accent)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"';
+    const P = {
+      /* 搜索 / 筛选无结果：放大镜 + 散落的虚线卡片 */
+      search: `
+        <g ${D} opacity=".5">
+          <rect x="18" y="20" width="26" height="20" rx="3"/>
+          <rect x="120" y="18" width="24" height="18" rx="3"/>
+          <rect x="14" y="66" width="22" height="18" rx="3"/>
+        </g>
+        <circle cx="72" cy="52" r="23" ${S}/>
+        <path d="M88 69l14 14" ${S}/>
+        <path d="M63 52h18" ${S} opacity=".45"/>`,
+      /* 内容不存在 / 不可采购：断开的框 */
+      lost: `
+        <path d="M34 34v-8a4 4 0 014-4h28" ${S} opacity=".75"/>
+        <path d="M94 22h26a4 4 0 014 4v20" ${S} opacity=".75"/>
+        <path d="M124 70v16a4 4 0 01-4 4H94" ${S} opacity=".75"/>
+        <path d="M66 90H38a4 4 0 01-4-4V62" ${S} opacity=".75"/>
+        <path d="M80 44v22" ${A}/>
+        <path d="M74 50l12 10" ${S} opacity=".4"/>
+        <path d="M86 50L74 60" ${S} opacity=".4"/>`,
+      /* 空选购车 */
+      cart: `
+        <path d="M30 32h14l12 46h44l10-32H52" ${S}/>
+        <circle cx="66" cy="90" r="5" ${S}/>
+        <circle cx="98" cy="90" r="5" ${S}/>
+        <path d="M74 58h24" ${A}/>`,
+      /* 空订单 / 单据 */
+      order: `
+        <path d="M52 18h44l18 18v56a4 4 0 01-4 4H56a4 4 0 01-4-4V22a4 4 0 014-4z" ${S}/>
+        <path d="M96 18v18h18" ${S}/>
+        <path d="M64 52h30M64 64h30M64 76h18" ${S} opacity=".55"/>
+        <path d="M64 40h14" ${A}/>`,
+      /* 空收藏 */
+      fav: `
+        <path d="M80 88s-32-19-32-41a17 17 0 0132-9 17 17 0 0132 9c0 22-32 41-32 41z" ${S}/>
+        <path d="M80 62s-14-8.5-14-17a7 7 0 0114-3.6A7 7 0 0194 45c0 8.5-14 17-14 17z" ${A} opacity=".9"/>`,
+      /* 全部处理完 */
+      done: `
+        <circle cx="80" cy="55" r="34" ${S} opacity=".35"/>
+        <path d="M64 56l11 11 22-24" ${A}/>`,
+      /* 没有通知 */
+      bell: `
+        <path d="M80 24a18 18 0 0118 18v18l7 10H55l7-10V42a18 18 0 0118-18z" ${S}/>
+        <path d="M72 78a8 8 0 0016 0" ${S}/>
+        <path d="M80 30v-4" ${A}/>`
+    };
+    return `<svg class="empty-art" viewBox="0 0 160 110" aria-hidden="true">${P[kind] || P.search}</svg>`;
+  };
+
   /* ------------------------------------------------------------ 授权策略 */
   /** 条款包：一套「采购方要填什么」+「创作者放行到哪」的预设 */
   CG.POLICY_PACKS = [
@@ -473,7 +529,7 @@
     let name = r.name;
     if (r.args.length && CG.ITEM_VIEW[name]) name = CG.ITEM_VIEW[name];
     const fn = CG.views[name];
-    if (!fn) { view.innerHTML = '<div class="empty"><b>页面不存在</b></div>'; return }
+    if (!fn) { view.innerHTML = '<div class="empty">' + CG.emptyArt('lost') + '<b>页面不存在</b></div>'; return }
     document.getElementById('main').scrollTop = 0;
     view.innerHTML = fn(r.args);
     CG.updateNav(name);
@@ -532,7 +588,7 @@
           : '当前是浏览器模式（静态托管或直接打开文件）。上传的文件存在浏览器 IndexedDB 里，换设备或清缓存就会丢。'}
           </p>
           <div class="note c" style="margin-top:12px">
-            ${I.info}
+            ${CG.emptyArt('bell')}
             <div>${isFs
           ? '文件目录：<code class="mono">cinegba-proto/data/uploads/</code><br>数据文件：<code class="mono">cinegba-proto/data/db.json</code>'
           : '想改成真实落盘：在项目目录运行 <code class="mono">node server.mjs</code>，然后访问 <code class="mono">http://localhost:8090</code>。'}</div>
@@ -561,7 +617,7 @@
           <div class="hint" style="margin-top:3px">${U.rel(n.at)}</div>
         </div>
       </div>`;
-    }).join('') : '<div class="empty"><p>没有新通知</p></div>';
+    }).join('') : '<div class="empty">' + CG.emptyArt('bell') + '<p>没有新通知</p></div>';
     CG.drawer('通知', html);
   };
 
