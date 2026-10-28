@@ -13,7 +13,7 @@
     dash: 'creator', library: 'creator', upload: 'creator', work: 'creator',
     promote: 'creator', promoteItem: 'creator', revenue: 'creator', dispute: 'creator',
     consumer: 'consumer', cart: 'consumer', orders: 'consumer', favorites: 'consumer',
-    settings: 'creator'
+    settings: 'creator', whyhk: 'market'
   };
 
   const SIDEBAR = {
@@ -21,6 +21,7 @@
       ['创作方', [
         ['dash', '工作台', 'grid'],
         ['library', '作品库', 'file'],
+        ['whyhk', '为什么是香港', 'globe'],
         ['upload', '上传作品', 'up'],
         ['promote', '宣发中心', 'megaphone']
       ]],
@@ -35,6 +36,7 @@
       ['逛市场', [
         ['home', '网站主页', 'grid'],
         ['market', '素材市场', 'cart'],
+        ['whyhk', '为什么是香港', 'globe'],
         ['consumer', '消费者中心', 'user'],
         ['favorites', '我的收藏', 'shield']
       ]],
@@ -67,7 +69,8 @@
     chart: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
     shield: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
     gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.9l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.9-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.9.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.9 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.9l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.9.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.9-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.9V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/>',
-    user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/>'
+    user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/>',
+    globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18"/>'
   };
   const svg = k => `<svg viewBox="0 0 24 24">${ICONS[k] || ICONS.grid}</svg>`;
 

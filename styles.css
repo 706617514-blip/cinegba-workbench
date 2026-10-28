@@ -1234,3 +1234,127 @@ button.more svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-widt
   .cl-over div{flex-direction:column;gap:1px}
   .cl-over b{flex:none}
 }
+
+
+/* ==========================================================================
+   为什么是香港
+   ========================================================================== */
+.wk-hero{position:relative;border-radius:18px;overflow:hidden;margin-bottom:26px;
+  border:1px solid var(--line);background:var(--surface-2)}
+.wk-hero-bg{position:absolute;inset:0;
+  background:
+    radial-gradient(760px 340px at 10% -12%,var(--accent-soft),transparent 62%),
+    radial-gradient(620px 300px at 94% 118%,var(--amber-soft),transparent 60%)}
+.wk-hero-in{position:relative;padding:44px 40px 38px;max-width:720px}
+.wk-kicker{display:inline-block;font-size:11px;letter-spacing:.1em;color:var(--amber);
+  border:1px solid var(--amber);background:var(--amber-soft);border-radius:20px;
+  padding:3px 11px;margin-bottom:16px}
+.wk-hero h1{font-size:36px;line-height:1.2;letter-spacing:-1.1px;font-weight:800}
+.wk-lead{font-size:13.5px;color:var(--ink-2);line-height:1.85;margin-top:16px;max-width:600px}
+.wk-lead b{color:var(--ink);font-weight:700}
+.wk-quote{margin-top:22px;padding-left:14px;border-left:2px solid var(--accent);
+  font-size:14px;color:var(--accent);font-weight:600;letter-spacing:.01em}
+
+/* 四道门 */
+.wk-gates{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:34px}
+.wk-gate{background:var(--surface);border:1px solid var(--line);border-radius:16px;
+  padding:22px 22px 20px;position:relative}
+.wk-gn{position:absolute;right:20px;top:16px;font-family:var(--fm);font-size:34px;
+  font-weight:800;color:var(--line-2);opacity:.5;letter-spacing:-2px;line-height:1}
+.wk-gate h2{font-size:17px;font-weight:750;letter-spacing:-.3px;margin-bottom:6px}
+.wk-q{font-size:12.5px;color:var(--accent);font-weight:600;margin-bottom:10px}
+.wk-lead2{font-size:12.5px;color:var(--ink-2);line-height:1.7;margin-bottom:14px}
+.wk-facts{display:flex;flex-direction:column;gap:10px}
+.wk-f{padding:10px 12px;border-radius:9px;background:var(--surface-2);
+  border:1px solid var(--line);border-left:2px solid var(--accent)}
+.wk-f b{display:block;font-size:12.5px;margin-bottom:3px;line-height:1.45}
+.wk-f p{font-size:11.5px;color:var(--muted);line-height:1.65}
+.wk-src{display:block;margin-top:5px;font-size:10px;color:var(--muted);
+  font-family:var(--fm);opacity:.85}
+.wk-why{margin-top:13px;padding-top:12px;border-top:1px solid var(--line);
+  font-size:11.5px;color:var(--ink-2);line-height:1.7}
+.wk-why b{color:var(--amber);display:block;font-size:10.5px;letter-spacing:.06em;
+  margin-bottom:3px;font-weight:700}
+.wk-cav{display:flex;gap:7px;margin-top:11px;padding:8px 10px;border-radius:8px;
+  background:var(--amber-soft);border:1px solid var(--amber);color:var(--amber);
+  font-size:10.5px;line-height:1.55}
+.wk-cav svg{width:12px;height:12px;flex:0 0 auto;margin-top:1px;stroke:currentColor;
+  fill:none;stroke-width:2}
+
+/* 过桥五步 */
+.wk-sec{margin-bottom:30px}
+.wk-sec.alt{background:var(--bg-2);margin:0 -9999px 30px;padding:34px 9999px}
+.wk-sec-h{max-width:640px;margin-bottom:20px}
+.wk-sec-h h2{font-size:21px;font-weight:800;letter-spacing:-.5px}
+.wk-sec-h p{font-size:12.5px;color:var(--muted);margin-top:7px;line-height:1.7}
+.wk-bridge{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.wk-step{background:var(--surface);border:1px solid var(--line);border-radius:14px;
+  padding:15px 14px;position:relative;transition:transform .18s,border-color .18s}
+.wk-step:hover{transform:translateY(-3px);border-color:var(--accent)}
+.wk-si{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;
+  background:var(--accent-soft);color:var(--accent);margin-bottom:10px}
+.wk-si svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8}
+.wk-sn{font-family:var(--fm);font-size:10px;color:var(--muted);display:block}
+.wk-sb b{display:block;font-size:13.5px;margin:2px 0 6px}
+.wk-sb em{font-style:normal;display:block;font-size:11px;color:var(--ink-2);line-height:1.55}
+.wk-alt{display:block;margin-top:8px;padding-top:8px;border-top:1px solid var(--line);
+  font-size:10px;color:var(--muted)}
+.wk-note{display:flex;gap:9px;margin-top:16px;padding:11px 13px;border-radius:10px;
+  background:var(--accent-soft);border:1px solid var(--accent);color:var(--accent);
+  font-size:11.5px;line-height:1.65}
+.wk-note svg{width:14px;height:14px;flex:0 0 auto;margin-top:1px;stroke:currentColor;
+  fill:none;stroke-width:1.9}
+
+/* 政策拼图 */
+.wk-policy{display:grid;grid-template-columns:1fr auto 1fr auto 1.15fr;gap:12px;align-items:stretch}
+.wk-p{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 17px}
+.wk-p.res{border-color:var(--accent);background:var(--accent-soft)}
+.wk-tag{display:inline-block;font-size:9.5px;letter-spacing:.06em;color:var(--muted);
+  border:1px solid var(--line-2);border-radius:4px;padding:1px 6px;margin-bottom:9px}
+.wk-p.res .wk-tag{color:var(--accent);border-color:var(--accent)}
+.wk-p b{display:block;font-size:14px;line-height:1.4;margin-bottom:7px}
+.wk-p p{font-size:11.5px;color:var(--muted);line-height:1.68}
+.wk-plus,.wk-eq{display:grid;place-items:center;font-size:20px;color:var(--muted);
+  font-weight:300;padding:0 2px}
+
+/* 边界 */
+.wk-limits{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.wk-l{background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:13px 15px}
+.wk-l b{display:block;font-size:12px;margin-bottom:4px;color:var(--ink)}
+.wk-l p{font-size:11px;color:var(--muted);line-height:1.65}
+
+.wk-cta{background:var(--surface-2);border:1px solid var(--line);border-radius:18px;
+  padding:38px 24px;text-align:center;position:relative;overflow:hidden}
+.wk-cta::before{content:"";position:absolute;inset:0;
+  background:radial-gradient(560px 200px at 50% 0%,var(--accent-soft),transparent 62%)}
+.wk-cta h2{font-size:22px;font-weight:800;letter-spacing:-.5px;position:relative}
+.wk-cta p{font-size:12.5px;color:var(--muted);margin:9px 0 20px;position:relative}
+
+/* 主页：四道门摘要条 */
+.hm-gates{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px}
+.hm-g{background:var(--surface);border:1px solid var(--line);border-radius:13px;
+  padding:14px 15px;display:flex;gap:11px;align-items:flex-start;transition:.16s}
+.hm-g:hover{border-color:var(--amber)}
+.hm-g .gi{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;
+  background:var(--amber-soft);color:var(--amber);flex:0 0 auto}
+.hm-g .gi svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.9}
+.hm-g b{display:block;font-size:12.5px;margin-bottom:2px}
+.hm-g span{font-size:10.5px;color:var(--muted);line-height:1.5}
+
+@media(max-width:1080px){
+  .wk-gates{grid-template-columns:1fr}
+  .wk-bridge{grid-template-columns:1fr 1fr}
+  .wk-policy{grid-template-columns:1fr}
+  .wk-plus,.wk-eq{display:none}
+  .wk-limits{grid-template-columns:1fr}
+  .hm-gates{grid-template-columns:1fr 1fr}
+}
+@media(max-width:760px){
+  .wk-hero-in{padding:26px 18px}
+  .wk-hero h1{font-size:24px;letter-spacing:-.6px}
+  .wk-lead{font-size:12.5px}
+  .wk-bridge{grid-template-columns:1fr}
+  .wk-sec.alt{margin:0 -12px 24px;padding:26px 12px}
+  .hm-gates{grid-template-columns:1fr}
+  .wk-gn{font-size:26px;right:14px;top:12px}
+}

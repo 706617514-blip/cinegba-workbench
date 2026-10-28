@@ -74,12 +74,13 @@
       <div class="hm-hero-bg"></div>
       <div class="hm-hero-in">
         <span class="hm-kicker">
-          <i class="pulse"></i> ${total.toLocaleString()} 件素材 · 5 种授权类型 · 三路存证
+          <i class="pulse"></i> 香港枢纽 · ${total.toLocaleString()} 件素材 · 5 种授权类型
         </span>
-        <h1>每一帧素材<br>都该有据可查</h1>
+        <h1>让每一帧素材<br>同时北上与南下</h1>
         <p class="hm-lead">
-          CineGBA IP-Bridge 把影视动漫素材的指纹、存证与授权合约接到一起。
-          创作者在这里登记与定价，采购方在这里找到可商用、可举证的内容。
+          CineGBA IP-Bridge 在香港完成认证、定价与结算。
+          一个剧本经此进入内地市场，也能沿东盟发行网络抵达新加坡、马来西亚。
+          <b>AI 授权哪里都能做，但四道门只有这里同时开着。</b>
         </p>
 
         <div class="hm-search">
@@ -92,6 +93,28 @@
           ${['国风', '城市空镜', '赛博朋克', '配乐', '角色模型'].map(t =>
       `<button data-kw="${t}">${t}</button>`).join('')}
         </div>
+      </div>
+    </section>
+
+    <section class="hm-sec">
+      <div class="hm-sec-h">
+        <h2>为什么是香港</h2>
+        <a class="more" href="#/whyhk">完整论证 ${I.arrow}</a>
+        <p style="flex-basis:100%">AI 授权的四道门——只有这四道同时开着，这门生意才成立。</p>
+      </div>
+      <div class="hm-gates">
+        <a class="hm-g" href="#/whyhk">
+          <span class="gi"><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></span>
+          <div><b>法律确定性</b><span>TDM 豁免立法中，为 AI 训练定性</span></div></a>
+        <a class="hm-g" href="#/whyhk">
+          <span class="gi"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 012-2h8l6 6v12a2 2 0 01-2 2H6a2 2 0 01-2-2z"/><path d="M14 3v6h6"/></svg></span>
+          <div><b>权利认证</b><span>MPIA 为国家版权局指定机构</span></div></a>
+        <a class="hm-g" href="#/whyhk">
+          <span class="gi"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18"/></svg></span>
+          <div><b>双向通道</b><span>CEPA 北上免配额，东盟南下已验证</span></div></a>
+        <a class="hm-g" href="#/whyhk">
+          <span class="gi"><svg viewBox="0 0 24 24"><path d="M12 3v18M6 7h12M6 7l-3 7h6zM18 7l-3 7h6z"/></svg></span>
+          <div><b>争议解决</b><span>普通法 + 中英双语 + 国际仲裁</span></div></a>
       </div>
     </section>
 

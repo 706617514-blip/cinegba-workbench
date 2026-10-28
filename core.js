@@ -347,7 +347,7 @@
   /* ------------------------------------------------------------ 路由 */
   CG.routes = ['home', 'dash', 'upload', 'library', 'work', 'market', 'marketItem',
     'promote', 'promoteItem', 'revenue', 'dispute', 'settings',
-    'consumer', 'cart', 'orders', 'favorites'];
+    'consumer', 'cart', 'orders', 'favorites', 'whyhk'];
 
   // 带二级路径时转发到独立视图（如 #/market/:id → marketItem）
   CG.ITEM_VIEW = { market: 'marketItem', promote: 'promoteItem' };
