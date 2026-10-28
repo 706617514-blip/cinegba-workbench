@@ -61,20 +61,45 @@
     ['__me', '我的', 'user']
   ];
   const ME_TARGET = { creator: 'dash', market: 'consumer', consumer: 'consumer' };
-  /* 「我的」涵盖的页面：不含 upload（有独立项）与 whyhk（归市场） */
-  const ME_GROUP = ['dash', 'library', 'work', 'dispute', 'revenue',
-    'settings', 'consumer', 'orders', 'favorites'];
-  /* 这些页面高亮「市场」而不是「我的」 */
-  const MARKET_GROUP = ['market', 'whyhk'];
+
+  /* 显式映射：每个页面写清楚高亮哪一项（'__me' 表示「我的」）。
+     不做「列表包含判断」，从根本上杜绝一项页面点亮两个导航。 */
+  const PAGE_NAV = {
+    home: 'home',
+    market: 'market',
+    marketItem: 'market',
+    whyhk: 'market',
+    upload: 'upload',
+    cart: 'cart',
+    consumer: '__me',
+    orders: '__me',
+    favorites: '__me',
+    dash: '__me',
+    library: '__me',
+    work: '__me',
+    promote: '__me',
+    promoteItem: '__me',
+    dispute: '__me',
+    revenue: '__me',
+    settings: '__me'
+  };
+
+  /* 兜底：新页面忘了登记时按分区猜，并在控制台提醒补映射 */
+  function navKeyOf(name, zone) {
+    if (PAGE_NAV[name]) return PAGE_NAV[name];
+    if (typeof console !== 'undefined' && console.warn) {
+      console.warn('[nav] 页面「' + name + '」未在 PAGE_NAV 登记，已按分区兜底，请补映射');
+    }
+    return zone === 'market' ? 'market' : '__me';
+  }
 
   function mobNavHtml(zone, name) {
+    const activeKey = navKeyOf(name, zone);
     return MOBNAV.map(function (it) {
       const key = it[0], label = it[1], ic = it[2];
       const isMe = key === '__me';
       const target = isMe ? (ME_TARGET[zone] || 'consumer') : key;
-      const on = isMe
-        ? ME_GROUP.indexOf(name) >= 0
-        : (key === 'market' ? MARKET_GROUP.indexOf(name) >= 0 : name === key);
+      const on = key === activeKey;
       return `<a data-nav="${target}" class="${on ? 'on' : ''}" href="#/${target}">${svg(ic)}${label}</a>`;
     }).join('');
   }
