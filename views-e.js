@@ -45,7 +45,10 @@
       <div class="hm-g-cav"><span>边界</span>${U.esc(g.caveat)}</div>
       <div class="hm-g-foot">
         <a class="btn sm" href="#/whyhk">看完整论证</a>
-        <button class="btn sm ghost" data-gate-close>收起</button>
+        <button class="btn sm" data-gate-close>
+          <svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.4">
+            <path d="M6 15l6-6 6 6"/></svg>
+          收起</button>
       </div>`;
   }
 
@@ -165,7 +168,7 @@
             <b>${U.esc(g.title)}</b>
             <span>${U.esc(g.short || g.lead)}</span>
           </div>
-          <span class="hm-g-arrow">${active ? '收起' : '展开'}</span>
+          <span class="hm-g-arrow">${active ? '收起' : '展开'}<svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span>
         </button>`;
     }).join('')}
       </div>

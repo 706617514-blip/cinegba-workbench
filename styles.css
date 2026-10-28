@@ -1419,8 +1419,15 @@ button.more svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-widt
 .hm-g-tx b{display:block;font-size:12.5px;margin-bottom:2px}
 .hm-g-tx span{font-size:10.5px;color:var(--muted);line-height:1.5;
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.hm-g-arrow{font-size:10.5px;color:var(--amber);font-weight:700;flex:0 0 auto;
-  padding-top:1px;white-space:nowrap}
+.hm-g-arrow{display:inline-flex;align-items:center;gap:3px;flex:0 0 auto;align-self:center;
+  font-size:11px;font-weight:700;white-space:nowrap;padding:2.5px 8px;border-radius:20px;
+  color:var(--amber);background:var(--amber-soft);border:1px solid var(--amber);
+  transition:background .16s,color .16s}
+.hm-g:hover .hm-g-arrow{background:var(--amber);color:var(--bg)}
+.hm-g.active .hm-g-arrow{background:var(--amber);color:var(--bg)}
+.hm-g-arrow svg{width:9px;height:9px;stroke:currentColor;fill:none;stroke-width:2.6;
+  transition:transform .3s cubic-bezier(.22,.7,.3,1)}
+.hm-g.active .hm-g-arrow svg{transform:rotate(180deg)}
 
 /* 向下延展：0fr → 1fr，无需 JS 量高度 */
 .hm-gate-panel{display:grid;grid-template-rows:0fr;opacity:0;margin-top:0;
