@@ -572,6 +572,22 @@
     return `
     <div class="ph"><div><h1>认证与设置</h1><p>账户、认证、收款与团队</p></div></div>
 
+    <div class="card mb12">
+      <div class="card-h"><h3>当前登录</h3>
+        <span class="pill ok">已登录</span>
+        <span class="more">${(CG.auth.user && CG.auth.user.email) || p.email || ''}</span></div>
+      <div class="fgrid">
+        <div><div class="hint">登录邮箱</div><b class="small">${U.esc((CG.auth.user && CG.auth.user.email) || p.email || '—')}</b></div>
+        <div><div class="hint">登录方式</div><b class="small">${CG.auth.mode === 'fs' ? '本地服务会话' : '离线本地会话'}</b></div>
+        <div><div class="hint">账号创建</div><b class="small">${U.esc(((CG.auth.user && CG.auth.user.createdAt) || '').slice(0, 10) || '—')}</b></div>
+        <div><div class="hint">会话有效期</div><b class="small">${CG.auth.mode === 'fs' ? '14 天' : '长期（离线）'}</b></div>
+      </div>
+      <div class="row mt12">
+        <button class="btn danger" data-act="logout">退出登录</button>
+        <span class="hint">退出后回到首页，数据仍保留在本机。</span>
+      </div>
+    </div>
+
     <div class="g2">
       <div class="card">
         <div class="card-h"><h3>机构信息</h3><span class="pill ok">${U.esc(p.verifyLevel)}已通过</span></div>
@@ -636,6 +652,7 @@
   CG.views.settings.after = function () {
     const root = document.getElementById('view'), st = CG.state;
     CG.bind(root, {
+      logout: () => { if (CG.doLogout) CG.doLogout() },
       saveProfile: () => {
         const g = id => (document.getElementById(id) || {}).value || '';
         st.profile.name = g('stName').trim() || st.profile.name;

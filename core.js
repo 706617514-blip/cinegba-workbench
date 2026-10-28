@@ -83,7 +83,9 @@
     edit: '<svg viewBox="0 0 24 24"><path d="M4 20h4l10-10-4-4L4 16z"/><path d="M14 6l4 4"/></svg>',
     arrow: '<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
     back: '<svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>',
-    empty: '<svg viewBox="0 0 24 24"><path d="M4 7l8-4 8 4v10l-8 4-8-4z"/><path d="M4 7l8 4 8-4M12 11v10"/></svg>'
+    empty: '<svg viewBox="0 0 24 24"><path d="M4 7l8-4 8 4v10l-8 4-8-4z"/><path d="M4 7l8 4 8-4M12 11v10"/></svg>',
+    eye: '<svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>',
+    eyeOff: '<svg viewBox="0 0 24 24"><path d="M3 3l18 18"/><path d="M10.6 5.2A9.9 9.9 0 0112 5c6.5 0 10 7 10 7a17 17 0 01-3.4 4.3"/><path d="M6.4 6.4A17 17 0 002 12s3.5 7 10 7a9.9 9.9 0 004-.8"/></svg>'
   };
 
   /* ------------------------------------------------------------ Toast */
@@ -474,6 +476,173 @@
         panel.querySelector('#cfmYes').onclick = () => { close(); onYes() };
       }
     });
+  };
+
+
+  /* ------------------------------------------------------------ 认证 */
+  const TK = 'cg-token', SE = 'cg-session', UK = 'cg-users';
+
+  async function sha256(txt) {
+    if (window.crypto && window.crypto.subtle) {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(txt));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+    let h = 2166136261;
+    for (let i = 0; i < txt.length; i++) { h ^= txt.charCodeAt(i); h = Math.imul(h, 16777619) }
+    return (h >>> 0).toString(16).padStart(8, '0').repeat(8).slice(0, 64);
+  }
+
+  const SEED_USERS = [
+    { email: 'lin@example.com', password: 'cinegba2026', name: '林静',
+      org: '大湾区晨曦动画工作室', orgId: 'CG-ENT-0231' },
+    { email: 'demo@cinegba.com', password: 'demo1234', name: '陈立',
+      org: '南岭影业（演示）', orgId: 'CG-ENT-0308' }
+  ];
+  CG.SEED_USERS = SEED_USERS;
+
+  /* ---- 离线（无后端）账号库 ---- */
+  const localDb = {
+    async all() {
+      try { return JSON.parse(localStorage.getItem(UK) || '[]') } catch (e) { return [] }
+    },
+    async save(list) { localStorage.setItem(UK, JSON.stringify(list)) },
+    async ensureSeed() {
+      let list = await this.all();
+      if (list.length) return list;
+      for (const s of SEED_USERS) {
+        const salt = Math.random().toString(36).slice(2, 10);
+        list.push({
+          id: 'u-' + Math.random().toString(36).slice(2, 10),
+          email: s.email, name: s.name, org: s.org, orgId: s.orgId,
+          role: 'creator', verifyLevel: '企业认证', verifyUntil: '2027-08',
+          salt, hash: await sha256(salt + s.password),
+          createdAt: new Date().toISOString()
+        });
+      }
+      await this.save(list);
+      return list;
+    }
+  };
+
+  CG.auth = {
+    user: null,
+    mode: 'fs',           // fs | local
+    lastLogin: null,
+
+    get isIn() { return !!(this.user) },
+
+    /** 启动时恢复会话 */
+    async boot() {
+      this.mode = (store.mode === 'fs') ? 'fs' : 'local';
+
+      if (this.mode === 'fs') {
+        const tk = localStorage.getItem(TK);
+        if (!tk) return null;
+        try {
+          const r = await fetch('/api/auth/me', { headers: { authorization: 'Bearer ' + tk } });
+          if (!r.ok) { localStorage.removeItem(TK); return null }
+          const j = await r.json();
+          this.user = j.user;
+          this.lastLogin = new Date().toISOString();
+          return this.user;
+        } catch (e) { return null }
+      }
+
+      // 离线模式
+      await localDb.ensureSeed();
+      const uid = localStorage.getItem(SE);
+      if (!uid) return null;
+      const list = await localDb.all();
+      const u = list.find(x => x.id === uid);
+      if (!u) { localStorage.removeItem(SE); return null }
+      this.user = u;
+      this.lastLogin = new Date().toISOString();
+      return u;
+    },
+
+    async login(email, password) {
+      email = String(email || '').trim().toLowerCase();
+      if (!email || !password) throw new Error('请输入邮箱和密码');
+
+      if (this.mode === 'fs') {
+        const r = await fetch('/api/auth/login', {
+          method: 'POST', headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(j.error || '登录失败');
+        localStorage.setItem(TK, j.token);
+        this.user = j.user;
+        this.lastLogin = new Date().toISOString();
+        return j.user;
+      }
+
+      const list = await localDb.ensureSeed();
+      const u = list.find(x => x.email === email);
+      if (!u) throw new Error('邮箱或密码不正确');
+      const h = await sha256(u.salt + password);
+      if (h !== u.hash) throw new Error('邮箱或密码不正确');
+      localStorage.setItem(SE, u.id);
+      this.user = u;
+      this.lastLogin = new Date().toISOString();
+      return u;
+    },
+
+    async register(data) {
+      const email = String(data.email || '').trim().toLowerCase();
+      const pw = String(data.password || '');
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) throw new Error('邮箱格式不正确');
+      if (pw.length < 6) throw new Error('密码至少 6 位');
+
+      if (this.mode === 'fs') {
+        const r = await fetch('/api/auth/register', {
+          method: 'POST', headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ email, password: pw, name: data.name, org: data.org })
+        });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(j.error || '注册失败');
+        localStorage.setItem(TK, j.token);
+        this.user = j.user;
+        this.lastLogin = new Date().toISOString();
+        return j.user;
+      }
+
+      const list = await localDb.ensureSeed();
+      if (list.some(x => x.email === email)) throw new Error('该邮箱已注册');
+      const salt = Math.random().toString(36).slice(2, 10);
+      const u = {
+        id: 'u-' + Math.random().toString(36).slice(2, 10),
+        email, name: String(data.name || '未命名用户').slice(0, 40),
+        org: String(data.org || '未填写机构').slice(0, 60),
+        orgId: 'CG-ENT-' + Math.floor(1000 + Math.random() * 8999),
+        role: 'creator', verifyLevel: '待认证', verifyUntil: '—',
+        salt, hash: await sha256(salt + pw),
+        createdAt: new Date().toISOString()
+      };
+      list.push(u);
+      await localDb.save(list);
+      localStorage.setItem(SE, u.id);
+      this.user = u;
+      this.lastLogin = new Date().toISOString();
+      return u;
+    },
+
+    async logout() {
+      if (this.mode === 'fs') {
+        const tk = localStorage.getItem(TK);
+        if (tk) {
+          try {
+            await fetch('/api/auth/logout', {
+              method: 'POST', headers: { authorization: 'Bearer ' + tk }
+            });
+          } catch (e) { }
+        }
+        localStorage.removeItem(TK);
+      } else {
+        localStorage.removeItem(SE);
+      }
+      this.user = null;
+    }
   };
 
 })();

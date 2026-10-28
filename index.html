@@ -11,9 +11,12 @@
 <meta name="theme-color" content="#0A0E17">
 <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body class="mode-boot">
 
 <!-- ==================== 顶栏 ==================== -->
+<div id="public"></div>
+<div id="app" hidden>
+
 <header class="top">
   <a class="brand" href="#/dash">
     <div class="logo">CG</div>
@@ -78,6 +81,8 @@
 </nav>
 
 <!-- ==================== 浮层 ==================== -->
+</div><!-- /#app -->
+
 <div class="drawer" id="drawer" hidden>
   <div class="drawer-bg" data-close></div>
   <aside class="drawer-panel">
@@ -105,6 +110,7 @@
 <script src="views-a.js"></script>
 <script src="views-b.js"></script>
 <script src="views-c.js"></script>
+<script src="views-d.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
