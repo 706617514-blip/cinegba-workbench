@@ -6,9 +6,10 @@
   const CG = window.CG, U = CG.util, I = CG.icon;
   CG.views = CG.views || {};
 
-  const GATES = [
+  CG.GATES = [
     {
       n: '01', key: 'law', title: '法律确定性',
+      short: 'TDM 豁免立法中，为 AI 训练定性',
       q: 'AI 训练到底合不合法，谁说了算？',
       lead: '全球多数法域还在打官司，香港正在把它写成条文。',
       facts: [
@@ -20,6 +21,7 @@
     },
     {
       n: '02', key: 'cert', title: '权利认证',
+      short: 'MPIA 为国家版权局指定机构',
       q: '谁出的版权凭证，内地认不认？',
       lead: '香港有一家被国家版权局指定的电影版权认证机构。',
       facts: [
@@ -31,6 +33,7 @@
     },
     {
       n: '03', key: 'gate', title: '双向通道',
+      short: 'CEPA 北上免配额，东盟南下已验证',
       q: '一个剧本，能不能同时进内地和东盟？',
       lead: '北上免配额，南下已跑通，这是香港最不可替代的一条。',
       facts: [
@@ -43,6 +46,7 @@
     },
     {
       n: '04', key: 'arb', title: '争议解决',
+      short: '普通法 + 中英双语 + 国际仲裁',
       q: '出事了，去哪打官司？',
       lead: '普通法 + 中英双语 + 国际仲裁，是内地与东盟都能接受的第三地。',
       facts: [
@@ -73,6 +77,14 @@
 
   CG.views.whyhk = function () {
     return `
+    <div class="wk-topbar">
+      <button class="btn sm ghost" data-back-home>
+        <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2">
+          <path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+        收起，回首页
+      </button>
+    </div>
+
     <section class="wk-hero">
       <div class="wk-hero-bg"></div>
       <div class="wk-hero-in">
@@ -91,7 +103,7 @@
     </section>
 
     <section class="wk-gates">
-      ${GATES.map(g => `
+      ${CG.GATES.map(g => `
         <article class="wk-gate">
           <div class="wk-gn">${g.n}</div>
           <h2>${g.title}</h2>
@@ -186,6 +198,12 @@
     </section>`;
   };
 
-  CG.views.whyhk.after = function () { };
+  CG.views.whyhk.after = function () {
+    const root = document.getElementById('view');
+    root.querySelectorAll('[data-back-home]').forEach(el => el.onclick = () => {
+      CG.ui.openGate = null;
+      CG.go('home');
+    });
+  };
 
 })();

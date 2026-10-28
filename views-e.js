@@ -17,6 +17,17 @@
     return own.concat(CG.virtual.all());
   };
 
+  /* 四道门图标 */
+  function gateIcon(key) {
+    const m = {
+      law: '<path d="M12 3v18M6 7h12M6 7l-3 7h6zM18 7l-3 7h6z"/>',
+      cert: '<path d="M4 5a2 2 0 012-2h8l6 6v12a2 2 0 01-2 2H6a2 2 0 01-2-2z"/><path d="M14 3v6h6"/><circle cx="12" cy="15" r="2"/>',
+      gate: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18"/>',
+      arb: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>'
+    };
+    return `<svg viewBox="0 0 24 24">${m[key] || m.law}</svg>`;
+  }
+
   const TYPE_LIST = [
     ['video', '视频', '成片、预告、空镜'],
     ['image', '图片', '概念稿、设定集'],
@@ -73,6 +84,7 @@
     <section class="hm-hero">
       <div class="hm-hero-bg"></div>
       <div class="hm-hero-in">
+        <div class="hm-hero-tx">
         <span class="hm-kicker">
           <i class="pulse"></i> 香港枢纽 · ${total.toLocaleString()} 件素材 · 5 种授权类型
         </span>
@@ -93,7 +105,27 @@
           ${['国风', '城市空镜', '赛博朋克', '配乐', '角色模型'].map(t =>
       `<button data-kw="${t}">${t}</button>`).join('')}
         </div>
+        </div>
+
+      <div class="hm-routes">
+        <div class="hm-node">
+          <span class="hm-dot"></span>
+          <b>香港</b>
+          <em>认证 · 定价 · 结算</em>
+        </div>
+        <div class="hm-legs">
+          <div class="hm-leg north">
+            <span class="hm-arrow">↗</span>
+            <div><b>北上 · 内地</b><em>CEPA 配额豁免</em></div>
+          </div>
+          <div class="hm-leg south">
+            <span class="hm-arrow">↘</span>
+            <div><b>南下 · 东盟</b><em>星马印已验证</em></div>
+          </div>
+        </div>
+        <div class="hm-rn">一条素材，两个方向</div>
       </div>
+      </div><!-- /.hm-hero-in -->
     </section>
 
     <section class="hm-sec">
@@ -103,18 +135,36 @@
         <p style="flex-basis:100%">AI 授权的四道门——只有这四道同时开着，这门生意才成立。</p>
       </div>
       <div class="hm-gates">
-        <a class="hm-g" href="#/whyhk">
-          <span class="gi"><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></span>
-          <div><b>法律确定性</b><span>TDM 豁免立法中，为 AI 训练定性</span></div></a>
-        <a class="hm-g" href="#/whyhk">
-          <span class="gi"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 012-2h8l6 6v12a2 2 0 01-2 2H6a2 2 0 01-2-2z"/><path d="M14 3v6h6"/></svg></span>
-          <div><b>权利认证</b><span>MPIA 为国家版权局指定机构</span></div></a>
-        <a class="hm-g" href="#/whyhk">
-          <span class="gi"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18"/></svg></span>
-          <div><b>双向通道</b><span>CEPA 北上免配额，东盟南下已验证</span></div></a>
-        <a class="hm-g" href="#/whyhk">
-          <span class="gi"><svg viewBox="0 0 24 24"><path d="M12 3v18M6 7h12M6 7l-3 7h6zM18 7l-3 7h6z"/></svg></span>
-          <div><b>争议解决</b><span>普通法 + 中英双语 + 国际仲裁</span></div></a>
+        ${CG.GATES.map(function (g) {
+          const open = CG.ui.openGate === g.key;
+          return `<div class="hm-gate-wrap ${open ? 'open' : ''}">
+            <button class="hm-g" data-gate="${g.key}" aria-expanded="${open ? 'true' : 'false'}">
+              <span class="gi">${gateIcon(g.key)}</span>
+              <div class="hm-g-tx">
+                <b>${U.esc(g.title)}</b>
+                <span>${U.esc(g.short || g.lead)}</span>
+              </div>
+              <span class="hm-g-arrow">${open ? '收起' : '展开'}</span>
+            </button>
+            ${open ? `<div class="hm-g-body">
+              <div class="hm-g-facts">
+                ${g.facts.map(function (f) {
+                  return `<div class="hm-gf">
+                    <b>${U.esc(f.t)}</b>
+                    <p>${U.esc(f.d)}</p>
+                    <span class="wk-src">来源：${U.esc(f.s)}</span>
+                  </div>`;
+                }).join('')}
+              </div>
+              <div class="hm-g-why"><b>对我们的意义</b>${g.why}</div>
+              <div class="hm-g-cav"><span>边界</span>${U.esc(g.caveat)}</div>
+              <div class="hm-g-foot">
+                <a class="btn sm" href="#/whyhk">看完整论证</a>
+                <button class="btn sm ghost" data-gate="${g.key}">收起</button>
+              </div>
+            </div>` : ''}
+          </div>`;
+        }).join('')}
       </div>
     </section>
 
@@ -231,6 +281,24 @@
       CG.go('market');
     });
     root.querySelectorAll('[data-open]').forEach(el => el.onclick = () => CG.go('market/' + el.dataset.open));
+
+    // 四道门：原地展开 / 收起
+    root.querySelectorAll('[data-gate]').forEach(el => {
+      el.onclick = (ev) => {
+        ev.preventDefault();
+        const k = el.dataset.gate;
+        CG.ui.openGate = (CG.ui.openGate === k) ? null : k;
+        CG.render();
+        // 展开后滚到该卡片，避免内容在视口外
+        if (CG.ui.openGate) {
+          setTimeout(() => {
+            const node = document.querySelector('.hm-gate-wrap.open');
+            if (node) node.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 40);
+        }
+      };
+    });
+
     bindFav(root);
   };
 
