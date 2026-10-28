@@ -1,6 +1,6 @@
 /* ==========================================================================
    CineGBA · 虚拟素材库
-   每种类型 1000 条，共 5000 条。不写入 state（避免存档膨胀），
+   每种类型 950–1400 条（按类型确定性随机），不写入 state（避免存档膨胀），
    每次启动用固定种子重建，保证同一 id 永远指向同一件作品。
    ========================================================================== */
 (function () {
@@ -70,8 +70,14 @@
     ['editorial']
   ];
 
-  const PER_TYPE = 1000;
   const TYPES = Object.keys(TYPE_META);
+
+  /* 每种类型的条数：950–1400 之间确定性随机（同一类型每次一致，但彼此不同） */
+  const TYPE_COUNT = {};
+  TYPES.forEach(function (t, i) {
+    const r = mulberry32(7700 + i * 137)();
+    TYPE_COUNT[t] = 950 + Math.floor(r * 451);   // 950..1400
+  });
 
   let cache = null;
   const idx = new Map();
@@ -83,10 +89,12 @@
 
     TYPES.forEach(type => {
       const meta = TYPE_META[type];
-      for (let i = 0; i < PER_TYPE; i++) {
+      const total = TYPE_COUNT[type];
+      for (let i = 0; i < total; i++) {
         const a = A[i % A.length];
         const b = B[Math.floor(i / A.length) % B.length] || B[0];
-        const title = a + b + meta.suffix[i % meta.suffix.length];
+        const seq = Math.floor(i / (A.length * B.length));   // 超过词组组合数后加序号（放末尾更自然）
+        const title = a + b + meta.suffix[i % meta.suffix.length] + (seq ? ' ' + (seq + 1) : '');
 
         const licKinds = LIC_SET[Math.floor(rnd() * LIC_SET.length)];
         const KF = { 'editorial': 0.05, 'clip': 0.42, 'ai-training': 1.35, 'adaptation': 8, 'full': 22 };
@@ -143,6 +151,7 @@
   }
 
   CG.virtual = {
+    TYPE_COUNT: TYPE_COUNT,
     ensure() {
       if (!cache) {
         cache = build();
@@ -153,6 +162,7 @@
     all() { return this.ensure() },
     get(id) { this.ensure(); return idx.get(id) || null },
     count() { return this.ensure().length },
+    countOf(type) { return TYPE_COUNT[type] || 0 },
     byType(type) { return this.ensure().filter(w => w.type === type) },
     /** 榜单：按热度 */
     top(n, type) {

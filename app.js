@@ -404,8 +404,8 @@
       setTimeout(() => {
         if (CG.auth.isIn) {
           CG.toast(CG.store.mode === 'fs'
-            ? '已连接本地数据站 · 素材市场已载入 5000 件演示素材'
-            : '浏览器模式 · 素材市场已载入 5000 件演示素材', 'ok');
+            ? '已连接本地数据站 · 素材市场已载入 ' + CG.virtual.count().toLocaleString() + ' 件演示素材'
+            : '浏览器模式 · 素材市场已载入 ' + CG.virtual.count().toLocaleString() + ' 件演示素材', 'ok');
         }
       }, 600);
     }

@@ -78,7 +78,7 @@
     const hot = CG.virtual.top(8);
     const picks = CG.virtual.pick(4, 7);
     const counts = {};
-    TYPE_LIST.forEach(t => { counts[t[0]] = CG.virtual.byType(t[0]).length });
+    TYPE_LIST.forEach(t => { counts[t[0]] = CG.virtual.countOf(t[0]) });
 
     return `
     <section class="hm-hero">
@@ -445,7 +445,7 @@
       <div>
         ${slice.length ? `<div class="mktgrid">${slice.map(w => assetCard(w)).join('')}</div>`
         : `<div class="empty">${I.empty}<b>没有匹配的素材</b>
-           <p>换关键词，或清空筛选看全部 5000 件</p>
+           <p>换关键词，或清空筛选看全部 ${CG.virtual.count().toLocaleString()} 件</p>
            <button class="btn" data-act="clrf">清空筛选</button></div>`}
         ${pageNav}
       </div>
@@ -661,7 +661,7 @@
       <a class="qk2" href="#/cart">${I.cart}<b>选购车</b><span>${cart.length} 件待结算</span></a>
       <a class="qk2" href="#/orders">${I.file}<b>我的订单</b><span>${orders.length} 笔</span></a>
       <a class="qk2" href="#/favorites">${I.shield}<b>我的收藏</b><span>${favs.length} 件</span></a>
-      <a class="qk2" href="#/market">${I.chart}<b>继续逛市场</b><span>5000 件素材</span></a>
+      <a class="qk2" href="#/market">${I.chart}<b>继续逛市场</b><span>${CG.virtual.count().toLocaleString()} 件素材</span></a>
     </section>
 
     <section class="cs-sec">
@@ -677,7 +677,7 @@
       <div class="cs-cats">
         ${TYPE_LIST.map(t => `<a class="cs-cat" href="#/market" data-typego="${t[0]}">
           <span>${typeIcon(t[0])}</span><b>${t[1]}</b>
-          <em>${CG.virtual.byType(t[0]).length} 件</em></a>`).join('')}
+          <em>${CG.virtual.countOf(t[0])} 件</em></a>`).join('')}
       </div>
     </section>
 
