@@ -304,7 +304,26 @@ CG.SEED = {
     { id: 'L-0924', workId: 'w-shanhai', licensee: '某动画制作公司', kind: 'adaptation',
       price: 48000, status: 'negotiating', at: '2026-10-27 10:41', note: '对方要求独家，待议价' },
     { id: 'L-0927', workId: 'w-wugang', licensee: '某品牌广告代理', kind: 'clip',
-      price: 88, status: 'rejected', at: '2026-10-27 17:22', note: '用途超出授权范围，已驳回' }
+      price: 88, status: 'rejected', at: '2026-10-27 17:22', note: '用途超出授权范围，已驳回' },
+    /* 历史人工回签记录：用来支撑飞轮提示（同一维度被手动接受多次） */
+    { id: 'L-0771', workId: 'w-shanhai', licensee: '某影视投资公司', kind: 'adaptation',
+      price: 128000, status: 'signed', at: '2026-09-18 14:20',
+      note: '改编权，对方要求完全独占',
+      over: [
+        { dim: '独占性', why: '超出范围：完全独占' },
+        { dim: '授权期限', why: '永久 超过自动上限 24 个月' }
+      ] },
+    { id: 'L-0784', workId: 'w-shanhai', licensee: '某流媒体平台', kind: 'clip',
+      price: 8600, status: 'signed', at: '2026-09-29 10:05',
+      note: '要求区域独家',
+      over: [{ dim: '独占性', why: '超出范围：完全独占' }] },
+    { id: 'L-0802', workId: 'w-shanhai', licensee: '某游戏公司', kind: 'ai-training',
+      price: 42000, status: 'signed', at: '2026-10-08 16:40',
+      note: '模型训练，需商品化使用',
+      over: [
+        { dim: '独占性', why: '超出范围：完全独占' },
+        { dim: '模型训练', why: '超出范围：允许' }
+      ] }
   ],
 
   revenue: [

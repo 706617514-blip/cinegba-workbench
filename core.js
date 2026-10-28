@@ -155,6 +155,106 @@
   const idbGet = (st, k) => idbTx(st, 'readonly', s => s.get(k));
   const idbPut = (st, k, v) => idbTx(st, 'readwrite', s => s.put(v, k));
 
+
+  /* ------------------------------------------------------------ 授权策略 */
+  /** 条款包：一套「采购方要填什么」+「创作者放行到哪」的预设 */
+  CG.POLICY_PACKS = [
+    {
+      id: 'standard', label: '标准商用包',
+      desc: '正片、短视频、广告；内地与香港；24 个月内；非独占',
+      clause: {
+        media: ['正片/成片', '短视频', '广告'], region: ['中国内地', '香港'], term: '24 个月',
+        exclusive: '非独占', modify: '原样使用', training: '禁止', resell: '禁止', credit: '必须署名'
+      },
+      auto: {
+        media: ['正片/成片', '短视频', '广告', '互动应用'], region: ['中国内地', '香港', '澳门'],
+        termMax: 24, exclusive: ['非独占'], modify: ['原样使用', '可剪辑'],
+        training: ['禁止'], resell: ['禁止'], credit: ['必须署名', '署名可选']
+      }
+    },
+    {
+      id: 'training', label: 'AI 训练包',
+      desc: '模型训练与评测；不要求独占；需披露训练用途',
+      clause: {
+        media: ['互动应用'], region: ['中国内地', '香港'], term: '12 个月',
+        exclusive: '非独占', modify: '原样使用', training: '允许但需披露', resell: '禁止', credit: '必须署名'
+      },
+      auto: {
+        media: ['互动应用', '正片/成片'], region: ['中国内地', '香港', '澳门'],
+        termMax: 24, exclusive: ['非独占'], modify: ['原样使用'],
+        training: ['允许但需披露'], resell: ['禁止'], credit: ['必须署名', '署名可选']
+      }
+    },
+    {
+      id: 'distribution', label: '全渠道发行包',
+      desc: '含印刷与线下展陈；内地、香港、东盟；36 个月；品类独占',
+      clause: {
+        media: ['正片/成片', '广告', '印刷出版', '线下展陈'], region: ['中国内地', '香港', '东南亚'],
+        term: '36 个月', exclusive: '品类独占', modify: '可剪辑',
+        training: '禁止', resell: '允许一级', credit: '必须署名'
+      },
+      auto: {
+        media: ['正片/成片', '广告', '印刷出版', '线下展陈'],
+        region: ['中国内地', '香港', '澳门', '东南亚'],
+        termMax: 36, exclusive: ['非独占', '品类独占'], modify: ['原样使用', '可剪辑'],
+        training: ['禁止'], resell: ['禁止', '允许一级'], credit: ['必须署名', '署名可选']
+      }
+    },
+    {
+      id: 'derivative', label: '衍生开发包',
+      desc: '允许改编与衍生；完全独占需人工；可转授权',
+      clause: {
+        media: ['互动应用', '印刷出版'], region: ['全球'], term: '36 个月',
+        exclusive: '完全独占', modify: '可衍生', training: '禁止', resell: '允许一级', credit: '署名可选'
+      },
+      auto: {
+        media: ['正片/成片', '互动应用', '印刷出版'], region: ['中国内地', '香港', '澳门'],
+        termMax: 36, exclusive: ['非独占', '品类独占'], modify: ['原样使用', '可剪辑', '可改编'],
+        training: ['禁止'], resell: ['禁止', '允许一级'], credit: ['必须署名', '署名可选']
+      }
+    }
+  ];
+
+  /** 取作品策略：没配过就用默认 */
+  CG.workPolicy = function (w) {
+    if (w && w.policy && w.policy.auto) return w.policy;
+    return JSON.parse(JSON.stringify(CG.DEFAULT_POLICY));
+  };
+
+  /** 是否对该作品启用了自动成交 */
+  CG.policyOn = function (w) {
+    return !(w && w.policy && w.policy.enabled === false);
+  };
+
+  /** 飞轮统计：历史上「人工接受过」的超限维度次数 */
+  CG.policyStats = function () {
+    const out = {};
+    ((CG.state && CG.state.leads) || []).forEach(l => {
+      if (l.status !== 'signed' || !l.over) return;
+      l.over.forEach(o => { out[o.dim] = (out[o.dim] || 0) + 1 });
+    });
+    return out;
+  };
+
+  /** 给创作者的建议：哪些维度已经够条件放宽了 */
+  CG.policyHints = function (w, min) {
+    const stats = CG.policyStats();
+    const pol = CG.workPolicy(w);
+    const hints = [];
+    Object.keys(stats).forEach(dim => {
+      if (stats[dim] >= (min || 3)) hints.push({ dim, count: stats[dim] });
+    });
+    return hints.sort((a, b) => b.count - a.count);
+  };
+
+  /** 策略的"放行率"估算：用近期询价里落在区间内的比例 */
+  CG.policyCoverage = function (w) {
+    const rows = ((CG.state && CG.state.leads) || []).filter(l => l.workId === (w && w.id));
+    if (!rows.length) return null;
+    const auto = rows.filter(l => !l.over || !l.over.length).length;
+    return { total: rows.length, auto, rate: Math.round(auto / rows.length * 100) };
+  };
+
   /* ------------------------------------------------------------ 认证头 */
   function authH(extra) {
     const h = Object.assign({}, extra || {});

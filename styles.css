@@ -1358,3 +1358,20 @@ button.more svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-widt
   .hm-gates{grid-template-columns:1fr}
   .wk-gn{font-size:26px;right:14px;top:12px}
 }
+
+
+/* 条款包卡片（创作者侧） */
+.pack-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.pack{border:1.5px solid var(--line);border-radius:var(--r);padding:12px 13px;
+  background:var(--surface-2);cursor:pointer;transition:.15s;position:relative}
+.pack:hover{border-color:var(--line-2)}
+.pack.on{border-color:var(--accent);background:var(--accent-soft)}
+.pack b{display:block;font-size:12.5px;margin-bottom:4px}
+.pack p{font-size:11px;color:var(--muted);line-height:1.6;padding-right:34px}
+.pack-go{position:absolute;right:11px;top:11px;font-size:10px;color:var(--accent);font-weight:700}
+.pack.on .pack-go{color:var(--accent)}
+
+/* 询价面板顶部条款包 */
+.pack-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.pack-row .chip{padding:4px 10px;font-size:11.5px}
+.pack-row .chip.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}

@@ -10,6 +10,7 @@
     ['overview', '总览'],
     ['evidence', '存证信息'],
     ['license', '授权配置'],
+    ['policy', '自动策略'],
     ['dispute', '维权动态'],
     ['revenue', '收入明细'],
     ['marketing', '宣发']
@@ -72,6 +73,7 @@
   function body(w, tab, ctx) {
     if (tab === 'evidence') return tabEvidence(w);
     if (tab === 'license') return tabLicense(w, ctx);
+    if (tab === 'policy') return tabPolicy(w, ctx);
     if (tab === 'dispute') return tabDispute(w, ctx);
     if (tab === 'revenue') return tabRevenue(w, ctx);
     if (tab === 'marketing') return tabMarketing(w);
@@ -200,6 +202,118 @@
           </tbody></table>` : '<p class="hint">还没有上传权属文件。</p>'}
         <button class="btn wide mt12" data-act="uploadDocs">上传权属文件</button>
         <div class="hint mt8">建议：权属文件缺失时，平台自动降低该作品可上架的授权等级，而不是让用户自由选择。</div>
+      </div>
+    </div>`;
+  }
+
+
+  /* ---------------- 自动成交策略 ---------------- */
+  function tabPolicy(w, ctx) {
+    const pol = CG.workPolicy(w);
+    const on = CG.policyOn(w);
+    const stats = CG.policyStats();
+    const hints = CG.policyHints(w, 3);
+    const cov = CG.policyCoverage(w);
+    const packs = CG.POLICY_PACKS;
+    const curPack = (w.policy && w.policy.pack) || null;
+
+    const dimRow = (d) => {
+      const allowed = d.multi ? (pol.auto[d.k] || []) : null;
+      if (d.k === 'term') {
+        return `<div class="cl-dim">
+          <div class="cl-label">${d.label}</div>
+          <div class="chipset" data-pdim="term" data-multi="0">
+            ${['12 个月', '24 个月', '36 个月'].map(t => {
+          const v = { '12 个月': 12, '24 个月': 24, '36 个月': 36 }[t];
+          return `<span class="chip ${pol.auto.termMax >= v ? 'on' : ''}" data-termv="${v}">≤ ${t}</span>`;
+        }).join('')}
+            <span class="hint" style="align-self:center">当前上限 ${pol.auto.termMax} 个月</span>
+          </div>
+        </div>`;
+      }
+      if (d.multi) {
+        return `<div class="cl-dim">
+          <div class="cl-label">${d.label}</div>
+          <div class="chipset" data-pdim="${d.k}" data-multi="1">
+            ${d.opts.map(o => `<span class="chip ${allowed.indexOf(o) >= 0 ? 'on' : ''}"
+              data-opt="${U.esc(o)}">${U.esc(o)}</span>`).join('')}
+          </div>
+        </div>`;
+      }
+      const cur = pol.auto[d.k] || [];
+      return `<div class="cl-dim">
+        <div class="cl-label">${d.label}</div>
+        <div class="chipset" data-pdim="${d.k}" data-multi="1">
+          ${d.opts.map(o => `<span class="chip ${cur.indexOf(o) >= 0 ? 'on' : ''}"
+            data-opt="${U.esc(o)}">${U.esc(o)}</span>`).join('')}
+        </div>
+      </div>`;
+    };
+
+    return `
+    <div class="card mb12">
+      <div class="card-h">
+        <h3>自动成交</h3>
+        <span class="pill ${on ? 'ok' : 'm'}">${on ? '已启用' : '已关闭'}</span>
+        <div class="switch ${on ? 'on' : ''}" data-psw="enabled" style="margin-left:auto"></div>
+      </div>
+      <p class="small" style="color:var(--ink-2);line-height:1.7">
+        开启后，采购方在「询价谈条款」里勾选的维度如果全部落在下面的放行区间内，
+        <b>系统直接生成订单</b>，不经过你。超出区间的部分才会进你的待办。
+      </p>
+      ${cov ? `<div class="note c" style="margin-top:11px">${I.info}
+        <div>效果参考：这件作品近期有 <b>${cov.total}</b> 条询价，其中
+        <b>${cov.auto}</b> 条可自动成交（<b>${cov.rate}%</b>）。
+        ${cov.rate < 50 ? '放行区间偏窄，可以考虑用条款包快速放宽。' : ''}</div></div>` : ''}
+    </div>
+
+    <div class="card mb12">
+      <div class="card-h"><h3>快速套用条款包</h3>
+        <span class="more">${curPack ? '当前：' + (packs.find(p => p.id === curPack) || {}).label : '未套用'}</span></div>
+      <div class="pack-grid">
+        ${packs.map(p => `
+          <div class="pack ${curPack === p.id ? 'on' : ''}" data-pack="${p.id}">
+            <b>${U.esc(p.label)}</b>
+            <p>${U.esc(p.desc)}</p>
+            <span class="pack-go">${curPack === p.id ? '已套用' : '套用'}</span>
+          </div>`).join('')}
+      </div>
+      <div class="hint mt8">套用会覆盖下面的放行区间，之后仍可逐项微调。</div>
+    </div>
+
+    <div class="card mb12">
+      <div class="card-h"><h3>放行区间</h3>
+        <span class="more">勾选的组合可自动成交</span></div>
+      ${CG.CLAUSE.map(dimRow).join('')}
+      <div class="hint mt8">至少勾一个选项；全部取消会导致没有询价能自动成交。</div>
+    </div>
+
+    ${hints.length ? `<div class="card mb12">
+      <div class="card-h"><h3>建议放宽</h3>
+        <span class="pill w">${hints.length} 条</span></div>
+      <p class="hint" style="margin-bottom:10px">
+        这些维度你已经手动接受过多次，说明实际业务里有需求。放宽后能减少人工回签。
+      </p>
+      ${hints.map(h => `<div class="srow">
+        <div class="tx"><b>${U.esc(h.dim)}</b>
+          <span>已被你手动接受 ${h.count} 次</span></div>
+        <button class="btn xs" data-widen="${U.esc(h.dim)}">放宽这一维</button>
+      </div>`).join('')}
+    </div>` : ''}
+
+    <div class="card">
+      <div class="card-h"><h3>当前策略摘要</h3></div>
+      <div class="fgrid">
+        ${CG.CLAUSE.map(d => {
+      let v;
+      if (d.k === 'term') v = '≤ ' + pol.auto.termMax + ' 个月';
+      else v = (pol.auto[d.k] || []).join('、') || '未放行';
+      return `<div><div class="hint">${d.label}</div><b class="small">${U.esc(v)}</b></div>`;
+    }).join('')}
+      </div>
+      <div class="row mt12">
+        <button class="btn" data-act="resetPolicy">恢复默认</button>
+        <span class="hint">修改会立即保存。</span>
       </div>
     </div>`;
   }
@@ -473,9 +587,89 @@
     U.qsa('[data-mat]', root).forEach(el => el.onclick = () =>
       CG.toast('演示环境不生成真实文件：' + el.dataset.mat, 'ok'));
 
-    // 宣发 tab 的判断
-    if (tab === 'marketing') { /* 已由 bind 处理 */ }
+    // ---- 自动策略 tab ----
+    if (tab === 'policy') bindPolicy(w, save);
   };
+
+
+  /* ---------------- 策略页事件 ---------------- */
+  function bindPolicy(w, save) {
+    const root = document.getElementById('view');
+    if (!w.policy) w.policy = CG.workPolicy(w);
+    const pol = w.policy;
+    if (pol.enabled === undefined) pol.enabled = true;
+
+    const sw = root.querySelector('[data-psw="enabled"]');
+    if (sw) sw.onclick = () => {
+      pol.enabled = !pol.enabled;
+      CG.toast(pol.enabled ? '已启用自动成交' : '已关闭自动成交');
+      save();
+    };
+
+    root.querySelectorAll('[data-pack]').forEach(el => el.onclick = () => {
+      const p = CG.POLICY_PACKS.find(x => x.id === el.dataset.pack);
+      if (!p) return;
+      pol.auto = JSON.parse(JSON.stringify(p.auto));
+      pol.pack = p.id;
+      CG.toast('已套用「' + p.label + '」', 'ok');
+      save();
+    });
+
+    // 维度勾选
+    root.querySelectorAll('[data-pdim]').forEach(set => {
+      const dim = set.dataset.pdim;
+      if (dim === 'term') {
+        set.querySelectorAll('[data-termv]').forEach(chip => {
+          chip.onclick = () => {
+            const v = Number(chip.dataset.termv);
+            pol.auto.termMax = (pol.auto.termMax === v) ? Math.max(6, v - 12) : v;
+            pol.pack = 'custom';
+            save();
+          };
+        });
+        return;
+      }
+      set.querySelectorAll('.chip').forEach(chip => {
+        chip.onclick = () => {
+          const opt = chip.dataset.opt;
+          const arr = pol.auto[dim] || (pol.auto[dim] = []);
+          const i = arr.indexOf(opt);
+          if (i >= 0) {
+            if (arr.length === 1) return CG.toast('至少保留一项', 'err');
+            arr.splice(i, 1);
+          } else {
+            arr.push(opt);
+          }
+          pol.pack = 'custom';
+          save();
+        };
+      });
+    });
+
+    // 飞轮：放宽某一维
+    root.querySelectorAll('[data-widen]').forEach(el => el.onclick = () => {
+      const dimName = el.dataset.widen;
+      const d = CG.CLAUSE.find(x => x.label === dimName);
+      if (!d) return;
+      if (d.k === 'term') {
+        pol.auto.termMax = 36;
+      } else {
+        pol.auto[d.k] = d.opts.slice();
+      }
+      pol.pack = 'custom';
+      CG.toast('已放宽「' + dimName + '」', 'ok');
+      save();
+    });
+
+    CG.bind(root, {
+      resetPolicy: () => CG.confirm('恢复默认策略', '会把放行区间重置为平台默认值。', () => {
+        w.policy = JSON.parse(JSON.stringify(CG.DEFAULT_POLICY));
+        w.policy.enabled = true;
+        CG.toast('已恢复默认');
+        save();
+      }, '恢复')
+    });
+  }
 
   /* ---------------- 编辑作品 ---------------- */
   function editWork(w, done) {

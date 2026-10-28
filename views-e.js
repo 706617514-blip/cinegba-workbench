@@ -905,7 +905,7 @@
 
   /** 按条款算价 + 判定是否落在自动接受区间 */
   CG.quote = function (w, l, clause) {
-    const pol = (w && w.policy) || CG.DEFAULT_POLICY;
+    const pol = CG.workPolicy(w);
     const auto = pol.auto, M = pol.mult;
     const over = [];
 
@@ -981,8 +981,10 @@
             ${q.ok
           ? `<span class="pill ok">可自动成交</span>
                  <div class="hint">所有维度都在版权方预设区间内，确认后直接生成订单。</div>`
-          : `<span class="pill w">${q.over.length} 项需人工确认</span>
-                 <div class="hint">超出部分由版权方回签，其余条款已锁定。</div>`}
+          : `<span class="pill w">${q.forced ? '版权方未开启自动成交' : q.over.length + ' 项需人工确认'}</span>
+                 <div class="hint">${q.forced
+            ? '该作品关闭了自动成交，所有询价都会进入版权方待办。'
+            : '超出部分由版权方回签，其余条款已锁定。'}</div>`}
           </div>
         </div>
         ${q.ok ? '' : `<div class="cl-over">
@@ -1000,6 +1002,10 @@
           <b>区间内的直接成交，超出的转人工</b>，并告诉你超在哪一维。</div>
         </div>
 
+        <div class="pack-row">
+          <span class="hint">快速套用：</span>
+          ${CG.POLICY_PACKS.map(p => `<button class="chip" data-quick="${p.id}">${U.esc(p.label)}</button>`).join('')}
+        </div>
         <div class="cl-grid" id="clGrid">${dimHtml()}</div>
 
         <div class="fld mt12">
@@ -1031,10 +1037,37 @@
         };
         const refresh = () => {
           quoted = CG.quote(w, l, clause);
+          // 版权方关掉自动成交时，即使区间内也走人工
+          if (quoted.ok && !CG.policyOn(w)) {
+            quoted = { price: quoted.price, ok: false, over: [], forced: true };
+          }
           status.innerHTML = statusHtml();
           syncGo();
         };
         syncGo();
+
+        panel.querySelectorAll('[data-quick]').forEach(btn => {
+          btn.onclick = () => {
+            const p = CG.POLICY_PACKS.find(x => x.id === btn.dataset.quick);
+            if (!p) return;
+            Object.keys(p.clause).forEach(k => {
+              clause[k] = Array.isArray(p.clause[k]) ? p.clause[k].slice() : p.clause[k];
+            });
+            panel.querySelectorAll('[data-quick]').forEach(b => b.classList.remove('on'));
+            btn.classList.add('on');
+            // 重绘维度选中态
+            grid.querySelectorAll('.chipset[data-dim]').forEach(set => {
+              const dim = set.dataset.dim;
+              const multi = set.dataset.multi === '1';
+              set.querySelectorAll('.chip').forEach(c => {
+                const on = multi ? clause[dim].indexOf(c.dataset.opt) >= 0
+                  : clause[dim] === c.dataset.opt;
+                c.classList.toggle('on', on);
+              });
+            });
+            refresh();
+          };
+        });
 
         grid.querySelectorAll('.chipset[data-dim]').forEach(set => {
           const dim = set.dataset.dim;
