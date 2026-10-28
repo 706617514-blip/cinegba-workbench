@@ -30,7 +30,7 @@
   function minPrice(w) {
     const on = (w.licenses || []).filter(l => l.on);
     if (!on.length) return 0;
-    return Math.min.apply(null, on.map(l => l.price));
+    return Math.min.apply(null, on.map(l => CG.listPrice(w, l)));
   }
   function statusPill(s) { const p = U.statusPill(s); return `<span class="pill ${p[1]}">${p[0]}</span>` }
   function fmtViews(n) {
@@ -249,8 +249,8 @@
     st.favorites = st.favorites || [];
     const i = st.favorites.indexOf(id);
     if (i >= 0) { st.favorites.splice(i, 1); CG.toast('已取消收藏') }
-    else { st.favorites.push(id); CG.toast('已加入收藏', 'ok') }
-    CG.save();
+    else { st.favorites.push(id); CG.toast('已加入收藏，可在「我的收藏」里找到', 'ok') }
+    CG.save(); CG.syncBadges();
   };
 
   /* ========================================================== 素材市场 */
@@ -399,11 +399,25 @@
         <p>可能已下架或未配置授权</p><a class="btn" href="#/market">回市场</a></div>`;
     }
     const on = (w.licenses || []).filter(l => l.on);
+    const isFav = ((CG.state.favorites) || []).indexOf(w.id) >= 0;
     const owner = w.owner || (CG.state.profile && CG.state.profile.org) || '';
     const sim = CG.virtual.pick(4, w.id.length * 31 + w.title.length, w.type);
 
     return `
     <div class="crumb"><a href="#/market">素材市场</a> / <span>${U.esc(w.type ? U.typeOf(w.type) : '')}</span> / <span>${U.esc(w.title)}</span></div>
+
+    <div class="ph" style="margin-bottom:12px">
+      <div style="min-width:0">
+        <h1>${U.esc(w.title)}</h1>
+        <p>${U.esc(w.owner || '')} · ${U.typeOf(w.type)} · 入库 ${U.date(w.createdAt)}</p>
+      </div>
+      <div class="ph-r">
+        <button class="btn fav-btn ${isFav ? 'on' : ''}" data-fav="${w.id}">
+          <svg viewBox="0 0 24 24"><path d="M12 21s-8-5-8-11a4.5 4.5 0 018-2.8A4.5 4.5 0 0120 10c0 6-8 11-8 11z"/></svg>
+          <span>${isFav ? '已收藏' : '收藏'}</span>
+        </button>
+      </div>
+    </div>
 
     <div class="dt-wrap">
       <div class="dt-left">
@@ -440,7 +454,7 @@
           ${on.length ? on.map((l, i) => {
       const k = U.licOf(l.kind);
       return `<div class="liccard ${i === 0 ? 'on' : ''}" data-pick="${l.id}">
-              <div class="lc-h"><b>${U.esc(k.label)}</b><span class="pr">${U.money(l.price)}</span></div>
+              <div class="lc-h"><b>${U.esc(k.label)}</b><span class="pr">${U.money(CG.listPrice(w, l))}</span></div>
               <p>${U.esc(k.desc)}</p>
               <div class="lc-f"><span>${U.esc(l.region)}</span>
                 <span>${l.term >= 999 ? '永久' : l.term + ' 个月'}</span>
@@ -479,6 +493,20 @@
   CG.views.marketItem.after = function (args) {
     const w = CG.asset(args[0]); if (!w) return;
     const root = document.getElementById('view');
+
+    // 收藏按钮（详情页）
+    const fb = root.querySelector('.fav-btn');
+    if (fb) fb.onclick = (ev) => {
+      ev.stopPropagation();
+      CG.toggleFav(w.id);
+      const now = ((CG.state.favorites) || []).indexOf(w.id) >= 0;
+      fb.classList.toggle('on', now);
+      const t = fb.querySelector('span');
+      if (t) t.textContent = now ? '已收藏' : '收藏';
+      const ci = document.getElementById('cartCount');
+      if (ci) ci.hidden = !(CG.state.cart || []).length;
+    };
+
     const cards = Array.from(root.querySelectorAll('[data-pick]'));
     let picked = cards.length ? cards[0].dataset.pick : null;
     cards.forEach(c => c.onclick = () => {
@@ -590,7 +618,8 @@
       const w = CG.asset(it.workId);
       if (!w) return '';
       const l = (w.licenses || []).find(x => x.id === it.licId) || { price: it.price, kind: it.kind };
-      const amount = l.price * (it.qty || 1);
+      const unit = (w && l.id) ? CG.listPrice(w, l) : it.price;
+      const amount = unit * (it.qty || 1);
       total += amount;
       return `<div class="ct-row">
         <label class="ct-check"><input type="checkbox" class="ct-sel" data-i="${i}" checked></label>
@@ -844,7 +873,7 @@
     const hit = st.cart.find(c => c.workId === workId && c.licId === licId);
     if (hit) { hit.qty = (hit.qty || 1) + (qty || 1) }
     else {
-      st.cart.push({ workId, licId, kind: l.kind, price: l.price, qty: qty || 1 });
+      st.cart.push({ workId, licId, kind: l.kind, price: CG.listPrice(w, l), qty: qty || 1 });
     }
     CG.save(); CG.syncBadges();
     CG.toast('已加入选购车', 'ok');
@@ -895,12 +924,44 @@
     }
   };
 
-  CG.defaultClause = function (l) {
-    return {
+  /** 默认条款：有作品策略时从放行区间里取「最便宜的那档」，保证默认勾选一定可自动成交 */
+  CG.defaultClause = function (w, l) {
+    const BASE = {
       media: ['正片/成片'], region: ['中国内地'], term: '12 个月',
       exclusive: '非独占', modify: '原样使用', training: '禁止',
       resell: '禁止', credit: '必须署名'
     };
+    if (!w) return BASE;
+
+    const a = CG.workPolicy(w).auto;
+    const pick = (arr, pref) => {
+      if (!arr || !arr.length) return pref[0];
+      for (const p of pref) if (arr.indexOf(p) >= 0) return p;
+      return arr[0];
+    };
+    const TERMS = [6, 12, 24, 36, 999];
+    const TERM_NAME = { 6: '6 个月', 12: '12 个月', 24: '24 个月', 36: '36 个月', 999: '永久' };
+    // 默认取标准档 12 个月（系数 1）；区间不允许 12 个月时退到最接近的较短档
+    const under = TERMS.filter(v => v <= (a.termMax || 12));
+    let termVal = 12;
+    if (a.termMax && a.termMax < 12) termVal = under.length ? under[under.length - 1] : 6;
+
+    return {
+      media: [pick(a.media, ['正片/成片', '短视频', '广告'])],
+      region: [pick(a.region, ['中国内地', '香港'])],
+      term: TERM_NAME[termVal],
+      exclusive: pick(a.exclusive, ['非独占', '品类独占']),
+      modify: pick(a.modify, ['原样使用', '可剪辑']),
+      training: pick(a.training, ['禁止', '允许但需披露']),
+      resell: pick(a.resell, ['禁止', '允许一级']),
+      credit: pick(a.credit, ['必须署名', '署名可选'])
+    };
+  };
+
+  /** 市场标价：策略默认条款算出来的价（保证与自动成交价一致，消除倒挂） */
+  CG.listPrice = function (w, l) {
+    if (!l) return 0;
+    return CG.quote(w, l, CG.defaultClause(w, l)).price;
   };
 
   /** 按条款算价 + 判定是否落在自动接受区间 */
@@ -933,7 +994,7 @@
     });
 
     // 计价：基准价 × 各维度系数
-    let price = Number(l.price) || 0;
+    let price = Number(l.price) || 0;   // 从基准价起算；listPrice 才是「基准价 × 系数」的结果
     price *= (M.term[termVal] || 1);
     price *= (M.exclusive[clause.exclusive] || 1);
     price *= (M.modify[clause.modify] || 1);
@@ -952,7 +1013,7 @@
   /* ---------------- 询价 / 报价面板 ---------------- */
   CG.inquiry = function (w, l, after) {
     const k = U.licOf(l.kind);
-    const clause = CG.defaultClause(l);
+    const clause = CG.defaultClause(w, l);
     let quoted = CG.quote(w, l, clause);
 
     const dimHtml = () => CG.CLAUSE.map(d => `
@@ -975,7 +1036,7 @@
           <div class="cl-q-l">
             <span class="hint">按当前条款的报价</span>
             <b>${U.money(q.price)}</b>
-            <span class="hint">基准价 ${U.money(l.price)} × 条款系数</span>
+            <span class="hint">标价 ${U.money(CG.listPrice(w, l))} × 条款系数</span>
           </div>
           <div class="cl-q-r">
             ${q.ok

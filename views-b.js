@@ -325,7 +325,9 @@
     const missing = all.filter(k => !lic.some(l => l.kind === k));
     return `
     <div class="note c">${I.info}<div>每开一种授权，作品就会以对应价格出现在<b>素材市场</b>。
-      采购方下单后你会收到询价，回签即生成合约与入账记录。</div></div>
+      采购方下单后你会收到询价，回签即生成合约与入账记录。
+      <br><b>价格联动：</b>这里显示的是<b>市场标价</b>，由「基准价 × 自动策略的默认条款系数」算出。
+      改了策略，标价会跟着变，不会再出现「直购价比自动成交价还低」的倒挂。</div></div>
 
     <div class="g2 mt12">
       <div class="card">
@@ -333,13 +335,20 @@
         ${lic.length ? lic.map(l => {
       const k = U.licOf(l.kind);
       return `<div class="liccard ${l.on ? 'on' : ''} mb8">
-              <div class="lc-h"><b>${k.label}</b><span class="pr">${U.money(l.price)}</span></div>
+              <div class="lc-h"><b>${k.label}</b><span class="pr">${U.money(CG.listPrice(w, l))}</span></div>
               <p>${U.esc(k.desc)}</p>
               <div class="lc-f">
                 <span>${U.esc(l.region)}</span>
                 <span>${l.term >= 999 ? '永久' : l.term + ' 个月'}</span>
                 <span>${l.resell ? '可转授权' : '不可转授权'}</span>
                 <span>${U.esc(k.unitLabel)}</span>
+              </div>
+              <div class="lc-price-note">
+                市场标价 ${U.money(CG.listPrice(w, l))}
+                · 基准价 ${U.money(l.price)}
+                ${CG.listPrice(w, l) !== l.price
+        ? `<b class="up">策略系数 ×${(CG.listPrice(w, l) / l.price).toFixed(1)}</b>`
+        : '<span class="ok">与基准价一致</span>'}
               </div>
               <div class="row mt8">
                 <button class="btn xs" data-ltoggle="${l.id}">${l.on ? '关闭' : '开启'}</button>
@@ -548,7 +557,7 @@
     U.qsa('[data-ledit]', root).forEach(el => el.onclick = () => {
       const l = w.licenses.find(x => x.id === el.dataset.ledit);
       if (!l) return;
-      const v = prompt('输入新的价格（元）', l.price);
+      const v = prompt('输入新的基准价（元）\n市场标价 = 基准价 × 当前策略系数', l.price);
       if (v == null) return;
       const n = Number(v);
       if (!n || n <= 0) return CG.toast('价格不合法', 'err');
@@ -765,7 +774,8 @@
           <div class="fld"><label>可否转授权</label>
             <select id="alResell"><option value="0">不可转授权</option><option value="1">可转授权</option></select></div>
         </div>
-        <div class="note c mt12">${I.info}<div>计价单位：${U.esc(k.unitLabel)}。价格会直接显示在素材市场。</div></div>
+        <div class="note c mt12">${I.info}<div>这里填的是<b>基准价</b>（对应最基础的条款组合）。
+          实际市场标价 = 基准价 × 当前自动策略的系数，加价后的部分由采购方承担。</div></div>
         <div class="row mt16" style="justify-content:flex-end">
           <button class="btn" data-close>取消</button>
           <button class="btn pri" id="alSave">添加并上架</button>

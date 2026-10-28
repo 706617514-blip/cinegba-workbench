@@ -992,11 +992,11 @@ body.zone-market #view{max-width:1360px}
 .hm-cta p{font-size:12.5px;color:var(--muted);margin:9px 0 20px}
 
 /* ---------- 市场卡片收藏 ---------- */
-.mkt-cover .fav{position:absolute;right:7px;top:7px;width:26px;height:26px;border-radius:8px;
-  display:grid;place-items:center;background:rgba(0,0,0,.45);color:#fff;
-  backdrop-filter:blur(4px);opacity:0;transition:.15s}
-.mkt:hover .mkt-cover .fav{opacity:1}
-.mkt-cover .fav.on{opacity:1;background:var(--danger);color:#fff}
+.mkt-cover .fav{position:absolute;right:7px;top:7px;width:28px;height:28px;border-radius:9px;
+  display:grid;place-items:center;background:rgba(0,0,0,.42);color:#fff;
+  backdrop-filter:blur(4px);opacity:.62;transition:.15s;border:1px solid rgba(255,255,255,.18)}
+.mkt:hover .mkt-cover .fav{opacity:1;background:rgba(0,0,0,.62)}
+.mkt-cover .fav.on{opacity:1;background:var(--danger);border-color:var(--danger);color:#fff}
 .mkt-cover .fav svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2}
 .mkt-cover .fav.on svg{fill:currentColor}
 
@@ -1375,3 +1375,16 @@ button.more svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-widt
 .pack-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:12px}
 .pack-row .chip{padding:4px 10px;font-size:11.5px}
 .pack-row .chip.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+
+
+/* 详情页收藏按钮 */
+.fav-btn{height:32px;padding:0 13px;gap:6px}
+.fav-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.9}
+.fav-btn.on{border-color:var(--danger);color:var(--danger);background:var(--danger-soft)}
+.fav-btn.on svg{fill:currentColor}
+
+/* 授权配置：价格联动说明 */
+.lc-price-note{margin-top:8px;padding-top:7px;border-top:1px dashed var(--line);
+  font-size:10px;color:var(--muted);display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.lc-price-note b.up{color:var(--amber);font-weight:700;font-family:var(--fm)}
+.lc-price-note .ok{color:var(--ok)}

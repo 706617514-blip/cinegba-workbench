@@ -38,7 +38,7 @@
         ['market', '素材市场', 'cart'],
         ['whyhk', '为什么是香港', 'globe'],
         ['consumer', '消费者中心', 'user'],
-        ['favorites', '我的收藏', 'shield']
+        ['favorites', '我的收藏', 'shield', 'favCnt']
       ]],
       ['我的交易', [
         ['cart', '选购车', 'cart', 'cartCnt'],
@@ -130,7 +130,8 @@
   function counts() {
     return {
       disputeCnt: ((CG.state && CG.state.disputes) || []).filter(d => d.status === 'open').length,
-      cartCnt: ((CG.state && CG.state.cart) || []).length
+      cartCnt: ((CG.state && CG.state.cart) || []).length,
+      favCnt: ((CG.state && CG.state.favorites) || []).length
     };
   }
 
@@ -373,6 +374,11 @@
       if (cm) {
         const n = (CG.state.cart || []).length;
         cm.textContent = n || '';
+      }
+      const fm = document.querySelector('[data-nav="favorites"] .cnt');
+      if (fm) {
+        const n = (CG.state.favorites || []).length;
+        fm.textContent = n || '';
       }
     };
 
