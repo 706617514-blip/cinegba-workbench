@@ -1388,3 +1388,23 @@ button.more svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-widt
   font-size:10px;color:var(--muted);display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .lc-price-note b.up{color:var(--amber);font-weight:700;font-family:var(--fm)}
 .lc-price-note .ok{color:var(--ok)}
+
+
+/* 收藏标签选择器 */
+.fav-tags{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.fav-tag{border:1.5px solid var(--line);border-radius:var(--r);padding:11px 12px;
+  background:var(--surface-2);text-align:left;transition:.15s;cursor:pointer}
+.fav-tag:hover{border-color:var(--line-2)}
+.fav-tag.on{border-color:var(--accent);background:var(--accent-soft)}
+.fav-tag b{display:block;font-size:12.5px;margin-bottom:3px}
+.fav-tag.on b{color:var(--accent)}
+.fav-tag span{font-size:10.5px;color:var(--muted);line-height:1.5}
+
+/* 收藏夹单元格：卡片下方加标签条 */
+.fav-cell{display:flex;flex-direction:column;gap:0}
+.fav-bar{display:flex;align-items:center;gap:7px;padding:7px 2px 0}
+.fav-bar .btn{margin-left:auto}
+
+@media(max-width:760px){
+  .fav-tags{grid-template-columns:1fr}
+}

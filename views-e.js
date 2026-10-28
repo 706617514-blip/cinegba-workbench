@@ -244,12 +244,41 @@
       };
     });
   }
-  CG.toggleFav = function (id) {
+  /* ---------------- 收藏（带标签） ---------------- */
+  CG.FAV_TAGS = [
+    { id: 'pick', label: '备选', pill: 'c', desc: '有意向，可能买' },
+    { id: 'compare', label: '待比价', pill: 'w', desc: '和别家或别件比一比' },
+    { id: 'ref', label: '参考', pill: 'm', desc: '只是找灵感，不打算买' }
+  ];
+
+  CG.favList = function () {
+    const raw = (CG.state && CG.state.favorites) || [];
+    return raw.map(x => typeof x === 'string' ? { id: x, tag: null, at: null } : x);
+  };
+  CG.isFav = function (id) { return CG.favList().some(f => f.id === id) };
+  CG.favOf = function (id) { return CG.favList().find(f => f.id === id) || null };
+  CG.favCount = function () { return CG.favList().length };
+
+  CG.setFavTag = function (id, tag) {
     const st = CG.state;
-    st.favorites = st.favorites || [];
-    const i = st.favorites.indexOf(id);
-    if (i >= 0) { st.favorites.splice(i, 1); CG.toast('已取消收藏') }
-    else { st.favorites.push(id); CG.toast('已加入收藏，可在「我的收藏」里找到', 'ok') }
+    st.favorites = CG.favList();
+    const f = st.favorites.find(x => x.id === id);
+    if (!f) return;
+    f.tag = tag || null;
+    CG.save(); CG.syncBadges();
+  };
+
+  CG.toggleFav = function (id, tag) {
+    const st = CG.state;
+    st.favorites = CG.favList();
+    const i = st.favorites.findIndex(f => f.id === id);
+    if (i >= 0) {
+      st.favorites.splice(i, 1);
+      CG.toast('已移除收藏');
+    } else {
+      st.favorites.push({ id: id, tag: tag || null, at: U.now() });
+      CG.toast('已收藏' + (tag ? '（' + ((CG.FAV_TAGS.find(t => t.id === tag) || {}).label || '') + '）' : ''), 'ok');
+    }
     CG.save(); CG.syncBadges();
   };
 
@@ -498,13 +527,12 @@
     const fb = root.querySelector('.fav-btn');
     if (fb) fb.onclick = (ev) => {
       ev.stopPropagation();
-      CG.toggleFav(w.id);
-      const now = ((CG.state.favorites) || []).indexOf(w.id) >= 0;
-      fb.classList.toggle('on', now);
-      const t = fb.querySelector('span');
-      if (t) t.textContent = now ? '已收藏' : '收藏';
-      const ci = document.getElementById('cartCount');
-      if (ci) ci.hidden = !(CG.state.cart || []).length;
+      CG.openFavPicker(w.id, () => {
+        const now = CG.isFav(w.id);
+        fb.classList.toggle('on', now);
+        const t = fb.querySelector('span');
+        if (t) t.textContent = now ? '已收藏' : '收藏';
+      });
     };
 
     const cards = Array.from(root.querySelectorAll('[data-pick]'));
@@ -537,7 +565,7 @@
     const st = CG.state;
     const cart = st.cart || [];
     const orders = st.orders || [];
-    const favs = (st.favorites || []).map(id => CG.asset(id)).filter(Boolean);
+    const favs = CG.favList().map(f => CG.asset(f.id)).filter(Boolean);
     const pending = orders.filter(o => o.status === 'pending');
     CG.ui.picksSeed = CG.ui.picksSeed || 20261028;
     const picks = CG.virtual.pick(8, CG.ui.picksSeed);
@@ -840,26 +868,70 @@
   };
 
   /* ========================================================== 收藏 */
+  if (!CG.ui.favTag) CG.ui.favTag = 'all';
+
   CG.views.favorites = function () {
-    const ids = CG.state.favorites || [];
-    const list = ids.map(id => CG.asset(id)).filter(Boolean);
+    const all = CG.favList();
+    const tag = CG.ui.favTag;
+    const counts = { all: all.length };
+    CG.FAV_TAGS.forEach(t => { counts[t.id] = all.filter(f => f.tag === t.id).length });
+    counts.none = all.filter(f => !f.tag).length;
+
+    let list = all;
+    if (tag === 'none') list = all.filter(f => !f.tag);
+    else if (tag !== 'all') list = all.filter(f => f.tag === tag);
+
+    const tagOf = (id) => { const f = all.find(x => x.id === id); return f ? f.tag : null };
+    const items = list.map(f => ({ f: f, w: CG.asset(f.id) })).filter(x => x.w);
+
+    const cards = items.map(x => {
+      const t = x.f.tag ? (CG.FAV_TAGS.find(y => y.id === x.f.tag) || {}) : null;
+      return `<div class="fav-cell">
+        ${assetCard(x.w, { fav: true })}
+        <div class="fav-bar">
+          ${t ? `<span class="pill ${t.pill}">${t.label}</span>` : `<span class="pill m">未分类</span>`}
+          <button class="btn xs" data-tag="${x.w.id}">改标签</button>
+        </div>
+      </div>`;
+    }).join('');
+
+    const chip = (k, label, n) => `<button class="chip ${tag === k ? 'on' : ''}" data-ftab="${k}">
+      ${label}${n ? ` <span class="hint">${n}</span>` : ''}</button>`;
+
     return `
     <div class="ph">
-      <div><h1>我的收藏</h1><p>${list.length} 件素材</p></div>
-      <div class="ph-r"><a class="btn" href="#/market">去市场</a></div>
+      <div><h1>我的收藏</h1><p>${all.length} 件 · 按标签整理，方便比价和回看</p></div>
+      <div class="ph-r"><a class="btn" href="#/market">继续逛市场</a></div>
     </div>
-    ${list.length ? `<div class="mktgrid">${list.map(w => assetCard(w, { fav: true })).join('')}</div>`
-        : `<div class="empty">${I.shield}<b>还没有收藏</b>
-           <p>在素材卡片右上角点心形图标即可收藏</p>
-           <a class="btn pri" href="#/market">去市场</a></div>`}`;
+
+    ${all.length ? `
+    <div class="chipset mb12">
+      ${chip('all', '全部', all.length)}
+      ${CG.FAV_TAGS.map(t => chip(t.id, t.label, counts[t.id])).join('')}
+      ${chip('none', '未分类', counts.none)}
+    </div>
+    ${items.length ? `<div class="mktgrid">${cards}</div>`
+        : `<div class="empty">${I.empty}<b>这个标签下还没有素材</b>
+           <p>换个标签，或去市场多收藏几件</p></div>`}
+    ` : `<div class="empty">${I.shield}<b>还没有收藏</b>
+         <p>在素材卡片或详情页点一下心形，先存着，不用马上决定买不买</p>
+         <a class="btn pri" href="#/market">去市场</a></div>`}`;
   };
+
   CG.views.favorites.after = function () {
     const root = document.getElementById('view');
+    root.querySelectorAll('[data-ftab]').forEach(el => el.onclick = () => {
+      CG.ui.favTag = el.dataset.ftab; CG.render();
+    });
     root.querySelectorAll('[data-open]').forEach(el => el.onclick = () => CG.go('market/' + el.dataset.open));
     root.querySelectorAll('[data-fav]').forEach(el => el.onclick = (ev) => {
       ev.stopPropagation();
       CG.toggleFav(el.dataset.fav);
       CG.render();
+    });
+    root.querySelectorAll('[data-tag]').forEach(el => el.onclick = (ev) => {
+      ev.stopPropagation();
+      CG.openFavPicker(el.dataset.tag, () => CG.render());
     });
   };
 
@@ -1008,6 +1080,53 @@
     price *= rf;
 
     return { price: Math.max(9, Math.round(price / 10) * 10), ok: over.length === 0, over };
+  };
+
+  /* ---------------- 收藏标签选择 ---------------- */
+  CG.openFavPicker = function (id, onChange) {
+    const w = CG.asset(id) || { title: '素材' };
+    const cur = CG.favOf(id);
+    const onFav = !!cur;
+
+    CG.modal(`
+      <div style="padding:18px 20px">
+        <div class="card-h"><h3>${onFav ? '管理收藏' : '收藏这件素材'}</h3>
+          <span class="more ellip" style="max-width:220px">${U.esc(w.title || '')}</span></div>
+        <p class="hint" style="margin-bottom:12px">
+          ${onFav
+        ? '当前标签：<b>' + (cur.tag ? (CG.FAV_TAGS.find(t => t.id === cur.tag) || {}).label : '未分类') + '</b>，可以改。'
+        : '打个标签，下次在收藏夹里好找。也可以直接收藏，之后再改。'}
+        </p>
+        <div class="fav-tags">
+          ${CG.FAV_TAGS.map(t => `
+            <button class="fav-tag ${cur && cur.tag === t.id ? 'on' : ''}" data-ftag="${t.id}">
+              <b>${t.label}</b><span>${t.desc}</span>
+            </button>`).join('')}
+        </div>
+        <div class="row mt16" style="justify-content:space-between">
+          ${onFav
+        ? `<button class="btn danger" id="fvDel">${I.trash}取消收藏</button>`
+        : `<button class="btn" id="fvPlain">不分类，直接收藏</button>`}
+          <button class="btn" data-close>关闭</button>
+        </div>
+      </div>`, {
+      onMount(panel, close) {
+        const done = () => { close(); if (onChange) onChange() };
+
+        panel.querySelectorAll('[data-ftag]').forEach(b => b.onclick = () => {
+          const tag = b.dataset.ftag;
+          if (onFav) { CG.setFavTag(id, tag); CG.toast('标签已更新', 'ok') }
+          else { CG.toggleFav(id, tag) }
+          done();
+        });
+
+        const del = panel.querySelector('#fvDel');
+        if (del) del.onclick = () => { CG.toggleFav(id); done() };
+
+        const plain = panel.querySelector('#fvPlain');
+        if (plain) plain.onclick = () => { CG.toggleFav(id, null); done() };
+      }
+    });
   };
 
   /* ---------------- 询价 / 报价面板 ---------------- */

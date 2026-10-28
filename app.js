@@ -131,7 +131,7 @@
     return {
       disputeCnt: ((CG.state && CG.state.disputes) || []).filter(d => d.status === 'open').length,
       cartCnt: ((CG.state && CG.state.cart) || []).length,
-      favCnt: ((CG.state && CG.state.favorites) || []).length
+      favCnt: (CG.favCount ? CG.favCount() : ((CG.state && CG.state.favorites) || []).length)
     };
   }
 
@@ -377,7 +377,7 @@
       }
       const fm = document.querySelector('[data-nav="favorites"] .cnt');
       if (fm) {
-        const n = (CG.state.favorites || []).length;
+        const n = CG.favCount ? CG.favCount() : ((CG.state.favorites) || []).length;
         fm.textContent = n || '';
       }
     };
