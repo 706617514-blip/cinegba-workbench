@@ -451,6 +451,8 @@
         <div class="seg">
           ${SORTS.map(s => `<button class="${sort === s[0] ? 'on' : ''}" data-sort="${s[0]}">${s[1]}</button>`).join('')}
         </div>
+        <button class="btn sm clr-filter" data-act="clrf"
+          ${(f.type.length || f.lic.length || f.price !== 'all' || q) ? '' : 'disabled'}>清空筛选</button>
       </div>
     </div>
 
@@ -469,7 +471,6 @@
         .map(p => `<label><input type="radio" name="pz" ${f.price === p[0] ? 'checked' : ''}
           data-price="${p[0]}"><span>${p[1]}</span></label>`).join('')}
         </div>
-        <button class="btn sm wide" data-act="clrf">清空筛选</button>
       </aside>
 
       <div>

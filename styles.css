@@ -1564,3 +1564,17 @@ button.more svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-widt
   .hm-search input{height:36px;font-size:14px}
   .hm-search .btn{height:36px;padding:0 15px;font-size:13.5px}
 }
+
+
+/* 排序栏 + 清空筛选 */
+.ph-r{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.clr-filter{flex:0 0 auto}
+.clr-filter:disabled{opacity:.42}
+
+@media(max-width:760px){
+  /* 标题与操作分两行，排序和清空放同一行不溢出 */
+  .ph{flex-wrap:wrap;gap:10px}
+  .ph-r{width:100%;justify-content:flex-start;gap:8px}
+  .ph-r .seg{flex:1 1 auto;min-width:0;overflow-x:auto;scrollbar-width:none}
+  .ph-r .seg::-webkit-scrollbar{display:none}
+}

@@ -51,14 +51,27 @@
     ]
   };
 
-  const MOBNAV = {
-    creator: [['dash', '工作台', 'grid'], ['library', '作品库', 'file'],
-    ['upload', '上传', 'up'], ['dispute', '维权', 'shield'], ['revenue', '收入', 'chart']],
-    market: [['home', '主页', 'grid'], ['market', '市场', 'cart'],
-    ['consumer', '消费者', 'user'], ['cart', '选购车', 'cart']],
-    consumer: [['consumer', '消费者', 'user'], ['market', '市场', 'cart'],
-    ['cart', '选购车', 'cart'], ['orders', '订单', 'file']]
-  };
+  /* 底部导航：五个位置固定不变，切换分区只改高亮与「我的」的落点，
+     避免项的顺序随分区变化导致手指按记忆点错 */
+  const MOBNAV = [
+    ['home', '主页', 'grid'],
+    ['market', '市场', 'cart'],
+    ['upload', '上传', 'up'],
+    ['cart', '选购车', 'cart'],
+    ['__me', '我的', 'user']
+  ];
+  const ME_TARGET = { creator: 'dash', market: 'consumer', consumer: 'consumer' };
+  const ME_GROUP = ['dash', 'library', 'work', 'upload', 'dispute', 'revenue', 'settings', 'consumer', 'orders', 'favorites', 'whyhk'];
+
+  function mobNavHtml(zone, name) {
+    return MOBNAV.map(function (it) {
+      const key = it[0], label = it[1], ic = it[2];
+      const isMe = key === '__me';
+      const target = isMe ? (ME_TARGET[zone] || 'consumer') : key;
+      const on = isMe ? ME_GROUP.indexOf(name) >= 0 : name === key;
+      return `<a data-nav="${target}" class="${on ? 'on' : ''}" href="#/${target}">${svg(ic)}${label}</a>`;
+    }).join('');
+  }
 
   const ICONS = {
     grid: '<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',
@@ -153,9 +166,7 @@
     `).join('') + `<div class="side-foot">${sideFoot()}</div>`;
 
     const mob = document.getElementById('mobnav');
-    mob.innerHTML = (MOBNAV[zone] || MOBNAV.creator).map(([key, label, ic]) =>
-      `<a data-nav="${key}" class="${name === key ? 'on' : ''}" href="#/${key}">${svg(ic)}${label}</a>`
-    ).join('');
+    mob.innerHTML = mobNavHtml(zone, name);
 
     document.querySelectorAll('#zones a').forEach(a => {
       a.classList.toggle('on', a.dataset.zone === zone);
