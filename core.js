@@ -155,6 +155,14 @@
   const idbGet = (st, k) => idbTx(st, 'readonly', s => s.get(k));
   const idbPut = (st, k, v) => idbTx(st, 'readwrite', s => s.put(v, k));
 
+  /* ------------------------------------------------------------ 认证头 */
+  function authH(extra) {
+    const h = Object.assign({}, extra || {});
+    const tk = localStorage.getItem('cg-token');
+    if (tk) h.authorization = 'Bearer ' + tk;
+    return h;
+  }
+
   /* ------------------------------------------------------------ 存储层 */
   const store = CG.store = {
     mode: 'local',          // fs | idb | local
@@ -181,7 +189,7 @@
     async load() {
       if (this.mode === 'fs') {
         try {
-          const r = await fetch('/api/state', { cache: 'no-store' });
+          const r = await fetch('/api/state', { cache: 'no-store', headers: authH() });
           const j = await r.json();
           if (j.ok && j.state && (j.state.works || []).length) return j.state;
         } catch (e) { }
@@ -194,10 +202,11 @@
     async save(state) {
       if (this.mode === 'fs') {
         try {
-          await fetch('/api/state', {
-            method: 'PUT', headers: { 'content-type': 'application/json' },
+          const r = await fetch('/api/state', {
+            method: 'PUT', headers: authH({ 'content-type': 'application/json' }),
             body: JSON.stringify(state)
           });
+          if (r.status === 401) { CG.toast('登录已失效，请重新登录', 'err'); return false }
           return true;
         } catch (e) { CG.toast('保存失败：' + e.message, 'err'); return false }
       }
@@ -214,6 +223,8 @@
           xhr.open('POST', '/api/upload');
           xhr.setRequestHeader('x-filename', encodeURIComponent(file.name));
           xhr.setRequestHeader('content-type', 'application/octet-stream');
+          const tk = localStorage.getItem('cg-token');
+          if (tk) xhr.setRequestHeader('Authorization', 'Bearer ' + tk);
           xhr.upload.onprogress = e => {
             if (e.lengthComputable && onProgress) onProgress(e.loaded / e.total);
           };
