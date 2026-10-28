@@ -61,14 +61,20 @@
     ['__me', '我的', 'user']
   ];
   const ME_TARGET = { creator: 'dash', market: 'consumer', consumer: 'consumer' };
-  const ME_GROUP = ['dash', 'library', 'work', 'upload', 'dispute', 'revenue', 'settings', 'consumer', 'orders', 'favorites', 'whyhk'];
+  /* 「我的」涵盖的页面：不含 upload（有独立项）与 whyhk（归市场） */
+  const ME_GROUP = ['dash', 'library', 'work', 'dispute', 'revenue',
+    'settings', 'consumer', 'orders', 'favorites'];
+  /* 这些页面高亮「市场」而不是「我的」 */
+  const MARKET_GROUP = ['market', 'whyhk'];
 
   function mobNavHtml(zone, name) {
     return MOBNAV.map(function (it) {
       const key = it[0], label = it[1], ic = it[2];
       const isMe = key === '__me';
       const target = isMe ? (ME_TARGET[zone] || 'consumer') : key;
-      const on = isMe ? ME_GROUP.indexOf(name) >= 0 : name === key;
+      const on = isMe
+        ? ME_GROUP.indexOf(name) >= 0
+        : (key === 'market' ? MARKET_GROUP.indexOf(name) >= 0 : name === key);
       return `<a data-nav="${target}" class="${on ? 'on' : ''}" href="#/${target}">${svg(ic)}${label}</a>`;
     }).join('');
   }
