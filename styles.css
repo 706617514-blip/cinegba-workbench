@@ -1186,3 +1186,16 @@ body[data-anim="on"] .kpi .vl,body[data-anim="on"] .cs-stats b{
   .ct-price{grid-column:3;text-align:left}
   .od-foot .row{margin-left:0;width:100%;justify-content:space-between}
 }
+
+
+/* 详情页：两条交易路径的说明 */
+.buy-hint{margin-top:11px;padding:10px 11px;border-radius:var(--r);
+  background:var(--surface-2);border:1px solid var(--line);
+  font-size:11px;line-height:1.65;color:var(--muted)}
+.buy-hint b{color:var(--ink-2);font-weight:700}
+
+/* 「换一批」等文字按钮 */
+button.more{border:none;background:none;cursor:pointer;color:var(--cyan);
+  font-size:12px;display:inline-flex;align-items:center;gap:4px;padding:0}
+button.more:hover{text-decoration:underline}
+button.more svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2}

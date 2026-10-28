@@ -429,7 +429,11 @@
             <button class="btn pri wide lg" data-act="addcart" ${on.length ? '' : 'disabled'}>
               ${I.cart}加入选购车</button>
             <button class="btn wide mt8" data-act="inquiry" ${on.length ? '' : 'disabled'}>
-              直接提交询价</button>
+              询价谈条款</button>
+            <div class="buy-hint">
+              <b>怎么选：</b>标价是标准授权价，条款合适就直接下单；
+              要改使用范围、期限或价格，走「询价谈条款」，由版权方回签后生成合约。
+            </div>
           </div>
           <div class="note c mt12">${I.info}<div>平台按成交额收 <b>12%</b> 佣金。
             虚拟素材为演示数据，采购流程与真实素材一致。</div></div>
@@ -484,7 +488,8 @@
     const orders = st.orders || [];
     const favs = (st.favorites || []).map(id => CG.asset(id)).filter(Boolean);
     const pending = orders.filter(o => o.status === 'pending');
-    const picks = CG.virtual.pick(8, 20261028);
+    CG.ui.picksSeed = CG.ui.picksSeed || 20261028;
+    const picks = CG.virtual.pick(8, CG.ui.picksSeed);
 
     return `
     <section class="cs-hero">
@@ -515,7 +520,7 @@
     <section class="cs-sec">
       <div class="cs-sec-h">
         <h2>猜你喜欢</h2>
-        <a class="more" href="#/market">换一批 ${I.arrow}</a>
+        <button class="more" data-act="reshuffle">换一批 ${I.arrow}</button>
       </div>
       <div class="mktgrid">${picks.map(w => assetCard(w)).join('')}</div>
     </section>
@@ -538,6 +543,11 @@
 
   CG.views.consumer.after = function () {
     const root = document.getElementById('view');
+    const rs = root.querySelector('[data-act="reshuffle"]');
+    if (rs) rs.onclick = () => {
+      CG.ui.picksSeed = (CG.ui.picksSeed || 20261028) + 7919;
+      CG.render();
+    };
     root.querySelectorAll('[data-open]').forEach(el => el.onclick = () => CG.go('market/' + el.dataset.open));
     root.querySelectorAll('[data-typego]').forEach(el => el.onclick = (e) => {
       e.preventDefault();
