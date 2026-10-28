@@ -1199,3 +1199,38 @@ button.more{border:none;background:none;cursor:pointer;color:var(--cyan);
   font-size:12px;display:inline-flex;align-items:center;gap:4px;padding:0}
 button.more:hover{text-decoration:underline}
 button.more svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2}
+
+
+/* ==========================================================================
+   条款参数化询价
+   ========================================================================== */
+.cl-grid{display:flex;flex-direction:column;gap:2px;margin-top:13px}
+.cl-dim{display:grid;grid-template-columns:88px 1fr;gap:12px;align-items:start;
+  padding:8px 0;border-bottom:1px solid var(--line)}
+.cl-dim:last-child{border-bottom:none}
+.cl-label{font-size:11.5px;color:var(--ink-2);font-weight:600;padding-top:4px}
+.cl-dim .chipset{gap:6px}
+.cl-dim .chip{padding:4px 9px;font-size:11.5px;border-radius:6px}
+
+.cl-quote{display:flex;align-items:center;gap:16px;margin-top:14px;padding:12px 14px;
+  border-radius:var(--r);background:var(--surface-2);border:1px solid var(--line);flex-wrap:wrap}
+.cl-q-l{display:flex;flex-direction:column;gap:1px}
+.cl-q-l b{font-size:22px;font-family:var(--fm);font-weight:800;color:var(--amber);
+  letter-spacing:-.6px;line-height:1.15}
+.cl-q-r{margin-left:auto;display:flex;flex-direction:column;gap:4px;align-items:flex-end;text-align:right}
+.cl-q-r .hint{max-width:280px}
+
+.cl-over{margin-top:9px;border:1px solid var(--amber);border-radius:var(--r);
+  background:var(--amber-soft);padding:8px 11px;display:flex;flex-direction:column;gap:5px}
+.cl-over div{display:flex;gap:8px;font-size:11px;line-height:1.5}
+.cl-over b{color:var(--amber);flex:0 0 62px;font-weight:700}
+.cl-over span{color:var(--ink-2);flex:1}
+
+@media(max-width:760px){
+  .cl-dim{grid-template-columns:1fr;gap:5px}
+  .cl-label{padding-top:0}
+  .cl-q-r{margin-left:0;align-items:flex-start;text-align:left}
+  .cl-q-r .hint{max-width:none}
+  .cl-over div{flex-direction:column;gap:1px}
+  .cl-over b{flex:none}
+}

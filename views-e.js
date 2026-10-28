@@ -828,44 +828,267 @@
   };
 
   /* ---------------- 询价（复用） ---------------- */
+  /* ==========================================================
+     条款参数化 + 自动报价（L2）
+     不枚举使用场景，只枚举权利维度；版权方设区间，系统算判
+     ========================================================== */
+  CG.CLAUSE = [
+    { k: 'media', label: '使用媒介', multi: true,
+      opts: ['正片/成片', '短视频', '广告', '互动应用', '印刷出版', '线下展陈'] },
+    { k: 'region', label: '授权地域', multi: true,
+      opts: ['中国内地', '香港', '澳门', '台湾', '东南亚', '全球'] },
+    { k: 'term', label: '授权期限', multi: false,
+      opts: ['6 个月', '12 个月', '24 个月', '36 个月', '永久'],
+      val: { '6 个月': 6, '12 个月': 12, '24 个月': 24, '36 个月': 36, '永久': 999 } },
+    { k: 'exclusive', label: '独占性', multi: false,
+      opts: ['非独占', '品类独占', '完全独占'] },
+    { k: 'modify', label: '修改权', multi: false,
+      opts: ['原样使用', '可剪辑', '可改编', '可衍生'] },
+    { k: 'training', label: '模型训练', multi: false,
+      opts: ['禁止', '允许但需披露', '允许'] },
+    { k: 'resell', label: '转授权', multi: false,
+      opts: ['禁止', '允许一级', '允许不限层'] },
+    { k: 'credit', label: '署名要求', multi: false,
+      opts: ['必须署名', '署名可选', '可放弃'] }
+  ];
+
+  CG.DEFAULT_POLICY = {
+    auto: {
+      media: ['正片/成片', '短视频', '广告', '互动应用'],
+      region: ['中国内地', '香港', '澳门'],
+      termMax: 24,
+      exclusive: ['非独占', '品类独占'],
+      modify: ['原样使用', '可剪辑'],
+      training: ['禁止', '允许但需披露'],
+      resell: ['禁止', '允许一级'],
+      credit: ['必须署名', '署名可选', '可放弃']
+    },
+    mult: {
+      term: { 6: 0.6, 12: 1, 24: 1.6, 36: 2, 999: 3 },
+      exclusive: { '非独占': 1, '品类独占': 1.6, '完全独占': 3.2 },
+      modify: { '原样使用': 1, '可剪辑': 1.2, '可改编': 1.8, '可衍生': 2.6 },
+      training: { '禁止': 1, '允许但需披露': 1.4, '允许': 2.2 },
+      resell: { '禁止': 1, '允许一级': 1.3, '允许不限层': 1.9 }
+    }
+  };
+
+  CG.defaultClause = function (l) {
+    return {
+      media: ['正片/成片'], region: ['中国内地'], term: '12 个月',
+      exclusive: '非独占', modify: '原样使用', training: '禁止',
+      resell: '禁止', credit: '必须署名'
+    };
+  };
+
+  /** 按条款算价 + 判定是否落在自动接受区间 */
+  CG.quote = function (w, l, clause) {
+    const pol = (w && w.policy) || CG.DEFAULT_POLICY;
+    const auto = pol.auto, M = pol.mult;
+    const over = [];
+
+    // 媒介
+    const badMedia = clause.media.filter(m => auto.media.indexOf(m) < 0);
+    if (!clause.media.length) over.push({ dim: '使用媒介', why: '至少选一项' });
+    else if (badMedia.length) over.push({ dim: '使用媒介', why: '超出范围：' + badMedia.join('、') });
+
+    // 地域
+    const badRegion = clause.region.filter(r => auto.region.indexOf(r) < 0);
+    if (!clause.region.length) over.push({ dim: '授权地域', why: '至少选一项' });
+    else if (badRegion.length) over.push({ dim: '授权地域', why: '超出范围：' + badRegion.join('、') });
+
+    // 期限
+    const termVal = ({ '6 个月': 6, '12 个月': 12, '24 个月': 24, '36 个月': 36, '永久': 999 })[clause.term] || 12;
+    if (termVal > auto.termMax) over.push({ dim: '授权期限', why: clause.term + ' 超过自动上限 ' + auto.termMax + ' 个月' });
+
+    // 单选维度
+    const singles = [['exclusive', '独占性'], ['modify', '修改权'],
+    ['training', '模型训练'], ['resell', '转授权'], ['credit', '署名要求']];
+    singles.forEach(([k, label]) => {
+      if (auto[k] && auto[k].indexOf(clause[k]) < 0) {
+        over.push({ dim: label, why: '超出范围：' + clause[k] });
+      }
+    });
+
+    // 计价：基准价 × 各维度系数
+    let price = Number(l.price) || 0;
+    price *= (M.term[termVal] || 1);
+    price *= (M.exclusive[clause.exclusive] || 1);
+    price *= (M.modify[clause.modify] || 1);
+    price *= (M.training[clause.training] || 1);
+    price *= (M.resell[clause.resell] || 1);
+    // 多媒介 / 多地域的覆盖系数
+    const mf = [1, 1, 1.15, 1.3, 1.42, 1.55, 1.65][Math.min(clause.media.length, 6)];
+    price *= mf;
+    const rf = clause.region.indexOf('全球') >= 0 ? 2
+      : [1, 1, 1.25, 1.45, 1.6, 1.75, 1.9][Math.min(clause.region.length, 6)];
+    price *= rf;
+
+    return { price: Math.max(9, Math.round(price / 10) * 10), ok: over.length === 0, over };
+  };
+
+  /* ---------------- 询价 / 报价面板 ---------------- */
   CG.inquiry = function (w, l, after) {
     const k = U.licOf(l.kind);
+    const clause = CG.defaultClause(l);
+    let quoted = CG.quote(w, l, clause);
+
+    const dimHtml = () => CG.CLAUSE.map(d => `
+      <div class="cl-dim">
+        <div class="cl-label">${d.label}</div>
+        <div class="chipset" data-dim="${d.k}" data-multi="${d.multi ? 1 : 0}">
+          ${d.opts.map(o => {
+      const on = d.multi
+        ? clause[d.k].indexOf(o) >= 0
+        : clause[d.k] === o;
+      return `<span class="chip ${on ? 'on' : ''}" data-opt="${U.esc(o)}">${U.esc(o)}</span>`;
+    }).join('')}
+        </div>
+      </div>`).join('');
+
+    const statusHtml = () => {
+      const q = quoted;
+      return `
+        <div class="cl-quote">
+          <div class="cl-q-l">
+            <span class="hint">按当前条款的报价</span>
+            <b>${U.money(q.price)}</b>
+            <span class="hint">基准价 ${U.money(l.price)} × 条款系数</span>
+          </div>
+          <div class="cl-q-r">
+            ${q.ok
+          ? `<span class="pill ok">可自动成交</span>
+                 <div class="hint">所有维度都在版权方预设区间内，确认后直接生成订单。</div>`
+          : `<span class="pill w">${q.over.length} 项需人工确认</span>
+                 <div class="hint">超出部分由版权方回签，其余条款已锁定。</div>`}
+          </div>
+        </div>
+        ${q.ok ? '' : `<div class="cl-over">
+          ${q.over.map(o => `<div><b>${U.esc(o.dim)}</b><span>${U.esc(o.why)}</span></div>`).join('')}
+        </div>`}`;
+    };
+
     CG.modal(`
       <div style="padding:18px 20px">
-        <div class="card-h"><h3>提交采购询价</h3></div>
-        <div class="srow"><div class="tx"><b>${U.esc(w.title)}</b>
-          <span>${U.esc(k.label)} · ${U.money(l.price)}</span></div></div>
-        <div class="fgrid mt12">
-          <div class="fld full"><label>采购方名称 <i>*</i></label>
-            <input id="iqName" placeholder="公司或机构名称" value="${U.esc((CG.state.profile.org || '') + '（询价）')}"></div>
-          <div class="fld full"><label>使用场景说明</label>
-            <textarea id="iqNote" rows="2" placeholder="例如：用于某模型的图像训练，仅内部评测"></textarea></div>
+        <div class="card-h"><h3>询价谈条款</h3>
+          <span class="more">${U.esc(w.title)} · ${U.esc(k.label)}</span></div>
+
+        <div class="note c" style="margin-top:0">
+          ${I.info}<div>不用描述使用场景，只勾权利维度。系统按版权方预设区间即时算价——
+          <b>区间内的直接成交，超出的转人工</b>，并告诉你超在哪一维。</div>
         </div>
-        <div class="note c mt12">${I.info}<div>提交后版权方会在工作台看到这条询价。
-          若为虚拟素材，会记录在询价列表中供演示。</div></div>
+
+        <div class="cl-grid" id="clGrid">${dimHtml()}</div>
+
+        <div class="fld mt12">
+          <label>采购方名称 <i>*</i></label>
+          <input id="iqName" value="${U.esc((CG.state.profile.org || '') + '（采购）')}">
+        </div>
+        <div class="fld mt12">
+          <label>补充说明（可选，不参与判定）</label>
+          <textarea id="iqNote" rows="2" placeholder="例如：用于某品牌年度 campaign，需在 3 个平台投放"></textarea>
+        </div>
+
+        <div id="clStatus">${statusHtml()}</div>
+
         <div class="row mt16" style="justify-content:flex-end">
           <button class="btn" data-close>取消</button>
-          <button class="btn pri" id="iqGo">提交询价</button>
+          <button class="btn pri" id="iqGo">${quoted.ok ? '确认下单 ' + U.money(quoted.price) : '提交人工确认 ' + U.money(quoted.price)}</button>
         </div>
       </div>`, {
+      wide: true,
       onMount(panel, close) {
-        panel.querySelector('#iqGo').onclick = () => {
+        const grid = panel.querySelector('#clGrid');
+        const status = panel.querySelector('#clStatus');
+        const go = panel.querySelector('#iqGo');
+
+        const syncGo = () => {
+          go.textContent = quoted.ok
+            ? '确认下单 ' + U.money(quoted.price)
+            : '提交人工确认 ' + U.money(quoted.price);
+        };
+        const refresh = () => {
+          quoted = CG.quote(w, l, clause);
+          status.innerHTML = statusHtml();
+          syncGo();
+        };
+        syncGo();
+
+        grid.querySelectorAll('.chipset[data-dim]').forEach(set => {
+          const dim = set.dataset.dim;
+          const multi = set.dataset.multi === '1';
+          set.querySelectorAll('.chip').forEach(chip => {
+            chip.onclick = () => {
+              const opt = chip.dataset.opt;
+              if (multi) {
+                const arr = clause[dim];
+                const i = arr.indexOf(opt);
+                if (i >= 0) {
+                  if (arr.length === 1) return CG.toast('至少保留一项', 'err');
+                  arr.splice(i, 1);
+                  chip.classList.remove('on');
+                } else {
+                  arr.push(opt);
+                  chip.classList.add('on');
+                }
+              } else {
+                clause[dim] = opt;
+                set.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
+                chip.classList.add('on');
+              }
+              refresh();
+            };
+          });
+        });
+
+        go.onclick = () => {
           const nm = panel.querySelector('#iqName').value.trim();
           if (!nm) return CG.toast('请填写采购方名称', 'err');
+          const note = panel.querySelector('#iqNote').value.trim();
           const st = CG.state;
-          st.leads.unshift({
-            id: U.uid('L'), workId: w.id, licensee: nm,
-            kind: l.kind, price: l.price, status: 'pending', at: U.now(),
-            note: panel.querySelector('#iqNote').value.trim() || '通过市场提交'
-          });
-          if (w.stats) { w.stats.inquiries = (w.stats.inquiries || 0) + 1 }
-          st.notices.unshift({
-            id: U.uid('N'), type: 'lead', at: U.now(),
-            title: '新询价：' + w.title,
-            body: nm + ' 询价「' + U.licOf(l.kind).label + '」，等待回签。'
-          });
-          CG.save(); CG.syncBadges(); close();
-          CG.toast('询价已提交', 'ok');
+
+          const clauseText = CG.CLAUSE.map(d => {
+            const v = clause[d.k];
+            return d.label + '：' + (Array.isArray(v) ? v.join('/') : v);
+          }).join('；');
+
+          if (quoted.ok) {
+            // 区间内 → 直接成交，生成订单
+            st.orders = st.orders || [];
+            st.orders.unshift({
+              id: 'OD-' + Date.now().toString(36).toUpperCase().slice(-6),
+              at: U.now(), buyer: nm, note: note || '自动成交（条款在预设区间内）',
+              status: 'pending', total: quoted.price,
+              items: [{
+                workId: w.id, title: w.title, kind: l.kind,
+                price: quoted.price, qty: 1, owner: w.owner || ''
+              }]
+            });
+            if (w.stats) { w.stats.inquiries = (w.stats.inquiries || 0) + 1 }
+            st.notices.unshift({
+              id: U.uid('N'), type: 'lead', at: U.now(),
+              title: '自动成交：' + w.title,
+              body: nm + ' 的条款全部落在预设区间内，已生成订单，金额 ' + U.money(quoted.price) + '。'
+            });
+            CG.save(); CG.syncBadges(); close();
+            CG.toast('条款合规，已直接生成订单', 'ok');
+            CG.go('orders');
+          } else {
+            // 超区间 → 转人工
+            st.leads.unshift({
+              id: U.uid('L'), workId: w.id, licensee: nm,
+              kind: l.kind, price: quoted.price, status: 'pending', at: U.now(),
+              note: note || '按条款询价',
+              clause: clause, over: quoted.over
+            });
+            if (w.stats) { w.stats.inquiries = (w.stats.inquiries || 0) + 1 }
+            st.notices.unshift({
+              id: U.uid('N'), type: 'lead', at: U.now(),
+              title: '新询价：' + w.title,
+              body: nm + ' 报价 ' + U.money(quoted.price) + '，' + quoted.over.length + ' 项超出区间，待回签。'
+            });
+            CG.save(); CG.syncBadges(); close();
+            CG.toast('已提交，版权方会在工作台看到', 'ok');
+          }
           if (after) after();
         };
       }
