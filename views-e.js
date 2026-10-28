@@ -28,6 +28,27 @@
     return `<svg viewBox="0 0 24 24">${m[key] || m.law}</svg>`;
   }
 
+  /* 四道门的展开内容（供面板复用） */
+  function gateBodyHtml(g) {
+    if (!g) return '';
+    return `
+      <div class="hm-g-facts">
+        ${g.facts.map(function (f) {
+      return `<div class="hm-gf">
+            <b>${U.esc(f.t)}</b>
+            <p>${U.esc(f.d)}</p>
+            <span class="wk-src">来源：${U.esc(f.s)}</span>
+          </div>`;
+    }).join('')}
+      </div>
+      <div class="hm-g-why"><b>对我们的意义</b>${g.why}</div>
+      <div class="hm-g-cav"><span>边界</span>${U.esc(g.caveat)}</div>
+      <div class="hm-g-foot">
+        <a class="btn sm" href="#/whyhk">看完整论证</a>
+        <button class="btn sm ghost" data-gate-close>收起</button>
+      </div>`;
+  }
+
   const TYPE_LIST = [
     ['video', '视频', '成片、预告、空镜'],
     ['image', '图片', '概念稿、设定集'],
@@ -136,36 +157,25 @@
       </div>
       <div class="hm-gates">
         ${CG.GATES.map(function (g) {
-          const open = CG.ui.openGate === g.key;
-          return `<div class="hm-gate-wrap ${open ? 'open' : ''}">
-            <button class="hm-g" data-gate="${g.key}" aria-expanded="${open ? 'true' : 'false'}">
-              <span class="gi">${gateIcon(g.key)}</span>
-              <div class="hm-g-tx">
-                <b>${U.esc(g.title)}</b>
-                <span>${U.esc(g.short || g.lead)}</span>
-              </div>
-              <span class="hm-g-arrow">${open ? '收起' : '展开'}</span>
-            </button>
-            ${open ? `<div class="hm-g-body">
-              <div class="hm-g-facts">
-                ${g.facts.map(function (f) {
-                  return `<div class="hm-gf">
-                    <b>${U.esc(f.t)}</b>
-                    <p>${U.esc(f.d)}</p>
-                    <span class="wk-src">来源：${U.esc(f.s)}</span>
-                  </div>`;
-                }).join('')}
-              </div>
-              <div class="hm-g-why"><b>对我们的意义</b>${g.why}</div>
-              <div class="hm-g-cav"><span>边界</span>${U.esc(g.caveat)}</div>
-              <div class="hm-g-foot">
-                <a class="btn sm" href="#/whyhk">看完整论证</a>
-                <button class="btn sm ghost" data-gate="${g.key}">收起</button>
-              </div>
-            </div>` : ''}
-          </div>`;
-        }).join('')}
+      const active = CG.ui.openGate === g.key;
+      return `<button class="hm-g ${active ? 'active' : ''}" data-gate="${g.key}"
+          aria-expanded="${active ? 'true' : 'false'}" aria-controls="gatePanel">
+          <span class="gi">${gateIcon(g.key)}</span>
+          <div class="hm-g-tx">
+            <b>${U.esc(g.title)}</b>
+            <span>${U.esc(g.short || g.lead)}</span>
+          </div>
+          <span class="hm-g-arrow">${active ? '收起' : '展开'}</span>
+        </button>`;
+    }).join('')}
       </div>
+
+      <div class="hm-gate-panel ${CG.ui.openGate ? 'open' : ''}" id="gatePanel" data-panel>
+        <div class="hm-gate-panel-in">
+          <div class="hm-gate-body-inner">${gateBodyHtml(CG.GATES.find(function (x) { return x.key === CG.ui.openGate }))}</div>
+        </div>
+      </div>
+
     </section>
 
     <section class="hm-sec">
@@ -258,22 +268,63 @@
     });
     root.querySelectorAll('[data-open]').forEach(el => el.onclick = () => CG.go('market/' + el.dataset.open));
 
-    // 四道门：原地展开 / 收起
+    // 四道门：原地向下延展（不重绘页面）
+    const panel = root.querySelector('[data-panel]');
+    const inner = panel ? panel.querySelector('.hm-gate-body-inner') : null;
+
+    function closePanel() {
+      CG.ui.openGate = null;
+      panel.classList.remove('open');
+      root.querySelectorAll('[data-gate]').forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-expanded', 'false');
+        const a = b.querySelector('.hm-g-arrow');
+        if (a) a.textContent = '展开';
+      });
+    }
+
+    function openPanel(k) {
+      const g = CG.GATES.find(x => x.key === k);
+      if (!g) return;
+      CG.ui.openGate = k;
+      inner.innerHTML = gateBodyHtml(g);
+      panel.classList.add('open');
+      root.querySelectorAll('[data-gate]').forEach(b => {
+        const on = b.dataset.gate === k;
+        b.classList.toggle('active', on);
+        b.setAttribute('aria-expanded', on ? 'true' : 'false');
+        const a = b.querySelector('.hm-g-arrow');
+        if (a) a.textContent = on ? '收起' : '展开';
+      });
+      bindCloseBtn();
+      // 动画结束后，仅当面板底部不在视口内时做最小滚动
+      setTimeout(() => {
+        const r = panel.getBoundingClientRect();
+        if (r.bottom > window.innerHeight - 40) panel.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }, 380);
+    }
+
+    function bindCloseBtn() {
+      const c = inner.querySelector('[data-gate-close]');
+      if (c) c.onclick = closePanel;
+    }
+
     root.querySelectorAll('[data-gate]').forEach(el => {
-      el.onclick = (ev) => {
-        ev.preventDefault();
+      el.onclick = () => {
         const k = el.dataset.gate;
-        CG.ui.openGate = (CG.ui.openGate === k) ? null : k;
-        CG.render();
-        // 展开后滚到该卡片，避免内容在视口外
+        if (CG.ui.openGate === k) { closePanel(); return }
+
         if (CG.ui.openGate) {
-          setTimeout(() => {
-            const node = document.querySelector('.hm-gate-wrap.open');
-            if (node) node.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          }, 40);
+          // 从 A 切到 B：先收再展，避免高度突变
+          panel.classList.remove('open');
+          setTimeout(() => openPanel(k), 190);
+        } else {
+          openPanel(k);
         }
       };
     });
+
+    bindCloseBtn();
 
     bindFav(root);
   };

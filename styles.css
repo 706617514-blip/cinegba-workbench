@@ -1405,14 +1405,13 @@ button.more svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-widt
 /* ==========================================================================
    首页四道门：原地展开
    ========================================================================== */
-.hm-gate-wrap{display:flex;flex-direction:column;min-width:0}
-.hm-gate-wrap.open{grid-column:1/-1}
 .hm-g{display:flex;gap:11px;align-items:flex-start;width:100%;text-align:left;
   background:var(--surface);border:1px solid var(--line);border-radius:13px;
-  padding:14px 15px;transition:.16s;cursor:pointer}
-.hm-g:hover{border-color:var(--amber)}
-.hm-gate-wrap.open .hm-g{border-color:var(--amber);border-bottom-left-radius:0;
-  border-bottom-right-radius:0;background:var(--surface-2)}
+  padding:14px 15px;transition:border-color .16s,background .16s,transform .16s;
+  cursor:pointer;font:inherit;color:inherit}
+.hm-g:hover{border-color:var(--line-2);transform:translateY(-1px)}
+.hm-g.active{border-color:var(--amber);background:var(--amber-soft)}
+.hm-g.active .hm-g-arrow{color:var(--amber)}
 .hm-g .gi{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;
   background:var(--amber-soft);color:var(--amber);flex:0 0 auto}
 .hm-g .gi svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.9}
@@ -1423,13 +1422,16 @@ button.more svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-widt
 .hm-g-arrow{font-size:10.5px;color:var(--amber);font-weight:700;flex:0 0 auto;
   padding-top:1px;white-space:nowrap}
 
-.hm-g-body{border:1px solid var(--amber);border-top:none;border-radius:0 0 13px 13px;
+/* 向下延展：0fr → 1fr，无需 JS 量高度 */
+.hm-gate-panel{display:grid;grid-template-rows:0fr;opacity:0;margin-top:0;
+  transition:grid-template-rows .36s cubic-bezier(.22,.7,.3,1),
+             opacity .26s ease,margin-top .36s cubic-bezier(.22,.7,.3,1)}
+.hm-gate-panel.open{grid-template-rows:1fr;opacity:1;margin-top:12px}
+.hm-gate-panel-in{overflow:hidden;min-height:0}
+.hm-gate-body-inner{border:1px solid var(--amber);border-radius:13px;
   padding:16px 17px 15px;background:var(--surface)}
-/* 动画只在 body[data-anim=on] 时启用：静态渲染不会冻在 opacity:0 */
-body[data-anim="on"] .hm-g-body{animation:gateOpen .22s cubic-bezier(.22,.7,.3,1) both}
-@keyframes gateOpen{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){
-  body[data-anim="on"] .hm-g-body{animation:none}
+  .hm-gate-panel{transition:none}
 }
 .hm-g-facts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .hm-gf{padding:10px 12px;border-radius:9px;background:var(--surface-2);
