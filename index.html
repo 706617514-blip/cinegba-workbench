@@ -3,32 +3,38 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>CineGBA IP-Bridge · 创作者工作台</title>
-<meta name="description" content="CineGBA IP-Bridge 平台原型：影视动漫 AI 资产确权与合规授权。可真实上传作品、配置授权、发布宣发。演示数据。">
-<meta property="og:title" content="CineGBA IP-Bridge · 创作者工作台">
-<meta property="og:description" content="可交互原型：上传存证、授权配置、宣发、收益结算。">
+<title>CineGBA IP-Bridge · 影视动漫 AI 资产确权与合规授权</title>
+<meta name="description" content="CineGBA IP-Bridge：影视动漫素材的确权、授权与交易平台。素材市场、创作者中心、消费者中心。">
+<meta property="og:title" content="CineGBA IP-Bridge">
+<meta property="og:description" content="让每一帧素材可授权、可结算、可举证。">
 <meta property="og:image" content="cover.jpg">
 <meta name="theme-color" content="#0A0E17">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body class="mode-boot">
 
-<!-- ==================== 顶栏 ==================== -->
 <div id="public"></div>
+
 <div id="app" hidden>
 
 <header class="top">
-  <a class="brand" href="#/dash">
+  <a class="brand" href="#/home">
     <div class="logo">CG</div>
     <div class="brand-tx">
       <b>CineGBA IP-Bridge</b>
-      <span id="brandSub">创作者工作台</span>
+      <span id="brandSub">影视动漫 AI 资产确权与合规授权</span>
     </div>
   </a>
 
+  <nav class="zones" id="zones">
+    <a data-zone="market" href="#/market">素材市场</a>
+    <a data-zone="creator" href="#/dash">创作者中心</a>
+    <a data-zone="consumer" href="#/consumer">消费者中心</a>
+  </nav>
+
   <div class="search" id="globalSearch">
     <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
-    <input id="q" placeholder="搜索作品、合约、询价、授权编号…" autocomplete="off">
+    <input id="q" placeholder="搜索作品、授权、编号…" autocomplete="off">
     <kbd>⌘K</kbd>
   </div>
 
@@ -37,50 +43,48 @@
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg>
       <span id="themeLbl">深色</span>
     </button>
-    <a class="tgl" href="#/market" title="切到采购方视图（授权市场）">
+
+    <a class="cartbtn" id="cartBtn" href="#/cart" title="选购车">
       <svg viewBox="0 0 24 24"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.4 11h11L21 7H6"/></svg>
-      <span>采购方视图</span>
+      <span id="cartCount" hidden>0</span>
     </a>
+
     <button class="iconbtn" id="notifBtn" title="通知">
       <svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 10-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10.5 21a2 2 0 003 0"/></svg>
       <i class="dot" id="notifDot" hidden></i>
     </button>
-    <button class="avatar" id="avatarBtn" title="账户">林</button>
+
+    <button class="avatar" id="avatarBtn" title="账户">·</button>
   </div>
 </header>
 
-<!-- ==================== 侧栏 ==================== -->
 <aside class="side" id="side">
   <div class="side-lbl">创作方</div>
-  <a class="navi" data-nav="dash" href="#/dash"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>工作台</a>
-  <a class="navi" data-nav="library" href="#/library"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 012-2h8l6 6v12a2 2 0 01-2 2H6a2 2 0 01-2-2z"/><path d="M14 3v6h6"/></svg>作品库<span class="cnt" id="navWorkCnt"></span></a>
-  <a class="navi" data-nav="upload" href="#/upload"><svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a2 2 0 002 2h12a2 2 0 002-2v-3"/></svg>上传作品</a>
-  <a class="navi" data-nav="promote" href="#/promote"><svg viewBox="0 0 24 24"><path d="M3 11l16-6v14L3 13z"/><path d="M7 12v6"/></svg>宣发中心</a>
+  <a class="navi" href="#/dash"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>工作台</a>
+  <a class="navi" href="#/library"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 012-2h8l6 6v12a2 2 0 01-2 2H6a2 2 0 01-2-2z"/><path d="M14 3v6h6"/></svg>作品库</a>
+  <a class="navi" href="#/upload"><svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a2 2 0 002 2h12a2 2 0 002-2v-3"/></svg>上传作品</a>
+  <a class="navi" href="#/promote"><svg viewBox="0 0 24 24"><path d="M3 11l16-6v14L3 13z"/><path d="M7 12v6"/></svg>宣发中心</a>
   <div class="side-lbl">交易</div>
-  <a class="navi" data-nav="market" href="#/market"><svg viewBox="0 0 24 24"><path d="M3 10l9-7 9 7v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 21v-7h6v7"/></svg>授权市场</a>
-  <a class="navi" data-nav="revenue" href="#/revenue"><svg viewBox="0 0 24 24"><path d="M3 17l5-6 4 3 4-6 5 4"/><path d="M3 21h18"/></svg>收入中心</a>
-  <a class="navi" data-nav="dispute" href="#/dispute"><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>维权中心<span class="cnt" id="navDisputeCnt"></span></a>
+  <a class="navi" href="#/market"><svg viewBox="0 0 24 24"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.4 11h11L21 7H6"/></svg>素材市场</a>
+  <a class="navi" href="#/revenue"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>收入中心</a>
+  <a class="navi" href="#/dispute"><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>维权中心</a>
   <div class="side-lbl">账户</div>
-  <a class="navi" data-nav="settings" href="#/settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.9l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.9-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.9.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.9 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.9l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.9.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.9-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.9V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>认证与设置</a>
-
-  <div class="side-foot" id="sideFoot"></div>
+  <a class="navi" href="#/settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.9l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.9-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.9.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.9 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.9l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.9.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.9-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.9V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>认证与设置</a>
+  <div class="side-foot"><b>企业认证已通过</b>大湾区晨曦动画工作室<br>编号 <span class="mono">CG-ENT-0231</span></div>
 </aside>
 
-<!-- ==================== 主区 ==================== -->
 <main class="main" id="main">
   <div id="view"></div>
 </main>
 
-<!-- ==================== 移动端底部导航 ==================== -->
 <nav class="mobnav" id="mobnav">
-  <a data-nav="dash" href="#/dash"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>工作台</a>
-  <a data-nav="library" href="#/library"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 012-2h8l6 6v12a2 2 0 01-2 2H6a2 2 0 01-2-2z"/><path d="M14 3v6h6"/></svg>作品库</a>
-  <a data-nav="upload" href="#/upload"><svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a2 2 0 002 2h12a2 2 0 002-2v-3"/></svg>上传</a>
-  <a data-nav="market" href="#/market"><svg viewBox="0 0 24 24"><path d="M3 10l9-7 9 7v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 21v-7h6v7"/></svg>市场</a>
-  <a data-nav="revenue" href="#/revenue"><svg viewBox="0 0 24 24"><path d="M3 17l5-6 4 3 4-6 5 4"/><path d="M3 21h18"/></svg>收入</a>
+  <a href="#/dash" class="on"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>工作台</a>
+  <a href="#/library"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 012-2h8l6 6v12a2 2 0 01-2 2H6a2 2 0 01-2-2z"/><path d="M14 3v6h6"/></svg>作品库</a>
+  <a href="#/market"><svg viewBox="0 0 24 24"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.4 11h11L21 7H6"/></svg>市场</a>
+  <a href="#/cart"><svg viewBox="0 0 24 24"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.4 11h11L21 7H6"/></svg>选购车</a>
+  <a href="#/consumer"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/></svg>消费者</a>
 </nav>
 
-<!-- ==================== 浮层 ==================== -->
 </div><!-- /#app -->
 
 <div class="drawer" id="drawer" hidden>
@@ -106,11 +110,13 @@
 </button>
 
 <script src="data.js"></script>
+<script src="virtual.js"></script>
 <script src="core.js"></script>
 <script src="views-a.js"></script>
 <script src="views-b.js"></script>
 <script src="views-c.js"></script>
 <script src="views-d.js"></script>
+<script src="views-e.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

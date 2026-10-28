@@ -345,8 +345,12 @@
   };
 
   /* ------------------------------------------------------------ 路由 */
-  CG.routes = ['dash', 'upload', 'library', 'work', 'market', 'marketItem',
-    'promote', 'promoteItem', 'revenue', 'dispute', 'settings'];
+  CG.routes = ['home', 'dash', 'upload', 'library', 'work', 'market', 'marketItem',
+    'promote', 'promoteItem', 'revenue', 'dispute', 'settings',
+    'consumer', 'cart', 'orders', 'favorites'];
+
+  // 带二级路径时转发到独立视图（如 #/market/:id → marketItem）
+  CG.ITEM_VIEW = { market: 'marketItem', promote: 'promoteItem' };
 
   CG.parse = function () {
     let raw = (location.hash || '').replace(/^#\/?/, '');
@@ -365,11 +369,13 @@
     if (!CG.state) return;
     const r = CG.parse();
     const view = document.getElementById('view');
-    const fn = CG.views[r.name];
+    let name = r.name;
+    if (r.args.length && CG.ITEM_VIEW[name]) name = CG.ITEM_VIEW[name];
+    const fn = CG.views[name];
     if (!fn) { view.innerHTML = '<div class="empty"><b>页面不存在</b></div>'; return }
     document.getElementById('main').scrollTop = 0;
     view.innerHTML = fn(r.args);
-    CG.updateNav(r.name);
+    CG.updateNav(name);
     if (fn.after) fn.after(r.args);
     CG.syncBadges();
   };

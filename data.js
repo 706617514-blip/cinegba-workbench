@@ -27,37 +27,54 @@ CG.TYPE_LABEL = {
 
 /* 抽象封面：按 id 生成不同色相的 SVG，让作品墙看起来像真的缩略图 */
 CG.makeCover = function (seed, type) {
-  const hue = (function () {
-    let h = 0;
-    for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) % 360;
-    return h;
-  })();
-  const h2 = (hue + 42) % 360;
-  const h3 = (hue + 200) % 360;
+  let h = 5381;
+  for (let i = 0; i < String(seed).length; i++) h = ((h << 5) + h + String(seed).charCodeAt(i)) | 0;
+  h = Math.abs(h);
+  const hue = h % 360;
+  const h2 = (hue + 38) % 360;
+  const h3 = (hue + 197) % 360;
+  const rot = (h >> 7) % 44 - 22;
+  const sc = 0.82 + ((h >> 3) % 34) / 100;
+  const ox = (h >> 5) % 70 - 35;
+  const oy = (h >> 11) % 56 - 28;
+  const light = 12 + (h >> 9) % 9;
   const shapes = {
-    video: `<rect x="40" y="70" width="240" height="135" rx="8" fill="hsla(${h3},70%,70%,.18)"/>
-            <circle cx="160" cy="137" r="26" fill="hsla(${h2},80%,72%,.55)"/>
-            <path d="M152 126l18 11-18 11z" fill="#0b1119"/>`,
-    audio: `<g stroke="hsla(${h2},85%,70%,.7)" stroke-width="5" stroke-linecap="round">
-            <path d="M40 137v-30M70 137v-58M100 137v-14M130 137v-70M160 137v-40M190 137v-52M220 137v-22M250 137v-44"/></g>`,
-    image: `<rect x="46" y="76" width="228" height="122" rx="7" fill="hsla(${h3},60%,60%,.22)"/>
-            <circle cx="104" cy="112" r="17" fill="hsla(${h2},85%,74%,.75)"/>
-            <path d="M46 198l70-58 44 34 36-28 78 52z" fill="hsla(${h2},70%,60%,.5)"/>`,
+    video: `<rect x="40" y="70" width="240" height="135" rx="8" fill="hsla(${h3},70%,70%,.16)"/>
+            <circle cx="160" cy="137" r="${22 + (h % 9)}" fill="hsla(${h2},80%,72%,.5)"/>
+            <path d="M153 127l17 10-17 10z" fill="#0b1119"/>`,
+    audio: `<g stroke="hsla(${h2},85%,70%,.68)" stroke-width="${4 + (h % 3)}" stroke-linecap="round">
+            ${[40, 70, 100, 130, 160, 190, 220, 250].map((x, i) =>
+      `<path d="M${x} 150v-${10 + ((h >> i) % 70)}"/>`).join('')}</g>`,
+    image: `<rect x="46" y="76" width="228" height="122" rx="7" fill="hsla(${h3},60%,60%,.2)"/>
+            <circle cx="${92 + (h % 40)}" cy="${104 + (h >> 4) % 22}" r="${13 + (h % 10)}"
+              fill="hsla(${h2},85%,74%,.72)"/>
+            <path d="M46 198l70-${48 + (h % 24)} 44 34 36-28 78 52z" fill="hsla(${h2},70%,60%,.48)"/>`,
     doc:   `<rect x="86" y="60" width="148" height="156" rx="7" fill="hsla(${h3},55%,62%,.2)"/>
-            <g stroke="hsla(${h2},70%,72%,.62)" stroke-width="4" stroke-linecap="round">
-            <path d="M108 94h104M108 118h104M108 142h84M108 166h96"/></g>`,
-    model: `<path d="M160 58l86 48v100l-86 48-86-48V106z" fill="hsla(${h3},60%,60%,.16)"
-            stroke="hsla(${h2},80%,70%,.66)" stroke-width="3"/>
-            <path d="M160 58v100M74 106l86 52 86-52" stroke="hsla(${h2},80%,70%,.5)"
+            <g stroke="hsla(${h2},70%,72%,.6)" stroke-width="4" stroke-linecap="round">
+            <path d="M108 94h${70 + (h % 36)}M108 118h104M108 142h${60 + (h % 30)}M108 166h96"/></g>`,
+    model: `<path d="M160 58l86 48v100l-86 48-86-48V106z" fill="hsla(${h3},60%,60%,.14)"
+            stroke="hsla(${h2},80%,70%,.62)" stroke-width="3"/>
+            <path d="M160 58v100M74 106l86 52 86-52" stroke="hsla(${h2},80%,70%,.46)"
             stroke-width="3" fill="none"/>`
   };
+  // 每张图再加 2-4 个装饰点，打散同质化
+  const dots = [];
+  for (let i = 0; i < 2 + (h % 3); i++) {
+    const dx = ((h >> (i * 3 + 2)) % 300) + 10;
+    const dy = ((h >> (i * 5 + 4)) % 250) + 12;
+    const dr = 2 + ((h >> (i * 2)) % 7);
+  dots.push(`<circle cx="${dx}" cy="${dy}" r="${dr}" fill="hsla(${(hue + i * 60) % 360},80%,72%,.22)"/>`);
+  }
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 274">
     <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="hsl(${hue},42%,17%)"/>
-      <stop offset="1" stop-color="hsl(${h3},48%,12%)"/>
+      <stop offset="0" stop-color="hsl(${hue},44%,${light}%)"/>
+      <stop offset="1" stop-color="hsl(${h3},50%,${Math.max(8, light - 4)}%)"/>
     </linearGradient></defs>
     <rect width="320" height="274" fill="url(#g)"/>
-    ${shapes[type] || shapes.image}
+    ${dots.join('')}
+    <g transform="rotate(${rot} 160 137) translate(${ox} ${oy}) translate(160 137) scale(${sc.toFixed(2)}) translate(-160 -137)">
+      ${shapes[type] || shapes.image}
+    </g>
   </svg>`;
   return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
 };
