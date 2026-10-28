@@ -669,7 +669,7 @@ body.mode-public #public{min-height:100vh}
 
 /* ---------- Hero ---------- */
 .lp-hero{display:grid;grid-template-columns:1.05fr .95fr;gap:44px;align-items:center;
-  padding:64px 0 56px}
+  padding:56px 0 28px}
 .lp-kicker{display:inline-block;font-size:11px;letter-spacing:.08em;color:var(--cyan);
   border:1px solid var(--cyan);border-radius:20px;padding:3px 11px;margin-bottom:18px;
   background:var(--cyan-soft)}
