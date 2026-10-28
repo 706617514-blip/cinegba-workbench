@@ -115,7 +115,7 @@
           <div class="srow"><div class="tx"><b>权属文件</b>
             <span>已上传 ${w.rights.docs || 0} 份</span></div>
             <button class="btn xs" data-act="uploadDocs">补充</button></div>
-          ${!ctx.canList ? `<div class="note w">${I.warn}<div>该作品含肖像或声音且没有授权文件，已限制上架授权市场。这属于合规硬性限制，不能通过改状态绕过。</div></div>` : ''}
+          ${!ctx.canList ? `<div class="note w">${I.warn}<div>该作品含肖像或声音且没有授权文件，已限制上架素材市场。这属于合规硬性限制，不能通过改状态绕过。</div></div>` : ''}
         </div>
 
         <div class="card">
@@ -210,7 +210,7 @@
     const all = Object.keys(CG.LICENSE_KINDS);
     const missing = all.filter(k => !lic.some(l => l.kind === k));
     return `
-    <div class="note c">${I.info}<div>每开一种授权，作品就会以对应价格出现在<b>授权市场</b>。
+    <div class="note c">${I.info}<div>每开一种授权，作品就会以对应价格出现在<b>素材市场</b>。
       采购方下单后你会收到询价，回签即生成合约与入账记录。</div></div>
 
     <div class="g2 mt12">
@@ -338,13 +338,13 @@
           <div class="promo-hero" style="margin-bottom:10px">
             <img src="${U.cover(w)}" alt="">
             <div class="ov"><b>${U.esc(mk.headline || w.title)}</b>
-              <span>渠道：${(mk.channels || []).map(c => ({ market: '授权市场', homepage: '平台首页', hktdc: 'FILMART 专区' }[c] || c)).join(' / ') || '—'}</span></div>
+              <span>渠道：${(mk.channels || []).map(c => ({ market: '素材市场', homepage: '平台首页', hktdc: 'FILMART 专区' }[c] || c)).join(' / ') || '—'}</span></div>
           </div>
           <div class="row">
             <button class="btn sm" data-act="editPromo">改文案</button>
             <button class="btn sm danger" data-act="stopPromo">停止宣发</button>
           </div>` : `
-          <p class="hint">还没有发布宣发。发布后作品会出现在授权市场推荐位，并获得独立的推广链接。</p>
+          <p class="hint">还没有发布宣发。发布后作品会出现在素材市场推荐位，并获得独立的推广链接。</p>
           <button class="btn pri wide mt12" data-act="goPromo">${I.megaphone}去发布宣发</button>`}
       </div>
       <div class="card">
@@ -390,9 +390,9 @@
         if (!(w.licenses || []).some(l => l.on)) return CG.toast('先在「授权配置」里开启至少一种授权', 'err');
         if ((w.rights.portrait || w.rights.voice) && !w.rights.docs) return CG.toast('含肖像/声音，需先补充授权文件', 'err');
         w.status = 'listed'; w.stats.views = w.stats.views || 0;
-        CG.toast('作品已上架授权市场', 'ok'); save();
+        CG.toast('作品已上架素材市场', 'ok'); save();
       },
-      offline: () => CG.confirm('下架作品', '下架后授权市场里不再展示，已签合约不受影响。', () => {
+      offline: () => CG.confirm('下架作品', '下架后素材市场里不再展示，已签合约不受影响。', () => {
         w.status = 'offline'; CG.toast('已下架'); save();
       }, '确认下架'),
       uploadDocs: () => CG.confirm('补充权属文件', '演示环境下会直接记为「已上传 1 份文件」。<br>正式版这里应该接文件上传。', () => {
@@ -420,7 +420,7 @@
       }),
       goPromo: () => CG.go('promote/' + w.id),
       editPromo: () => CG.go('promote/' + w.id),
-      stopPromo: () => CG.confirm('停止宣发', '停止后作品不再出现在推荐位，但仍在授权市场可搜到。', () => {
+      stopPromo: () => CG.confirm('停止宣发', '停止后作品不再出现在推荐位，但仍在素材市场可搜到。', () => {
         w.marketing.on = false; CG.toast('已停止宣发'); save();
       }, '停止')
     });
@@ -571,7 +571,7 @@
           <div class="fld"><label>可否转授权</label>
             <select id="alResell"><option value="0">不可转授权</option><option value="1">可转授权</option></select></div>
         </div>
-        <div class="note c mt12">${I.info}<div>计价单位：${U.esc(k.unitLabel)}。价格会直接显示在授权市场。</div></div>
+        <div class="note c mt12">${I.info}<div>计价单位：${U.esc(k.unitLabel)}。价格会直接显示在素材市场。</div></div>
         <div class="row mt16" style="justify-content:flex-end">
           <button class="btn" data-close>取消</button>
           <button class="btn pri" id="alSave">添加并上架</button>
@@ -602,13 +602,13 @@
     const w = CG.work(id);
     if (!w || w.status !== 'listed') {
       return `<div class="empty">${I.empty}<b>该作品当前不可采购</b><p>可能已下架或未配置授权</p>
-        <a class="btn" href="#/market">回授权市场</a></div>`;
+        <a class="btn" href="#/market">回素材市场</a></div>`;
     }
     const onLic = (w.licenses || []).filter(l => l.on);
     const similar = CG.state.works.filter(x => x.id !== id && x.status === 'listed').slice(0, 4);
 
     return `
-    <div class="crumb"><a href="#/market">授权市场</a> / <span>${U.esc(w.title)}</span></div>
+    <div class="crumb"><a href="#/market">素材市场</a> / <span>${U.esc(w.title)}</span></div>
     <div class="g2" style="grid-template-columns:1.5fr 1fr">
       <div>
         <div class="card" style="padding:0;overflow:hidden">
@@ -723,7 +723,7 @@
               CG.state.leads.unshift({
                 id: U.uid('L'), workId: w.id, licensee: nm + '（市场询价）',
                 kind: l.kind, price: l.price, status: 'pending', at: U.now(),
-                note: panel.querySelector('#iqNote').value.trim() || '通过授权市场提交'
+                note: panel.querySelector('#iqNote').value.trim() || '通过素材市场提交'
               });
               w.stats.inquiries = (w.stats.inquiries || 0) + 1;
               w.stats.views = (w.stats.views || 0) + 1;

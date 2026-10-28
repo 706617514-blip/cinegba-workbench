@@ -1,5 +1,5 @@
 /* ==========================================================================
-   视图 C：授权市场 / 宣发 / 收入 / 维权 / 设置
+   视图 C：素材市场 / 宣发 / 收入 / 维权 / 设置
    ========================================================================== */
 (function () {
   'use strict';
@@ -7,9 +7,9 @@
   CG.views = CG.views || {};
 
   function pill(s) { const p = U.statusPill(s); return `<span class="pill ${p[1]}">${p[0]}</span>` }
-  const CH_LABEL = { market: '授权市场推荐位', homepage: '平台首页 Banner', hktdc: 'FILMART 专区' };
+  const CH_LABEL = { market: '素材市场推荐位', homepage: '平台首页 Banner', hktdc: 'FILMART 专区' };
 
-  /* ========================================================== 授权市场 */
+  /* ========================================================== 素材市场 */
   if (!CG.ui.mkt) CG.ui.mkt = { types: [], lics: [], price: 'all' };
 
   CG.views.market = function () {
@@ -67,7 +67,7 @@
 
     return `
     <div class="ph">
-      <div><h1>授权市场</h1><p>采购方视角 · ${list.length} 件可采购作品 ·
+      <div><h1>素材市场</h1><p>采购方视角 · ${list.length} 件可采购作品 ·
         所有预览带水印，采购后交付无水印原件</p></div>
       <div class="ph-r">
         <div class="seg">
@@ -167,7 +167,7 @@
         <div class="card-h"><h3>推荐位说明</h3></div>
         <div class="chan">
           <div class="chi"><div class="ci">${I.megaphone}</div>
-            <div class="cx"><b>授权市场推荐位</b><span>出现在市场首页前列，按曝光计费</span></div>
+            <div class="cx"><b>素材市场推荐位</b><span>出现在市场首页前列，按曝光计费</span></div>
             <span class="pill c">含在佣金内</span></div>
           <div class="chi"><div class="ci">${I.chart}</div>
             <div class="cx"><b>平台首页 Banner</b><span>需要运营审核，每周 3 个名额</span></div>
@@ -293,7 +293,7 @@
         });
         CG.toast('宣发已发布，市场推荐位已生效', 'ok'); save();
       },
-      stop: () => CG.confirm('停止宣发', '作品仍保留在授权市场，只是不再出现在推荐位。', () => {
+      stop: () => CG.confirm('停止宣发', '作品仍保留在素材市场，只是不再出现在推荐位。', () => {
         mk.on = false; CG.toast('已停止宣发'); save();
       }, '停止'),
       share: () => CG.copy(location.origin + location.pathname + '#/market/' + w.id, '推广链接已复制')

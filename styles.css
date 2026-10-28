@@ -10,34 +10,52 @@
   --nav-h:56px; --side-w:208px;
 }
 [data-theme="dark"]{
-  --bg:#0A0E17; --bg-2:#0D1320;
-  --surface:#121B29; --surface-2:#172233; --surface-3:#1E2B3E;
-  --line:#22303F; --line-2:#2E4056;
-  --ink:#E9EFF7; --ink-2:#A8B8CC; --muted:#6C7E94;
-  --cyan:#22D3EE; --cyan-d:#0891B2; --cyan-soft:rgba(34,211,238,.12);
-  --gold:#F0B23C; --gold-soft:rgba(240,178,60,.13);
-  --ok:#34D399; --ok-soft:rgba(52,211,153,.13);
-  --warn:#FBBF24; --warn-soft:rgba(251,191,36,.13);
-  --danger:#F87171; --danger-soft:rgba(248,113,113,.13);
-  --accent:#22D3EE;
-  --shadow:0 8px 28px rgba(0,0,0,.38);
-  --grid:rgba(255,255,255,.045);
-  --glass:rgba(10,14,23,.82);
+  /* 中性层：偏冷的石墨灰，不抢戏 */
+  --bg:#0A0D14; --bg-2:#0E121A;
+  --surface:#141A24; --surface-2:#1A212D; --surface-3:#222B39;
+  --line:#28323F; --line-2:#37434F;
+  --ink:#E7ECF3; --ink-2:#9FADBE; --muted:#69788C;
+
+  /* 强调色只有两个：青（交互）+ 琥珀（数据/金额） */
+  --accent:#3FC1D4; --accent-soft:rgba(63,193,212,.11);
+  --accent-d:#1E8FA6;
+  --amber:#D9A24A; --amber-soft:rgba(217,162,74,.12);
+
+  /* 状态色：降饱和，只做小面积点缀 */
+  --ok:#4FA97F; --ok-soft:rgba(79,169,127,.11);
+  --danger:#D2675C; --danger-soft:rgba(210,103,92,.11);
+
+  /* 别名：让既有引用自动收敛 */
+  --cyan:var(--accent); --cyan-soft:var(--accent-soft); --cyan-d:var(--accent-d);
+  --gold:var(--amber); --gold-soft:var(--amber-soft);
+  --warn:var(--amber); --warn-soft:var(--amber-soft);
+
+  --shadow:0 8px 28px rgba(0,0,0,.36);
+  --grid:rgba(255,255,255,.04);
+  --glass:rgba(10,13,20,.84);
 }
 [data-theme="light"]{
-  --bg:#F0EAE0; --bg-2:#F7F3EC;
-  --surface:#FFFFFF; --surface-2:#FAF7F2; --surface-3:#F2ECE2;
-  --line:#DAD3C7; --line-2:#C4BDB0;
-  --ink:#252824; --ink-2:#4A4E48; --muted:#68665F;
-  --cyan:#0E7490; --cyan-d:#155E75; --cyan-soft:rgba(14,116,144,.09);
-  --gold:#A9681A; --gold-soft:rgba(169,104,26,.10);
-  --ok:#2E7D4F; --ok-soft:rgba(46,125,79,.10);
-  --warn:#8A5A00; --warn-soft:rgba(138,90,0,.10);
-  --danger:#B5392A; --danger-soft:rgba(181,57,42,.09);
-  --accent:#B5392A;
-  --shadow:0 1px 2px rgba(37,40,36,.04),0 8px 24px rgba(37,40,36,.07);
-  --grid:rgba(37,40,36,.05);
-  --glass:rgba(240,234,224,.86);
+  /* 纸色中性层 */
+  --bg:#F1ECE4; --bg-2:#F8F4ED;
+  --surface:#FFFFFF; --surface-2:#FAF7F2; --surface-3:#F1EBE1;
+  --line:#DCD5C9; --line-2:#C3BCAF;
+  --ink:#23261F; --ink-2:#4A4E46; --muted:#6A675E;
+
+  /* 浅底上强调色需要更深，才能保证对比 */
+  --accent:#0E7490; --accent-soft:rgba(14,116,144,.08);
+  --accent-d:#155E75;
+  --amber:#8E5F17; --amber-soft:rgba(142,95,23,.09);
+
+  --ok:#2F7D57; --ok-soft:rgba(47,125,87,.09);
+  --danger:#A9483C; --danger-soft:rgba(169,72,60,.08);
+
+  --cyan:var(--accent); --cyan-soft:var(--accent-soft); --cyan-d:var(--accent-d);
+  --gold:var(--amber); --gold-soft:var(--amber-soft);
+  --warn:var(--amber); --warn-soft:var(--amber-soft);
+
+  --shadow:0 1px 2px rgba(35,38,31,.04),0 8px 24px rgba(35,38,31,.06);
+  --grid:rgba(35,38,31,.05);
+  --glass:rgba(241,236,228,.88);
 }
 
 *{box-sizing:border-box;margin:0;padding:0}
@@ -167,7 +185,7 @@ input,select,textarea{font:inherit}
 .pill.c{background:var(--cyan-soft);color:var(--cyan)}
 .pill.w{background:var(--warn-soft);color:var(--warn)}
 .pill.d{background:var(--danger-soft);color:var(--danger)}
-.pill.g{background:var(--gold-soft);color:var(--gold)}
+.pill.g{background:var(--amber-soft);color:var(--amber)}
 .pill.m{background:var(--surface-3);color:var(--muted)}
 
 .note{display:flex;gap:8px;padding:9px 11px;border-radius:var(--r);font-size:11px;
@@ -342,6 +360,8 @@ td a:hover{text-decoration:underline}
 .wm{position:absolute;inset:0;pointer-events:none;font-size:0;color:transparent;
   background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='152' height='86'%3E%3Ctext x='6' y='48' font-family='sans-serif' font-size='12' font-weight='700' fill='%23ffffff' fill-opacity='0.22' transform='rotate(-20 76 43)'%3ECineGBA%3C/text%3E%3C/svg%3E");
   background-repeat:repeat}
+[data-theme="light"] .wm{
+  background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='152' height='86'%3E%3Ctext x='6' y='48' font-family='sans-serif' font-size='12' font-weight='700' fill='%23000000' fill-opacity='0.20' transform='rotate(-20 76 43)'%3ECineGBA%3C/text%3E%3C/svg%3E")}
 .mkt-cover .lic{position:absolute;left:7px;bottom:7px;display:flex;gap:4px;flex-wrap:wrap}
 .mkt-cover .lic span{font-size:9px;padding:1.5px 5px;border-radius:4px;font-weight:600;
   background:rgba(0,0,0,.62);color:#fff;backdrop-filter:blur(4px)}

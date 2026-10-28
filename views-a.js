@@ -152,7 +152,7 @@
       <div class="quick">
         <a class="qk" href="#/upload">${I.up}<b>上传作品</b><span>拖文件即可存证</span></a>
         <a class="qk" href="#/library">${I.file}<b>作品库</b><span>${m.workCount} 件作品</span></a>
-        <a class="qk" href="#/market">${I.cart}<b>授权市场</b><span>看采购方视角</span></a>
+        <a class="qk" href="#/market">${I.cart}<b>素材市场</b><span>素材市场</span></a>
         <a class="qk" href="#/promote">${I.megaphone}<b>宣发中心</b><span>推广与曝光</span></a>
         <a class="qk" href="#/revenue">${I.chart}<b>收入中心</b><span>${U.money(m.monthRev)} 本月</span></a>
       </div>
@@ -331,7 +331,7 @@
                 <span class="chip ${f.portrait ? 'on' : ''}" data-v="portrait">含肖像</span>
                 <span class="chip ${f.voice ? 'on' : ''}" data-v="voice">含声音</span>
               </div>
-              <div class="hint">含肖像或声音时，可存证但不能上架授权市场，需先补充对应授权文件。</div>
+              <div class="hint">含肖像或声音时，可存证但不能上架素材市场，需先补充对应授权文件。</div>
             </div>
           </div>
           <div class="note c mt12">${I.info}<div>提交后会<b>真实生成</b>指纹占位与存证记录，并保存到你选择的数据位置。</div></div>

@@ -85,6 +85,8 @@
       document.documentElement.setAttribute('data-theme', next);
       localStorage.setItem('cg-theme', next);
       if (lbl) lbl.textContent = next === 'dark' ? '深色' : '浅色';
+      // 封面是按主题生成的，切完要重绘
+      if (CG.state && CG.auth.isIn) setTimeout(() => { try { CG.render() } catch (e) { } }, 30);
     };
   }
 
