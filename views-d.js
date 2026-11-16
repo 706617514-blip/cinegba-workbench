@@ -12,19 +12,19 @@
   /* ========================================================== 落地页 */
   /* 落地页顶部的通栏胶片条：两行封面从右往左流，第二行更慢更淡，
      让首屏第一眼就有「影视素材库」的质感，而不是纯文字 + 一张 UI 卡片。 */
-  function lpStrip(n) {
+  function lpStrip(n, skip) {
     const types = ['video', 'image', 'audio', 'doc', 'model'];
     const pools = types.map(t => ((CG.COVER_POOL && CG.COVER_POOL[t]) || []));
     if (!pools.some(p => p.length)) return '';
-    /* 主视觉那张卡已经占了某张图，这里就别再重复用 */
-    const skip = showcaseEntry() ? showcaseEntry().f : null;
+    /* 轮播里已经露脸的图，胶片条就别再用了，免得一屏里重复 */
+    const used = skip || [];
     const out = [];
     let i = 0;
-    while (out.length < n && i < n * 10) {
+    while (out.length < n && i < n * 12) {
       const p = pools[i % pools.length];
       if (p.length) {
         const e = p[Math.floor(i / pools.length) % p.length];
-        if (e && e.f !== skip && out.indexOf(e.f) < 0) out.push(e.f);
+        if (e && used.indexOf(e.f) < 0 && out.indexOf(e.f) < 0) out.push(e.f);
       }
       i++;
     }
@@ -35,57 +35,85 @@
     return `<div class="lp-strip">${row(out, 'r1')}${row(out.slice().reverse(), 'r2')}</div>`;
   }
 
-  /* 主视觉那张「已跑完全流程的素材」用哪个 slug */
-  const SHOWCASE_RE = /forest-light|lavender|coast-cliff|glacier/;
+  /* 主视觉轮播：一件作品一张卡，左右箭头翻页。
+     每类的展示口径（规格 / 后缀 / 授权标签 / 起价）按类型给，避免所有卡长得一样。 */
+  const CAR_CFG = {
+    video: { kind: '视频', spec: '4K · 24fps', suffix: '· 全片', price: '1,200', lic: ['AI 训练授权', '片段引用', '改编权'] },
+    image: { kind: '图片', spec: '6000×4000', suffix: '· 设定集', price: '680', lic: ['AI 训练授权', '片段引用'] },
+    audio: { kind: '音频', spec: '48k · 24bit', suffix: '· 配乐', price: '360', lic: ['片段引用', '改编权'] },
+    doc: { kind: '剧本文档', spec: '48 页 · PDF', suffix: '· 剧本', price: '2,400', lic: ['改编权', '片段引用'] },
+    model: { kind: '3D 模型', spec: 'PBR · GLB', suffix: '· 角色模型', price: '1,900', lic: ['AI 训练授权', '片段引用'] }
+  };
+  const CAR_OWNERS = ['星野影像（香港）', '北岸概念艺术', '雾港声音设计', '孤山剧作社', '纸鸢三维工作室', '潮汐视觉数字科技'];
 
-  function showcaseEntry() {
-    const pool = (CG.COVER_POOL && CG.COVER_POOL.video) || [];
-    return pool.filter(x => SHOWCASE_RE.test(x.f))[0] || pool[0] || null;
+  function showcaseItems(n) {
+    const types = Object.keys(CAR_CFG);
+    const out = [];
+    for (let i = 0; out.length < n && i < n * 8; i++) {
+      const t = types[i % types.length];
+      const pool = (CG.COVER_POOL && CG.COVER_POOL[t]) || [];
+      if (!pool.length) continue;
+      const e = pool[Math.floor(i / types.length) % pool.length];
+      if (!e || out.some(x => x.f === e.f)) continue;
+      const c = CAR_CFG[t];
+      out.push({
+        f: e.f, subject: e.s || '未命名素材',
+        kind: c.kind, spec: c.spec, suffix: c.suffix, price: c.price, lic: c.lic,
+        owner: CAR_OWNERS[i % CAR_OWNERS.length]
+      });
+    }
+    return out;
   }
 
-  /* 落地页主视觉：一张「已经跑完全流程的素材」卡片。
-     原来这里放的是一个仿「创作者工作台」的假界面截图（已存证 7 / 本月收入 ¥8,080…），
-     看着像把应用内页搬到了官网，很容易误会。现在改成真实封面 + 授权 + 存证凭证三件套：
-     说明的是「一份素材在平台上长什么样」，而不是「后台长什么样」。 */
-  function lpShowcase() {
-    const pick = showcaseEntry();
-    if (!pick) return '';
-    const cover = pick.f;
-    const subject = pick.s || '雨夜反光路面';
+  /* 落地页主视觉：多件作品的可翻页轮播。
+     原来是单张卡 + 一枚浮在下面的存证凭证（被嫌多余，已删掉）；
+     现在一次能翻 6 件，左右大箭头，任何人都看得出能点。 */
+  function lpCarousel(items) {
+    if (!items.length) return '';
+    const slides = items.map((it, i) => `
+        <article class="lp-slide" aria-hidden="${i ? 'true' : 'false'}">
+          <div class="lp-show">
+            <div class="lp-show-media">
+              <img src="${it.f}" alt="${U.esc(it.subject)}" loading="${i < 2 ? 'eager' : 'lazy'}">
+              <span class="lp-show-spec">${U.esc(it.spec)}</span>
+              <span class="lp-show-wm">CineGBA</span>
+              <span class="lp-show-count">${i + 1} / ${items.length}</span>
+            </div>
+            <div class="lp-show-body">
+              <div class="lp-show-h">
+                <b>${U.esc(it.subject)} ${U.esc(it.suffix)}</b>
+                <span class="pill ok">在售</span>
+              </div>
+              <div class="lp-show-own">${U.esc(it.owner)} · ${U.esc(it.kind)} · 入库 2026-09-24</div>
+              <div class="lp-show-badges">
+                ${it.lic.map(l => `<span>${U.esc(l)}</span>`).join('')}
+              </div>
+              <div class="lp-show-foot">
+                <b>¥${U.esc(it.price)}</b><span>起</span>
+                <em>询价 →</em>
+              </div>
+            </div>
+          </div>
+        </article>`).join('');
+
+    const dots = items.map((_, i) =>
+      `<button class="lp-car-dot${i ? '' : ' on'}" data-car-go="${i}" aria-label="第 ${i + 1} 件"></button>`).join('');
+
     return `
-      <div class="lp-show">
-        <div class="lp-show-media">
-          <img src="${cover}" alt="${U.esc(subject)}">
-          <span class="lp-show-spec">4K · 24fps</span>
-          <span class="lp-show-wm">CineGBA</span>
-        </div>
-        <div class="lp-show-body">
-          <div class="lp-show-h">
-            <b>${U.esc(subject)} · 全片</b>
-            <span class="pill ok">在售</span>
-          </div>
-          <div class="lp-show-own">星野影像（香港）· 视频 · 入库 2026-09-24</div>
-          <div class="lp-show-badges">
-            <span>AI 训练授权</span><span>片段引用</span><span>改编权</span>
-          </div>
-          <div class="lp-show-foot">
-            <b>¥1,200</b><span>起</span>
-            <em>询价 →</em>
-          </div>
-        </div>
-      </div>
-      <div class="lp-proof">
-        <span class="lp-proof-ic">
-          <svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>
-        </span>
-        <div class="lp-proof-tx">
-          <b>三路存证已完成</b>
-          <span>链上 <i class="mono">0x8f3c…d21a</i> · 区块 1,204,887 · TSA 2026-09-24 10:41</span>
-        </div>
+      <div class="lp-car" id="lpCar" data-count="${items.length}">
+        <div class="lp-car-view"><div class="lp-car-track" id="lpCarTrack">${slides}</div></div>
+        <button class="lp-car-btn prev" data-car-prev aria-label="上一件作品">
+          <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
+        </button>
+        <button class="lp-car-btn next" data-car-next aria-label="下一件作品">
+          <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+        </button>
+        <div class="lp-car-dots">${dots}</div>
       </div>`;
   }
 
   CG.pages.landing = function () {
+    const carItems = showcaseItems(6);
     return `
 <div class="lp">
 
@@ -101,12 +129,12 @@
       <a href="#boundary">边界</a>
     </nav>
     <div class="lp-act">
-      <a class="btn ghost" href="#/login">登录</a>
-      <a class="btn pri" href="#/register">免费入驻</a>
+      <a class="btn lp-btn-ghost" href="#/login">登录</a>
+      <a class="btn pri lp-btn-pri" href="#/register">免费入驻</a>
     </div>
   </header>
 
-  ${lpStrip(15)}
+  ${lpStrip(15, carItems.map(x => x.f))}
 
   <section class="lp-hero">
     <div class="lp-hero-tx">
@@ -128,7 +156,7 @@
       </div>
     </div>
     <div class="lp-hero-vis">
-      ${lpShowcase()}
+      ${lpCarousel(carItems)}
       <div class="lp-glow"></div>
     </div>
   </section>
@@ -271,7 +299,48 @@
   };
 
   CG.pages.landing.after = function () {
-    // 锚点滚动用原生行为即可；这里只处理外部锚点跳回
+    // 锚点滚动用原生行为即可；这里处理主视觉轮播
+    const car = document.getElementById('lpCar');
+    if (!car) return;
+    const track = document.getElementById('lpCarTrack');
+    const slides = Array.from(track.children);
+    const dots = Array.from(car.querySelectorAll('.lp-car-dot'));
+    const total = slides.length;
+    let idx = 0;
+
+    function go(n) {
+      idx = (n + total) % total;
+      track.style.transform = 'translateX(' + (-idx * 100) + '%)';
+      slides.forEach((s, i) => s.setAttribute('aria-hidden', i === idx ? 'false' : 'true'));
+      dots.forEach((d, i) => d.classList.toggle('on', i === idx));
+    }
+
+    const prev = car.querySelector('[data-car-prev]');
+    const next = car.querySelector('[data-car-next]');
+    if (prev) prev.onclick = () => go(idx - 1);
+    if (next) next.onclick = () => go(idx + 1);
+    dots.forEach((d, i) => { d.onclick = () => go(i) });
+
+    // 键盘 ← → 也能翻（焦点在页面任意处都行，输入框里除外）
+    document.addEventListener('keydown', function onKey(e) {
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+      const t = e.target;
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return;
+      if (!document.getElementById('lpCar')) { document.removeEventListener('keydown', onKey); return }
+      e.preventDefault();
+      go(idx + (e.key === 'ArrowRight' ? 1 : -1));
+    });
+
+    // 触屏左右滑
+    let sx = null;
+    car.addEventListener('pointerdown', e => { sx = e.clientX });
+    car.addEventListener('pointerup', e => {
+      if (sx === null) return;
+      const dx = e.clientX - sx; sx = null;
+      if (Math.abs(dx) > 40) go(idx + (dx < 0 ? 1 : -1));
+    });
+
+    go(0);
   };
 
   /* ========================================================== 登录 */

@@ -1900,3 +1900,136 @@ button.more svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-widt
   .lp-proof-tx b{font-size:11px}
   .lp-proof-tx span{font-size:9px}
 }
+
+/* ==========================================================================
+   落地页：主视觉轮播（多作品 + 左右大箭头）
+   —— 上一版是单张卡 + 一枚浮在下面的存证凭证，用户反馈「那块多余」，
+      并且要求作品能自己翻、而且这一块要再大一点、按钮要显眼到谁都看得见。
+   ========================================================================== */
+
+/* 主视觉放大：容器宽一点，视觉列比文字列略宽 */
+.lp{max-width:1280px}
+.lp-hero{grid-template-columns:.9fr 1.1fr;gap:56px;align-items:start}
+
+.lp-car{position:relative;padding:0 0 42px}
+.lp-car-view{overflow:hidden;border-radius:18px}
+.lp-car-track{display:flex;transition:transform .52s cubic-bezier(.22,.75,.28,1);will-change:transform}
+.lp-slide{flex:0 0 100%;min-width:0}
+
+/* 卡片本身比原来大一档 */
+.lp-show{box-shadow:0 2px 8px rgba(28,26,20,.06),0 30px 64px rgba(28,26,20,.18)}
+.lp-show-media{aspect-ratio:3/2}
+.lp-show-body{padding:16px 18px 17px}
+.lp-show-h b{font-size:16px}
+.lp-show-own{font-size:11.5px;margin-top:6px}
+.lp-show-badges{margin-top:12px}
+.lp-show-badges span{font-size:11px;padding:3px 9px}
+.lp-show-foot{margin-top:14px;padding-top:13px}
+.lp-show-foot b{font-size:23px}
+.lp-show-foot span{font-size:11px}
+.lp-show-foot em{font-size:13px}
+.lp-show-count{position:absolute;right:10px;top:10px;z-index:2;font-size:10px;font-weight:600;
+  padding:2px 8px;border-radius:20px;color:#fff;background:rgba(15,17,20,.55);
+  backdrop-filter:blur(4px);font-variant-numeric:tabular-nums}
+
+/* 左右箭头：46px 实心圆，压在卡片两侧，任何时候都看得见 */
+.lp-car-btn{position:absolute;top:38%;z-index:4;width:46px;height:46px;border-radius:50%;
+  display:grid;place-items:center;background:var(--surface);
+  border:1px solid var(--line-2);color:var(--ink);cursor:pointer;
+  box-shadow:0 2px 6px rgba(28,26,20,.10),0 12px 26px rgba(28,26,20,.16);
+  transition:transform .16s,background .16s,color .16s,border-color .16s,box-shadow .16s}
+.lp-car-btn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2.2;
+  stroke-linecap:round;stroke-linejoin:round}
+.lp-car-btn.prev{left:-20px}
+.lp-car-btn.next{right:-20px}
+.lp-car-btn:hover{background:var(--accent);border-color:var(--accent);color:#fff;
+  transform:scale(1.08);box-shadow:0 4px 10px rgba(11,110,127,.28),0 16px 30px rgba(11,110,127,.24)}
+.lp-car-btn:active{transform:scale(.96)}
+
+/* 圆点指示 */
+.lp-car-dots{position:absolute;left:0;right:0;bottom:6px;display:flex;justify-content:center;gap:7px}
+.lp-car-dot{width:8px;height:8px;border-radius:50%;background:var(--line-2);cursor:pointer;
+  transition:width .2s,background .2s;border:none;padding:0}
+.lp-car-dot.on{width:24px;border-radius:20px;background:var(--accent)}
+
+/* 顶栏右侧的「登录 / 免费入驻」：原来是小号灰按钮，缩在角落里像装饰 */
+.lp-act{gap:12px}
+.lp-btn-ghost.lp-btn-ghost,.lp-act .lp-btn-ghost{height:42px;padding:0 22px;font-size:14px;
+  font-weight:600;border-radius:10px;border-color:var(--line-2);background:var(--surface);
+  box-shadow:var(--shadow-sm)}
+.lp-act .lp-btn-ghost:hover{border-color:var(--accent);color:var(--accent);background:var(--surface)}
+.lp-act .lp-btn-pri{height:42px;padding:0 26px;font-size:14px;font-weight:700;border-radius:10px;
+  box-shadow:0 2px 6px rgba(11,110,127,.24),0 10px 24px rgba(11,110,127,.22)}
+.lp-act .lp-btn-pri:hover{background:var(--accent-d);border-color:var(--accent-d);
+  box-shadow:0 4px 10px rgba(11,110,127,.30),0 16px 32px rgba(11,110,127,.28)}
+
+@media(max-width:1080px){
+  .lp-hero{grid-template-columns:1fr;gap:30px}
+  .lp-car-btn{width:42px;height:42px}
+  .lp-car-btn.prev{left:-12px}
+  .lp-car-btn.next{right:-12px}
+}
+@media(max-width:760px){
+  .lp-hero{grid-template-columns:1fr;gap:22px}
+  .lp-show-body{padding:13px 14px 14px}
+  .lp-show-h b{font-size:14px}
+  .lp-show-foot b{font-size:19px}
+  .lp-car{padding:0 0 38px}
+  .lp-car-btn{width:40px;height:40px;top:34%}
+  .lp-car-btn.prev{left:6px}
+  .lp-car-btn.next{right:6px}
+  .lp-car-btn svg{width:20px;height:20px}
+  .lp-act{gap:8px}
+  .lp-act .lp-btn-ghost,.lp-act .lp-btn-pri{height:36px;padding:0 14px;font-size:13px}
+}
+
+/* ==========================================================================
+   应用内首页横幅：加左右大箭头，让素材带能手动翻
+   ========================================================================== */
+.band-shift{will-change:transform;transition:transform .45s cubic-bezier(.22,.75,.28,1)}
+.band-row.manual .band-track{animation-play-state:paused}
+
+.band-nav{position:absolute;right:28px;bottom:28px;z-index:6;display:flex;gap:12px}
+.band-arrow{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;
+  background:rgba(255,255,255,.16);border:1.5px solid rgba(255,255,255,.34);
+  color:#F1EEE8;cursor:pointer;backdrop-filter:blur(6px);
+  transition:background .16s,border-color .16s,transform .16s,color .16s}
+.band-arrow svg{width:25px;height:25px;stroke:currentColor;fill:none;stroke-width:2.2;
+  stroke-linecap:round;stroke-linejoin:round}
+.band-arrow:hover{background:var(--accent);border-color:var(--accent);color:#fff;transform:scale(1.07)}
+.band-arrow:active{transform:scale(.95)}
+
+/* ==========================================================================
+   顶栏右侧：图标与分区小导航放大
+   —— 反馈是「缩在角落里，傻子来了不知道点哪」，所以全部加一档尺寸。
+   ========================================================================== */
+.top-r{gap:8px}
+.iconbtn{width:38px;height:38px;border-radius:10px}
+.iconbtn svg{width:19px;height:19px;stroke-width:1.8}
+.cartbtn{width:38px;height:38px;border-radius:10px}
+.cartbtn svg{width:19px;height:19px}
+.avatar{width:36px;height:36px;font-size:13px;font-weight:800;border-width:1.5px;margin-left:6px}
+.dot{width:7px;height:7px;top:6px;right:7px}
+
+.zone-sub a{font-size:13px;font-weight:600;padding:8px 14px;border-radius:9px;color:rgba(241,238,232,.78)}
+.zone-sub a:hover{background:rgba(255,255,255,.09);color:#fff}
+.zone-sub a.on{color:#fff;background:rgba(255,255,255,.13)}
+/* 当前页再补一条下划线，光靠底色不够醒目 */
+.zone-sub a.on{box-shadow:inset 0 -2px 0 var(--accent)}
+
+@media(max-width:1080px){
+  .band-nav{right:16px;bottom:16px;gap:10px}
+  .band-arrow{width:48px;height:48px}
+}
+@media(max-width:760px){
+  .iconbtn,.cartbtn{width:34px;height:34px;border-radius:9px}
+  .iconbtn svg,.cartbtn svg{width:17px;height:17px}
+  .avatar{width:32px;height:32px;font-size:12px}
+  .band-nav{right:12px;bottom:12px}
+  .band-arrow{width:44px;height:44px}
+  .band-arrow svg{width:21px;height:21px}
+}
+
+/* 轮播是 flex 轨道，网格子项默认按 min-content 撑开，会把文字列挤窄 —— 必须显式归零 */
+.lp-hero-tx,.lp-hero-vis{min-width:0}
+.lp-hero-vis{overflow:visible}

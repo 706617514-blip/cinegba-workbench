@@ -125,15 +125,19 @@
     const rowA = bandImages(13);
     const rowB = rowA.slice().reverse();
     const strip = (arr, cls) => arr.length
-      ? `<div class="band-row ${cls}"><div class="band-track">
+      ? `<div class="band-row ${cls}" data-band-row><div class="band-shift"><div class="band-track">
           ${arr.concat(arr).map(f => `<span class="band-cell"><img src="${f}" alt="" loading="eager" decoding="async"></span>`).join('')}
-        </div></div>`
+        </div></div></div>`
       : '';
 
     return `
     <section class="hm-band">
       <div class="band-media">${strip(rowA, 'r1')}${strip(rowB, 'r2')}</div>
       <div class="band-scrim"></div>
+      <div class="band-nav">
+        <button class="band-arrow" data-band-prev aria-label="往左翻"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <button class="band-arrow" data-band-next aria-label="往右翻"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+      </div>
       <div class="band-copy">
         <span class="band-kicker"><i class="pulse"></i> 香港枢纽 · ${total.toLocaleString()} 件素材 · 5 种授权类型</span>
         <h1>让每一帧素材<br>同时北上与南下</h1>
@@ -260,6 +264,39 @@
 
   CG.views.home.after = function () {
     const root = document.getElementById('view');
+
+    /* 横幅：默认自己慢慢流；点箭头顶掉自动滚动，改成手动翻，停手 9 秒再恢复 */
+    (function bindBandNav() {
+      const rows = Array.from(root.querySelectorAll('[data-band-row]'));
+      const shifts = Array.from(root.querySelectorAll('.band-shift'));
+      if (!rows.length || !shifts.length) return;
+      const cell = root.querySelector('.band-cell');
+      const step = cell ? Math.round(cell.getBoundingClientRect().width + 16) : 312;
+      const MAX = step * 6;
+      let off = 0, timer = null;
+
+      function apply() {
+        shifts.forEach(el => { el.style.transform = 'translateX(' + off + 'px)' });
+      }
+      function pause() {
+        rows.forEach(r => { r.classList.add('manual') });
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(() => {
+          rows.forEach(r => { r.classList.remove('manual') });
+          timer = null;
+        }, 9000);
+      }
+      function nudge(dir) {
+        pause();
+        off = Math.max(-MAX, Math.min(MAX, off + dir * step));
+        apply();
+      }
+      const p = root.querySelector('[data-band-prev]');
+      const n = root.querySelector('[data-band-next]');
+      if (p) p.onclick = () => nudge(1);
+      if (n) n.onclick = () => nudge(-1);
+    })();
+
     const q = document.getElementById('hmQ');
     const go = (kw) => {
       CG.ui.q = (kw != null ? kw : (q ? q.value : '')).trim();
