@@ -2244,3 +2244,43 @@ body.zone-home #view{max-width:1480px}
   .zone.on::after{display:block;left:12px;right:12px;bottom:4px;height:2px;
     border-radius:2px;background:var(--accent)}
 }
+
+/* ==========================================================================
+   顶栏第二次调整：左右对调
+   上一版把「品牌 + 搜索」放左边、「分区按钮」放右边，方向反了。
+   现在：分区按钮在左，品牌 + 搜索紧贴右侧（正好落在购物车/通知/头像这一列下面）。
+   ========================================================================== */
+.top-grid{
+  grid-template-columns:minmax(0,1fr) auto auto;
+  grid-template-areas:
+    "note  note  icons"
+    "zones brand search";
+}
+.zonebar{grid-area:zones;justify-self:start}
+.brand{grid-area:brand}
+.search{grid-area:search;justify-self:end;width:420px;max-width:420px}
+
+@media(max-width:1180px){
+  .search{width:300px;max-width:300px}
+}
+@media(max-width:1080px){
+  .search{width:230px;max-width:230px}
+}
+@media(max-width:920px){
+  /* 搜索藏起来之后，第三列塌成 0，品牌直接贴右边 */
+  .top-grid{
+    grid-template-columns:minmax(0,1fr) auto auto;
+    grid-template-areas:
+      "note  note  icons"
+      "zones brand brand";
+  }
+}
+@media(max-width:760px){
+  /* 手机上品牌仍然在左（那是手机端的常规习惯），分区条在下一行 */
+  .top-grid{
+    grid-template-columns:minmax(0,1fr) auto;
+    grid-template-rows:52px 48px;
+    grid-template-areas:"brand icons" "zones zones";
+  }
+  .search{display:none}
+}
