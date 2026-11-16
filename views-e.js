@@ -96,6 +96,24 @@
     </div>`;
   }
 
+  /* 通栏横幅用的图片：从各类型的封面池里交叉取，保证一条横幅里题材不重样 */
+  function bandImages(n) {
+    const types = ['video', 'image', 'audio', 'doc', 'model'];
+    const pools = types.map(t => ((CG.COVER_POOL && CG.COVER_POOL[t]) || []));
+    if (!pools.some(p => p.length)) return [];
+    const out = [];
+    let i = 0;
+    while (out.length < n && i < n * 8) {
+      const p = pools[i % pools.length];
+      if (p.length) {
+        const e = p[Math.floor(i / pools.length) % p.length];
+        if (e && out.indexOf(e.f) < 0) out.push(e.f);
+      }
+      i++;
+    }
+    return out;
+  }
+
   /* ========================================================== 网站主页 */
   CG.views.home = function () {
     const total = CG.virtual.count();
@@ -104,21 +122,25 @@
     const counts = {};
     TYPE_LIST.forEach(t => { counts[t[0]] = CG.virtual.countOf(t[0]) });
 
+    const rowA = bandImages(13);
+    const rowB = rowA.slice().reverse();
+    const strip = (arr, cls) => arr.length
+      ? `<div class="band-row ${cls}"><div class="band-track">
+          ${arr.concat(arr).map(f => `<span class="band-cell"><img src="${f}" alt="" loading="eager" decoding="async"></span>`).join('')}
+        </div></div>`
+      : '';
+
     return `
-    <section class="hm-hero">
-      <div class="hm-hero-bg"></div>
-      <div class="hm-hero-in">
-        <div class="hm-hero-tx">
-        <span class="hm-kicker">
-          <i class="pulse"></i> 香港枢纽 · ${total.toLocaleString()} 件素材 · 5 种授权类型
-        </span>
+    <section class="hm-band">
+      <div class="band-media">${strip(rowA, 'r1')}${strip(rowB, 'r2')}</div>
+      <div class="band-scrim"></div>
+      <div class="band-copy">
+        <span class="band-kicker"><i class="pulse"></i> 香港枢纽 · ${total.toLocaleString()} 件素材 · 5 种授权类型</span>
         <h1>让每一帧素材<br>同时北上与南下</h1>
-        <p class="hm-lead">
+        <p class="band-lead">
           CineGBA IP-Bridge 在香港完成认证、定价与结算。
           一个剧本经此进入内地市场，也能沿东盟发行网络抵达新加坡、马来西亚。
-          <b>AI 授权哪里都能做，但四道门只有这里同时开着。</b>
         </p>
-
         <div class="hm-search">
           <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
           <input id="hmQ" placeholder="搜索素材：国风动画、城市空镜、配乐…">
@@ -129,28 +151,15 @@
           ${['国风', '城市空镜', '赛博朋克', '配乐', '角色模型'].map(t =>
       `<button data-kw="${t}">${t}</button>`).join('')}
         </div>
+        <div class="band-route">
+          <b>香港</b><span>认证 · 定价 · 结算</span>
+          <em>↗ 北上 · 内地 CEPA 配额豁免</em>
+          <em>↘ 南下 · 东盟 星马印已验证</em>
         </div>
-
-      <div class="hm-routes">
-        <div class="hm-node">
-          <span class="hm-dot"></span>
-          <b>香港</b>
-          <em>认证 · 定价 · 结算</em>
-        </div>
-        <div class="hm-legs">
-          <div class="hm-leg north">
-            <span class="hm-arrow">↗</span>
-            <div><b>北上 · 内地</b><em>CEPA 配额豁免</em></div>
-          </div>
-          <div class="hm-leg south">
-            <span class="hm-arrow">↘</span>
-            <div><b>南下 · 东盟</b><em>星马印已验证</em></div>
-          </div>
-        </div>
-        <div class="hm-rn">一条素材，两个方向</div>
       </div>
-      </div><!-- /.hm-hero-in -->
     </section>
+
+    <div class="band-rule"></div>
 
     <section class="hm-sec">
       <div class="hm-sec-h">

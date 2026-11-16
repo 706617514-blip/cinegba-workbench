@@ -49,7 +49,8 @@
     debounce(fn, ms) { let t; return function () { clearTimeout(t); t = setTimeout(() => fn.apply(this, arguments), ms) } },
     cover(w) {
       if (w && w.coverUrl) return w.coverUrl;
-      return CG.makeCover(w ? w.id : 'x', w ? w.type : 'image');
+      if (w && w.cover) return w.cover;
+      return CG.coverFor(w ? w.id : 'x', w ? w.type : 'image');
     },
     licOf(id) { return CG.LICENSE_KINDS[id] || { label: id, short: id, pill: 'm', unitLabel: '' } },
     typeOf(t) { return CG.TYPE_LABEL[t] || t },

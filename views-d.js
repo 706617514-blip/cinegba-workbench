@@ -10,6 +10,81 @@
   const KINDS = ['ai-training', 'clip', 'adaptation', 'full', 'editorial'];
 
   /* ========================================================== 落地页 */
+  /* 落地页顶部的通栏胶片条：两行封面从右往左流，第二行更慢更淡，
+     让首屏第一眼就有「影视素材库」的质感，而不是纯文字 + 一张 UI 卡片。 */
+  function lpStrip(n) {
+    const types = ['video', 'image', 'audio', 'doc', 'model'];
+    const pools = types.map(t => ((CG.COVER_POOL && CG.COVER_POOL[t]) || []));
+    if (!pools.some(p => p.length)) return '';
+    /* 主视觉那张卡已经占了某张图，这里就别再重复用 */
+    const skip = showcaseEntry() ? showcaseEntry().f : null;
+    const out = [];
+    let i = 0;
+    while (out.length < n && i < n * 10) {
+      const p = pools[i % pools.length];
+      if (p.length) {
+        const e = p[Math.floor(i / pools.length) % p.length];
+        if (e && e.f !== skip && out.indexOf(e.f) < 0) out.push(e.f);
+      }
+      i++;
+    }
+    if (!out.length) return '';
+    const row = (arr, cls) => `<div class="band-row ${cls}"><div class="band-track">${arr.concat(arr)
+      .map(f => `<span class="band-cell sm"><img src="${f}" alt="" loading="eager" decoding="async"></span>`)
+      .join('')}</div></div>`;
+    return `<div class="lp-strip">${row(out, 'r1')}${row(out.slice().reverse(), 'r2')}</div>`;
+  }
+
+  /* 主视觉那张「已跑完全流程的素材」用哪个 slug */
+  const SHOWCASE_RE = /forest-light|lavender|coast-cliff|glacier/;
+
+  function showcaseEntry() {
+    const pool = (CG.COVER_POOL && CG.COVER_POOL.video) || [];
+    return pool.filter(x => SHOWCASE_RE.test(x.f))[0] || pool[0] || null;
+  }
+
+  /* 落地页主视觉：一张「已经跑完全流程的素材」卡片。
+     原来这里放的是一个仿「创作者工作台」的假界面截图（已存证 7 / 本月收入 ¥8,080…），
+     看着像把应用内页搬到了官网，很容易误会。现在改成真实封面 + 授权 + 存证凭证三件套：
+     说明的是「一份素材在平台上长什么样」，而不是「后台长什么样」。 */
+  function lpShowcase() {
+    const pick = showcaseEntry();
+    if (!pick) return '';
+    const cover = pick.f;
+    const subject = pick.s || '雨夜反光路面';
+    return `
+      <div class="lp-show">
+        <div class="lp-show-media">
+          <img src="${cover}" alt="${U.esc(subject)}">
+          <span class="lp-show-spec">4K · 24fps</span>
+          <span class="lp-show-wm">CineGBA</span>
+        </div>
+        <div class="lp-show-body">
+          <div class="lp-show-h">
+            <b>${U.esc(subject)} · 全片</b>
+            <span class="pill ok">在售</span>
+          </div>
+          <div class="lp-show-own">星野影像（香港）· 视频 · 入库 2026-09-24</div>
+          <div class="lp-show-badges">
+            <span>AI 训练授权</span><span>片段引用</span><span>改编权</span>
+          </div>
+          <div class="lp-show-foot">
+            <b>¥1,200</b><span>起</span>
+            <em>询价 →</em>
+          </div>
+        </div>
+      </div>
+      <div class="lp-proof">
+        <span class="lp-proof-ic">
+          <svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>
+        </span>
+        <div class="lp-proof-tx">
+          <b>三路存证已完成</b>
+          <span>链上 <i class="mono">0x8f3c…d21a</i> · 区块 1,204,887 · TSA 2026-09-24 10:41</span>
+        </div>
+      </div>`;
+  }
+
   CG.pages.landing = function () {
     return `
 <div class="lp">
@@ -31,6 +106,8 @@
     </div>
   </header>
 
+  ${lpStrip(15)}
+
   <section class="lp-hero">
     <div class="lp-hero-tx">
       <span class="lp-kicker">香港 · 粤港澳大湾区</span>
@@ -51,26 +128,7 @@
       </div>
     </div>
     <div class="lp-hero-vis">
-      <div class="lp-mock">
-        <div class="lp-mock-bar"><i></i><i></i><i></i><span>cinegba · 创作者工作台</span></div>
-        <div class="lp-mock-body">
-          <div class="lp-mock-row">
-            <div class="lp-mk"><span>已存证</span><b>7</b></div>
-            <div class="lp-mk"><span>待确认侵权</span><b class="warn">3</b></div>
-            <div class="lp-mk"><span>本月收入</span><b class="gold">¥8,080</b></div>
-          </div>
-          <div class="lp-mock-list">
-            <div class="lp-mli"><i class="c"></i><span>山海绘卷 · 第 3 集</span><em>在售</em></div>
-            <div class="lp-mli"><i class="c"></i><span>霓虹湾 · 全片</span><em>在售</em></div>
-            <div class="lp-mli"><i class="g"></i><span>纸鸢 · 角色模型</span><em>在售</em></div>
-            <div class="lp-mli"><i class="m"></i><span>南音手记 · 纪录片</span><em>已存证</em></div>
-          </div>
-          <div class="lp-mock-chart">
-            ${[28, 42, 36, 55, 48, 62, 74, 68, 86, 79, 92, 100].map((v, i) =>
-      `<i style="height:${v}%"></i>`).join('')}
-          </div>
-        </div>
-      </div>
+      ${lpShowcase()}
       <div class="lp-glow"></div>
     </div>
   </section>

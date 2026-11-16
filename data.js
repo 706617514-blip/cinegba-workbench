@@ -37,9 +37,8 @@ CG.makeCover = function (seed, type) {
   const hue = warm ? 28 + (h % 19) : 186 + (h % 67);
   const hue2 = warm ? (hue + 11) % 360 : 186 + ((h >> 3) % 67);
   const hue3 = warm ? (hue + 6) % 360 : 232 + ((h >> 5) % 22);
-  /* 跟随主题：深色主题走暗调，浅色主题走淡调 */
-  const isLight = (typeof document !== 'undefined')
-    && document.documentElement.getAttribute('data-theme') === 'light';
+  /* 单主题（暖石浅底）之后，程序化封面只做兜底，一律按浅底配色渲染 */
+  const isLight = true;
   const light = isLight ? 86 + (h >> 9) % 6 : 11 + (h >> 9) % 6;
   const sat = isLight ? 30 : 34;
   const sat2 = isLight ? 26 : 40;
@@ -93,6 +92,20 @@ CG.makeCover = function (seed, type) {
     </g>
   </svg>`;
   return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+};
+
+/* 封面取用：优先真实摄影图（covers.js 里的 CG.COVER_POOL），
+   没有对应图片时才退回上面那个程序化 SVG。
+   虚拟素材自身带 w.cover（轮转分配，保证同屏不撞图）；
+   这里主要服务「用户自己上传/新建的作品」以及任何没有 cover 字段的对象。 */
+CG.coverFor = function (seed, type) {
+  const pool = (CG.COVER_POOL && CG.COVER_POOL[type]) || null;
+  if (pool && pool.length) {
+    let h = 5381;
+    for (let i = 0; i < String(seed).length; i++) h = ((h << 5) + h + String(seed).charCodeAt(i)) | 0;
+    return pool[Math.abs(h) % pool.length].f;
+  }
+  return CG.makeCover(seed, type);
 };
 
 const d = (s) => s;

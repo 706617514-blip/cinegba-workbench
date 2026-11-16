@@ -16,37 +16,33 @@
     settings: 'creator', whyhk: 'market'
   };
 
+  /* 侧栏只放「本分区内」的入口。
+     跨分区切换统一交给顶部的分区栏（.zonebar），
+     所以这里不再出现 market / dash / home / settings 这类跨区重复项：
+       · 创作者中心原来还有一条「素材市场」，和分区栏重复 → 删
+       · 消费者中心原来有「网站主页 / 素材市场 / 为什么是香港 / 切到创作者中心 / 账户设置」，
+         全是别的地方已有的入口 → 删
+       · 「为什么是香港」是市场分区的页面，不再挂在创作者侧栏里 */
   const SIDEBAR = {
     creator: [
-      ['创作方', [
+      ['创作', [
         ['dash', '工作台', 'grid'],
         ['library', '作品库', 'file'],
-        ['whyhk', '为什么是香港', 'globe'],
         ['upload', '上传作品', 'up'],
         ['promote', '宣发中心', 'megaphone']
       ]],
-      ['交易', [
-        ['market', '素材市场', 'cart'],
+      ['交易与维权', [
         ['revenue', '收入中心', 'chart'],
         ['dispute', '维权中心', 'shield', 'disputeCnt']
       ]],
       ['账户', [['settings', '认证与设置', 'gear']]]
     ],
     consumer: [
-      ['逛市场', [
-        ['home', '网站主页', 'grid'],
-        ['market', '素材市场', 'cart'],
-        ['whyhk', '为什么是香港', 'globe'],
+      ['逛与买', [
         ['consumer', '消费者中心', 'user'],
-        ['favorites', '我的收藏', 'shield', 'favCnt']
-      ]],
-      ['我的交易', [
         ['cart', '选购车', 'cart', 'cartCnt'],
-        ['orders', '我的订单', 'file']
-      ]],
-      ['账户', [
-        ['settings', '账户设置', 'gear'],
-        ['dash', '切到创作者中心', 'chart']
+        ['orders', '我的订单', 'file'],
+        ['favorites', '我的收藏', 'shield', 'favCnt']
       ]]
     ]
   };
@@ -119,22 +115,12 @@
   const svg = k => `<svg viewBox="0 0 24 24">${ICONS[k] || ICONS.grid}</svg>`;
 
   /* ---------------- 主题 ---------------- */
+  /* 只剩一套「暖石」主题（深色模式按用户要求取消，浅色也压深了一档）。
+     这里不再有切换按钮，只负责把主题标记写上，并清掉老版本留在
+     localStorage 里的 cg-theme —— 否则老用户带着 dark 进来会看到半旧样式。 */
   function initTheme() {
-    const saved = localStorage.getItem('cg-theme') || 'dark';
-    document.documentElement.setAttribute('data-theme', saved);
-    const lbl = document.getElementById('themeLbl');
-    if (lbl) lbl.textContent = saved === 'dark' ? '深色' : '浅色';
-    const btn = document.getElementById('themeBtn');
-    if (!btn) return;
-    btn.onclick = () => {
-      const cur = document.documentElement.getAttribute('data-theme');
-      const next = cur === 'dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', next);
-      localStorage.setItem('cg-theme', next);
-      if (lbl) lbl.textContent = next === 'dark' ? '深色' : '浅色';
-      // 封面是按主题生成的，切完要重绘
-      if (CG.state && CG.auth.isIn) setTimeout(() => { try { CG.render() } catch (e) { } }, 30);
-    };
+    try { localStorage.removeItem('cg-theme') } catch (e) { }
+    document.documentElement.setAttribute('data-theme', 'stone');
   }
 
   /* ---------------- 路由名 ---------------- */
@@ -199,8 +185,13 @@
     const mob = document.getElementById('mobnav');
     mob.innerHTML = mobNavHtml(zone, name);
 
-    document.querySelectorAll('#zones a').forEach(a => {
+    document.querySelectorAll('#zones .zone').forEach(a => {
       a.classList.toggle('on', a.dataset.zone === zone);
+    });
+    // 市场分区没有侧栏，分区栏右侧那组小导航要跟着高亮
+    document.querySelectorAll('#zoneSub a').forEach(a => {
+      const href = a.getAttribute('href') || '';
+      a.classList.toggle('on', href === '#/' + name);
     });
 
     paintAvatar(); paintCart();
