@@ -2159,3 +2159,88 @@ body.zone-home #view{max-width:1480px}
   .band-copy .hm-chips{margin-top:11px;gap:6px}
   .band-copy .hm-chips button{font-size:11px;padding:3px 9px}
 }
+
+/* ==========================================================================
+   顶栏重构：细工具条 + 主导航条
+
+   反馈：原来「品牌 + 搜索」和「购物车 / 通知 / 头像」挤在同一行，
+   前者在左、后者在右，中间留一大段空的。现在拆成两行：
+       第一行（46px）：地点说明 …… 购物车 / 通知 / 头像
+       第二行（66px）：品牌 · 搜索 ……… 首页 / 素材市场 / 创作者中心 / 消费者中心
+   用 CSS Grid 排，一套 DOM 同时适配桌面（两行）和手机（品牌在左、分区在下一行）。
+   ========================================================================== */
+:root{--util-h:46px;--nav-row-h:66px;--nav-h:112px}
+
+.top{position:fixed;top:0;left:0;right:0;z-index:60;
+  background:var(--chrome);color:var(--chrome-ink);
+  box-shadow:0 1px 0 rgba(255,255,255,.05) inset, 0 2px 16px rgba(20,18,14,.22)}
+.top-grid{display:grid;align-items:center;column-gap:20px;
+  width:100%;max-width:calc(var(--shell) + var(--shell-pad) * 2);
+  margin:0 auto;padding:0 var(--shell-pad);
+  grid-template-columns:auto minmax(0,1fr) auto;
+  grid-template-rows:var(--util-h) var(--nav-row-h);
+  grid-template-areas:
+    "note note icons"
+    "brand search zones"}
+.top-note{grid-area:note;font-size:11.5px;letter-spacing:.04em;
+  color:rgba(241,238,232,.46);white-space:nowrap}
+.top-r{grid-area:icons;justify-self:end;display:flex;align-items:center;gap:8px;margin-left:auto}
+.brand{grid-area:brand;width:auto}
+.search{grid-area:search;justify-self:start;width:100%;max-width:420px;flex:none}
+.zonebar{grid-area:zones;justify-self:end}
+
+/* 分隔线：工具条与主导航条之间一条极淡的线，要横贯整个顶栏（不是只到版心宽度） */
+.top::after{content:"";position:absolute;left:0;right:0;top:var(--util-h);height:1px;
+  background:rgba(255,255,255,.08);pointer-events:none}
+
+/* 分区按钮从「贴底的高瘦块」改成「药丸」 */
+.zonebar{height:auto;background:none;border:none;padding:0;display:block}
+.zonebar-in{display:flex;align-items:center;gap:6px;max-width:none;padding:0;width:auto}
+.zone{height:44px;padding:0 15px;border-radius:11px;max-width:none;
+  transition:background .16s,color .16s}
+.zone.on{background:rgba(255,255,255,.11)}
+.zone.on::after{display:none}
+.zone-tx em{display:none}
+.zone-tx b{font-size:13px}
+.zone-ic{width:25px;height:25px;border-radius:8px}
+
+@media(max-width:1180px){
+  .zone{padding:0 12px;gap:8px}
+  .zone-tx b{font-size:12.5px}
+  .search{max-width:300px}
+}
+@media(max-width:1080px){
+  :root{--nav-h:104px;--util-h:42px;--nav-row-h:62px}
+  .zone-ic{width:22px;height:22px}
+  .zone{padding:0 11px}
+  .zone-tx b{font-size:12px}
+  .search{max-width:260px}
+}
+@media(max-width:920px){
+  /* 这里开始藏掉顶栏搜索：首页自己有搜索框，手机上更是本来就隐藏 */
+  .search{display:none}
+  .top-grid{grid-template-columns:auto minmax(0,1fr) auto}
+}
+@media(max-width:760px){
+  :root{--nav-h:100px;--util-h:0px;--nav-row-h:100px}
+  .top-note{display:none}
+  /* 手机上：第一行 品牌 + 图标，第二行 分区条横跨整行 */
+  .top-grid{grid-template-columns:minmax(0,1fr) auto;
+    grid-template-rows:52px 48px;
+    grid-template-areas:"brand icons" "zones zones";
+    column-gap:10px}
+  .top-r{grid-area:icons;justify-self:end;margin-left:0}
+  .brand{grid-area:brand}
+  .zonebar{grid-area:zones;justify-self:stretch;width:100%}
+  .top::after{top:52px}
+  /* 4 档在 390px 里要一屏放下：去图标、只留文字，四等分 */
+  .zonebar-in{justify-content:space-between;gap:3px}
+  .zone{height:40px;flex:1 1 0;padding:0 4px;gap:0;border-radius:9px;
+    justify-content:center;min-width:0}
+  .zone-ic{display:none}
+  .zone-tx b{font-size:12px;letter-spacing:-.3px}
+  /* 没有彩色图标块了，当前分区靠一条青色下划线点出来 */
+  .zone.on{background:rgba(255,255,255,.10)}
+  .zone.on::after{display:block;left:12px;right:12px;bottom:4px;height:2px;
+    border-radius:2px;background:var(--accent)}
+}
