@@ -2033,3 +2033,46 @@ button.more svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-widt
 /* 轮播是 flex 轨道，网格子项默认按 min-content 撑开，会把文字列挤窄 —— 必须显式归零 */
 .lp-hero-tx,.lp-hero-vis{min-width:0}
 .lp-hero-vis{overflow:visible}
+
+/* ==========================================================================
+   版心对齐：通栏横幅 / 顶栏 / 分区栏的内层内容，统一跟页面主体同一条中轴
+
+   问题：页面主体 #view 是居中的（max-width 1480），但通栏横幅是 100vw，
+       横幅里的文字直接贴在视口左边；顶栏右侧那组小导航也顶在视口右边。
+       屏幕一宽，上面贴边、下面居中，就散了。
+   做法：定义一个「版心」变量，三处共用，永远和 .main 的内边距对得上。
+   ========================================================================== */
+:root{
+  --shell:1480px;   /* 版心宽度，和 body.zone-market #view 一致 */
+  --shell-pad:28px; /* 版心左右留白，和 body.zone-market .main 一致 */
+}
+
+/* 顶栏第一行：品牌 / 搜索 / 图标，跟着版心居中 */
+.top-row{width:100%;max-width:calc(var(--shell) + var(--shell-pad) * 2);
+  margin:0 auto;padding:0 var(--shell-pad)}
+
+/* 分区栏：外层仍是满宽深色带，内层内容居中 */
+.zonebar{display:flex;justify-content:center;padding:0;height:var(--zone-h);
+  background:var(--chrome-2);border-top:1px solid var(--chrome-line)}
+.zonebar-in{display:flex;align-items:stretch;gap:6px;width:100%;
+  max-width:calc(var(--shell) + var(--shell-pad) * 2);padding:0 14px 0 var(--shell-pad)}
+
+/* 通栏横幅里的文案：跟版心左缘对齐，不再贴视口边 */
+.band-copy{width:100%;max-width:calc(var(--shell) + var(--shell-pad) * 2);
+  margin:0 auto;padding:56px var(--shell-pad)}
+/* 文案内部的窄栏保持原来的尺度 */
+.band-route{max-width:620px}
+/* 横幅左右箭头也跟着版心走，屏幕再宽也不会跑到天边 */
+.band-nav{right:max(20px, calc((100% - var(--shell)) / 2))}
+
+@media(max-width:1080px){
+  :root{--shell-pad:24px}
+  .band-copy{padding:44px var(--shell-pad)}
+}
+@media(max-width:760px){
+  :root{--shell-pad:18px}
+  .top-row{padding:0 var(--shell-pad)}
+  .zonebar-in{padding:0 8px}
+  .band-copy{padding:30px var(--shell-pad)}
+  .band-nav{right:12px}
+}
