@@ -2076,3 +2076,34 @@ button.more svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-widt
   .band-copy{padding:30px var(--shell-pad)}
   .band-nav{right:12px}
 }
+
+/* ==========================================================================
+   分区栏 4 档（首页 / 素材市场 / 创作者中心 / 消费者中心）
+   首页独立成档之后，它和素材市场一样没有侧栏，内容吃满宽度。
+   ========================================================================== */
+body.zone-home .side{display:none}
+body.zone-home .main{margin-left:0;padding:20px 28px 76px}
+body.zone-home #view{max-width:1480px}
+@media(max-width:760px){
+  body.zone-home .main{padding:12px 12px 88px}
+}
+
+/* 4 个按钮比原来挤一点，缩一档字号，保证 1440 以内不换行 */
+.zone{padding:0 16px;max-width:270px}
+.zone-tx b{font-size:13px}
+.zone-tx em{font-size:10px}
+
+@media(max-width:1180px){
+  .zone{padding:0 12px;gap:9px}
+  .zone-tx em{display:none}
+  .zone-tx b{font-size:12.5px}
+}
+@media(max-width:760px){
+  /* 手机端 4 档横向可滚，不硬挤 */
+  .zonebar-in{overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none}
+  .zonebar-in::-webkit-scrollbar{display:none}
+  .zone{flex:0 0 auto;padding:0 10px;gap:7px;min-width:0}
+  .zone-ic{width:20px;height:20px;border-radius:6px}
+  .zone-ic svg{width:12px;height:12px}
+  .zone-tx b{font-size:12px;white-space:nowrap}
+}

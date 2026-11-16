@@ -9,7 +9,7 @@
 <meta property="og:description" content="让每一帧素材可授权、可结算、可举证。">
 <meta property="og:image" content="cover.jpg">
 <meta name="theme-color" content="#15171A">
-<link rel="stylesheet" href="styles.css?v=20261116-2245">
+<link rel="stylesheet" href="styles.css?v=20261116-2300">
 </head>
 <body class="mode-boot">
 
@@ -48,11 +48,16 @@
     </div>
   </div>
 
-  <!-- 分区栏：把「切换分区」这件事集中到页面最上方，做成三个大按钮。
-       侧栏里不再重复出现跨分区的入口（原来同一个跳转在 2–3 个地方都有）。 -->
+  <!-- 分区栏：把「切换分区」集中到页面最上方，做成四个大按钮。
+       「首页」独立成一档（原来它藏在市场分区的小导航里），侧栏里不再重复出现跨分区入口。 -->
   <nav class="zonebar" id="zones">
     <div class="zonebar-in">
-    <a class="zone" data-zone="market" href="#/home">
+    <a class="zone" data-zone="home" href="#/home">
+      <span class="zone-ic"><svg viewBox="0 0 24 24"><path d="M3 10.5L12 3l9 7.5"/><path d="M5.5 9.5V20h13V9.5"/><path d="M10 20v-5h4v5"/></svg></span>
+      <span class="zone-tx"><b>首页</b><em>品牌与精选合集</em></span>
+      <span class="zone-dot"></span>
+    </a>
+    <a class="zone" data-zone="market" href="#/market">
       <span class="zone-ic"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 14l4.5-4.5 3.5 3.5 3-3 7 7"/><circle cx="8.5" cy="8.5" r="1.4"/></svg></span>
       <span class="zone-tx"><b>素材市场</b><em>浏览与采购可授权素材</em></span>
       <span class="zone-dot"></span>
@@ -67,14 +72,6 @@
       <span class="zone-tx"><b>消费者中心</b><em>收藏 · 选购 · 订单</em></span>
       <span class="zone-dot"></span>
     </a>
-
-    <!-- 市场分区没有侧栏（让素材网格吃满宽度），所以它自己的页面入口放这里，
-         其它分区隐藏这一组，避免和侧栏重复。 -->
-    <div class="zone-sub" id="zoneSub">
-      <a href="#/home">网站主页</a>
-      <a href="#/market">素材市场</a>
-      <a href="#/whyhk">为什么是香港</a>
-    </div>
     </div><!-- /.zonebar-in -->
   </nav>
 </header>
@@ -129,16 +126,16 @@
   <i class="dotb"></i><span id="modeText">连接中…</span>
 </button>
 
-<script src="data.js?v=20261116-2245"></script>
-<script src="covers.js?v=20261116-2245"></script>
-<script src="virtual.js?v=20261116-2245"></script>
-<script src="core.js?v=20261116-2245"></script>
-<script src="views-a.js?v=20261116-2245"></script>
-<script src="views-b.js?v=20261116-2245"></script>
-<script src="views-c.js?v=20261116-2245"></script>
-<script src="views-d.js?v=20261116-2245"></script>
-<script src="views-e.js?v=20261116-2245"></script>
-<script src="views-f.js?v=20261116-2245"></script>
-<script src="app.js?v=20261116-2245"></script>
+<script src="data.js?v=20261116-2300"></script>
+<script src="covers.js?v=20261116-2300"></script>
+<script src="virtual.js?v=20261116-2300"></script>
+<script src="core.js?v=20261116-2300"></script>
+<script src="views-a.js?v=20261116-2300"></script>
+<script src="views-b.js?v=20261116-2300"></script>
+<script src="views-c.js?v=20261116-2300"></script>
+<script src="views-d.js?v=20261116-2300"></script>
+<script src="views-e.js?v=20261116-2300"></script>
+<script src="views-f.js?v=20261116-2300"></script>
+<script src="app.js?v=20261116-2300"></script>
 </body>
 </html>

@@ -137,12 +137,11 @@
 
   const TYPES = Object.keys(TYPE_META);
 
-  /* 每种类型的条数：950–1400 再减 80% → 190–280 */
+  /* 每种类型多少件：**等于这个类型的封面池大小**（一件作品一张图，池子多大就多少件）。
+     上一版是每类 190–280 件、池子只有 30 张，等于同一张图要轮 8 遍 ——
+     按类型筛选时一屏里就能看到好几张一样的。
+     现在改成 1:1，任何一屏都不会撞图。具体数字在 build() 里按实际池子算。 */
   const TYPE_COUNT = {};
-  TYPES.forEach(function (t, i) {
-    const r = mulberry32(7700 + i * 137)();
-    TYPE_COUNT[t] = 190 + Math.floor(r * 91);   // 190..280
-  });
 
   let cache = null;
   const idx = new Map();
@@ -160,24 +159,27 @@
 
     TYPES.forEach(type => {
       const meta = TYPE_META[type];
-      const total = TYPE_COUNT[type];
       const pool = poolOf(type);
+      /* 一件作品一张图：有多少张封面就出多少件作品 */
+      const total = pool ? pool.length : 40;
+      TYPE_COUNT[type] = total;
 
       for (let i = 0; i < total; i++) {
-        /* 封面轮转：同一类型内 i 连续递增 → 池子依次取，
-           所以任意连续 pool.length 件不会撞图，一屏 24 件更不会。 */
+        /* 封面轮转：池子按「第 1 张全部 → 第 2 张全部 → 第 3 张全部」排过，
+           相邻作品必然来自不同主题；件数等于池子大小时，全程零重复。 */
         const pi = pool ? (i % pool.length) : 0;
         const entry = pool ? pool[pi] : null;
         const subject = entry ? entry.s : (A[i % A.length] + (B[Math.floor(i / A.length) % B.length] || ''));
+        const v = (entry && entry.v) || 1;
+        const round = pool ? Math.floor(i / pool.length) : 0;   // 正常恒为 0，只是兜底
 
         const a = A[i % A.length];
         const b = B[Math.floor(i / A.length) % B.length] || B[0];
-        /* 时段：先看题材能不能对上（夜景就别写正午），对不上再轮转 */
-        const todIdx = Math.floor(i / (pool ? pool.length : 1) / meta.suffix.length);
-        const tod = todFor(subject, todIdx);
-        const suffix = meta.suffix[Math.floor(i / (pool ? pool.length : 1)) % meta.suffix.length];
+        /* 同一主题的第 2、3 张换一个后缀，标题不会撞 */
+        const suffix = meta.suffix[(v - 1) % meta.suffix.length];
+        const tod = todFor(subject, v + round);
 
-        const title = subject + suffix;
+        const title = subject + suffix + (round ? ' ' + (round + 1) : '');
         const spec = meta.spec[Math.floor(rnd() * meta.spec.length)];
         const lens = meta.lens[Math.floor(rnd() * meta.lens.length)];
 
@@ -250,7 +252,7 @@
     all() { return this.ensure() },
     get(id) { this.ensure(); return idx.get(id) || null },
     count() { return this.ensure().length },
-    countOf(type) { return TYPE_COUNT[type] || 0 },
+    countOf(type) { this.ensure(); return TYPE_COUNT[type] || 0 },
     byType(type) { return this.ensure().filter(w => w.type === type) },
     /** 榜单：按热度 */
     top(n, type) {

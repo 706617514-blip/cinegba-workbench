@@ -8,12 +8,14 @@
   const PUBLIC = ['login', 'register'];
 
   /* ---------------- 分区定义 ---------------- */
+  /* 「首页」现在是独立的一档，和素材市场并列（原来它藏在市场分区的小导航里） */
   const ZONE_OF = {
-    home: 'market', market: 'market', marketItem: 'market',
+    home: 'home', whyhk: 'home',
+    market: 'market', marketItem: 'market',
     dash: 'creator', library: 'creator', upload: 'creator', work: 'creator',
     promote: 'creator', promoteItem: 'creator', revenue: 'creator', dispute: 'creator',
     consumer: 'consumer', cart: 'consumer', orders: 'consumer', favorites: 'consumer',
-    settings: 'creator', whyhk: 'market'
+    settings: 'creator'
   };
 
   /* 侧栏只放「本分区内」的入口。
@@ -187,11 +189,6 @@
 
     document.querySelectorAll('#zones .zone').forEach(a => {
       a.classList.toggle('on', a.dataset.zone === zone);
-    });
-    // 市场分区没有侧栏，分区栏右侧那组小导航要跟着高亮
-    document.querySelectorAll('#zoneSub a').forEach(a => {
-      const href = a.getAttribute('href') || '';
-      a.classList.toggle('on', href === '#/' + name);
     });
 
     paintAvatar(); paintCart();
