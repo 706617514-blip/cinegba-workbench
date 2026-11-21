@@ -321,6 +321,130 @@
   };
   const t = CG.t;
 
+  /* ==========================================================
+     第二层：整页文本翻译
+     ─ data-i18n 只覆盖手写的静态文案；工作台内页有 600 多条零散文案，
+       逐条加标记代价太大。所以再走一层「按文本替换」：
+         · CG.UI_TEXT    中文原文 → English（界面用词）
+         · CG.CONTENT_TEXT 作品标题 / 机构名 / 描述（构建虚拟数据时自动注册）
+     ─ 规则：≥3 字的键做子串替换（能翻「新询价：山海绘卷」这种拼接句）；
+       ≤2 字的键只做整节点相等匹配，避免把「一起」翻成「一from」。
+     ========================================================== */
+  const CJK = /[\u4e00-\u9fff]/;
+  const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  let _reUI = null, _reContent = null, _contentLen = -1;
+
+  function buildRe(dict) {
+    const keys = Object.keys(dict).filter(k => k.length >= 2).sort((a, b) => b.length - a.length);
+    if (!keys.length) return null;
+    return new RegExp('(?:' + keys.map(escRe).join('|') + ')', 'g');
+  }
+
+  /* 两字词（全部 / 在售 / 授权 / 询价…）要在「授权 4」这种写法里也能替换，
+     但不能把「一起」翻成「一from」——所以匹配前后只要紧挨着汉字就跳过。 */
+  function subRe(text, re, dict) {
+    if (!re) return text;
+    return text.replace(re, function (m, offset, full) {
+      const v = dict[m];
+      if (v == null) return m;
+      if (m.length <= 2) {
+        const before = full.charAt(offset - 1);
+        const after = full.charAt(offset + m.length);
+        if (CJK.test(before) || CJK.test(after)) return m;
+      }
+      return v;
+    });
+  }
+
+  /* 带数字的动态句子没法逐词翻，单独用模式表 */
+  const PATTERNS = [
+    [/共 (\d+) 件 · 在售 (\d+) 件 · 草稿 (\d+) 件/g, '$1 total · $2 listed · $3 draft'],
+    [/共 (\d+) 件 · 在售 (\d+) 件/g, '$1 total · $2 listed'],
+    [/共 (\d+) 件/g, '$1 works'],
+    [/近 (\d+) 天/g, 'last $1 days'],
+    [/第 (\d+) 天/g, 'day $1'],
+    [/剩余 (\d+) 天/g, '$1 days left'],
+    [/已选 (\d+) 项/g, '$1 selected'],
+    [/查看全部 (\d+)/g, 'View all $1'],
+    [/共 (\d+) 页/g, '$1 pages'],
+    [/(\d+) 件作品/g, '$1 works'],
+    [/(\d+) 件素材/g, '$1 assets'],
+    [/在售授权 (\d+) 种/g, '$1 licences on sale'],
+    [/本月收入已达 (¥[\d,]+)/g, 'This month reached $1'],
+    [/更新至 (\S+) · 结算周期 T\+(\d+) · 平台佣金 ([\d.]+)%/g, 'Updated $1 · T+$2 settlement · $3% platform fee'],
+    [/(\d+) 次曝光/g, '$1 impressions'],
+    [/(\d+) 天前/g, '$1 days ago'],
+    [/(\d+) 种/g, '$1 types'],
+    [/(\d+) 份/g, '$1 files'],
+    [/(\d+) 笔/g, '$1 entries'],
+    [/(\d+) 条/g, '$1 items'],
+    [/(\d+) 件/g, '$1 items'],
+    [/(\d+) 页/g, '$1 pages'],
+  ];
+  CG.addPattern = function (re, rep) { PATTERNS.push([re, rep]) };
+
+  CG.registerContent = function (zh, en) {
+    if (!zh || !en || zh === en || !CJK.test(zh)) return;
+    CG.CONTENT_TEXT = CG.CONTENT_TEXT || {};
+    CG.CONTENT_TEXT[zh] = en;
+    _contentLen = -1;              // 让下次重建正则
+  };
+
+  CG.translateDom = function (root) {
+    if (lang !== 'en' || !root) return;
+    const ui = CG.UI_TEXT || {};
+    const ct = CG.CONTENT_TEXT || {};
+    if (!_reUI) _reUI = buildRe(ui);
+    const ctLen = Object.keys(ct).length;
+    if (ctLen !== _contentLen) { _reContent = buildRe(ct); _contentLen = ctLen; }
+
+    const doc = root.ownerDocument || document;
+    const walker = doc.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode(n) {
+        const tag = n.parentNode && n.parentNode.nodeName;
+        if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'TEXTAREA') return NodeFilter.FILTER_REJECT;
+        return CJK.test(n.nodeValue) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+      }
+    });
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+
+    for (let i = 0; i < nodes.length; i++) {
+      const n = nodes[i];
+      const raw = n.nodeValue;
+      const key = raw.trim();
+      const flat = key.replace(/\s+/g, ' ');
+      if (ui[key] != null) { n.nodeValue = raw.replace(key, ui[key]); continue; }
+      if (ct[key] != null) { n.nodeValue = raw.replace(key, ct[key]); continue; }
+      if (flat !== key && ui[flat] != null) { n.nodeValue = raw.replace(key, ui[flat]); continue; }
+      if (flat !== key && ct[flat] != null) { n.nodeValue = raw.replace(key, ct[flat]); continue; }
+      let out = raw;
+      for (let k = 0; k < PATTERNS.length; k++) out = out.replace(PATTERNS[k][0], PATTERNS[k][1]);
+      out = subRe(out, _reContent, ct);
+      out = subRe(out, _reUI, ui);
+      if (out !== raw) n.nodeValue = out;
+    }
+
+    /* 占位符 / 提示 / aria */
+    const attrs = ['placeholder', 'title', 'aria-label', 'value'];
+    const els = root.querySelectorAll ? root.querySelectorAll('[placeholder],[title],[aria-label]') : [];
+    for (let i = 0; i < els.length; i++) {
+      const el = els[i];
+      for (let a = 0; a < attrs.length; a++) {
+        const v = el.getAttribute(attrs[a]);
+        if (!v || !CJK.test(v)) continue;
+        const k = v.trim();
+        if (ui[k] != null) { el.setAttribute(attrs[a], ui[k]); continue; }
+        if (ct[k] != null) { el.setAttribute(attrs[a], ct[k]); continue; }
+        let out = v;
+        for (let k = 0; k < PATTERNS.length; k++) out = out.replace(PATTERNS[k][0], PATTERNS[k][1]);
+        out = subRe(out, _reContent, ct);
+        out = subRe(out, _reUI, ui);
+        if (out !== v) el.setAttribute(attrs[a], out);
+      }
+    }
+  };
+
   /* 静态外壳：换掉所有 [data-i18n] 的文案 / [data-i18n-ph] 的占位符 */
   CG.applyShellI18n = function (root) {
     const r = root || document;
@@ -335,6 +459,7 @@
     r.querySelectorAll('[data-i18n-title]').forEach(function (el) {
       el.title = t(el.dataset.i18nTitle);
     });
+    CG.translateDom(r);
   };
 
   /* 切换语言：写标记 → 换外壳 → 重渲染当前视图 */

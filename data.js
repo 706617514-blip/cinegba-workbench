@@ -40,6 +40,94 @@ CG.TYPE_LABEL_EN = {
   video: 'Video', audio: 'Audio', image: 'Image', doc: 'Script', model: '3D model'
 };
 
+/* ---------------------------------------------------------------------------
+   种子作品的中英对照。
+   作品内容是「原始资料」，不机翻；这里给的是人工写的正式英文名，
+   没列到的一律保持原文（真实跨境素材库也是这么处理的）。
+   --------------------------------------------------------------------------- */
+CG.SEED_EN = {
+  '山海绘卷': 'Shanhai Scrolls',
+  '霓虹湾': 'Neon Bay',
+  '潮汐纪': 'Tidal Era',
+  '小城年夜': 'Small Town New Year',
+  '纸鸢': 'Paper Kite',
+  '南音手记': 'Nanyin Notes',
+  '雾港十四行': 'Fog Harbour Sonnets',
+  '长夏未晚': 'Long Summer, Not Yet Late',
+
+  '山海绘卷 · 第 3 集': 'Shanhai Scrolls · Ep. 3',
+  '霓虹湾 · 全片': 'Neon Bay · Feature',
+  '潮汐纪 · 概念设定集': 'Tidal Era · Concept Bible',
+  '小城年夜 · 片段包': 'Small Town New Year · Clip Pack',
+  '纸鸢 · 角色模型': 'Paper Kite · Character Model',
+  '南音手记 · 纪录片': 'Nanyin Notes · Documentary',
+  '雾港十四行 · 配乐': 'Fog Harbour Sonnets · Score',
+  '长夏未晚 · 剧本': 'Long Summer, Not Yet Late · Script',
+
+  '系列动画第三集，含 6 个原创角色设定与全部场景美术。':
+    'Episode 3 of the series, including six original character designs and all scene art.',
+  '赛博都市题材长片，适合概念参考与场景训练。':
+    'A cyber-metropolis feature — useful as concept reference and for scene training.',
+  '《潮汐纪》全片概念设计手稿与场景美术共 128 张。':
+    '128 concept sketches and scene artworks from the Tidal Era feature.',
+  '写实家庭题材短片，含 12 段可独立授权的生活场景片段。':
+    'A naturalistic family short with 12 independently licensable slice-of-life clips.',
+  '主角「纸鸢」带绑定与表情的 3D 模型，可直接用于游戏与动画。':
+    'The Paper Kite character model, rigged with facial blendshapes, ready for games and animation.',
+  '南音传承人口述史纪录长片，含全部访谈原始素材。':
+    'A feature documentary of oral histories from Nanyin inheritors, with all raw interviews.',
+  '原创配乐 14 首，含分轨与纯乐器版本。':
+    'Fourteen original cues, with stems and instrumental versions.',
+  '院线长片剧本初稿与三版修订稿，含人物小传。':
+    'First draft plus three revisions of a theatrical feature script, with character bios.',
+
+  '2026 年度国产系列动画，6 位原创角色可商用':
+    'A 2026 Chinese animated series with six commercial-ready original characters',
+  '赛博都会视觉参考，4K 原片可分镜授权':
+    'Cyber-city visual reference — 4K master licensable shot by shot',
+  '128 张设定稿，适合美术风格训练与项目提案':
+    '128 design sheets, suited to style training and project pitches',
+  '可绑定的原创角色，游戏与动画双场景可用':
+    'A rigged original character usable in both games and animation',
+  '氛围向原创配乐，支持分轨与改编':
+    'Ambient original score, with stems and adaptation rights',
+
+  '动画': 'Animation', '国风': 'Guofeng', '系列剧': 'Series',
+  '科幻': 'Sci-fi', '赛博朋克': 'Cyberpunk', '长片': 'Feature',
+  '概念设计': 'Concept design', '设定集': 'Art bible', '海洋': 'Ocean',
+  '写实': 'Photoreal', '家庭': 'Family', '短片': 'Short',
+  '3D': '3D', '角色': 'Character', '可绑定': 'Rigged',
+  '纪录片': 'Documentary', '非遗': 'Intangible heritage', '岭南': 'Lingnan',
+  '原创音乐': 'Original music', '配乐': 'Score', '氛围': 'Ambient',
+  '剧本': 'Script', '青春': 'Coming of age',
+
+  '大湾区晨曦动画工作室': 'GBA Dawn Animation Studio'
+};
+
+/* 把对照表套到种子作品上，并注册进内容字典。
+   由 app.js 在载入 CG.state 之后调用（此时 CG.SEED 才就位）。 */
+CG.applySeedEn = function (state) {
+  const M = CG.SEED_EN;
+  const pick = s => M[s] || '';
+  ((state && state.works) || []).forEach(w => {
+    w.titleEn = pick(w.title);
+    w.seriesEn = pick(w.series);
+    w.descEn = pick(w.desc);
+    if (w.marketing) w.marketing.headlineEn = pick(w.marketing.headline);
+    w.tagsEn = (w.tags || []).map(pick);
+    w.ownerEn = pick(w.owner);
+    if (CG.registerContent) {
+      CG.registerContent(w.title, w.titleEn);
+      CG.registerContent(w.series, w.seriesEn);
+      CG.registerContent(w.desc, w.descEn);
+      if (w.marketing) CG.registerContent(w.marketing.headline, w.marketing.headlineEn);
+      CG.registerContent(w.owner, w.ownerEn);
+      (w.tags || []).forEach((t, i) => CG.registerContent(t, (w.tagsEn || [])[i]));
+    }
+  });
+  Object.keys(M).forEach(k => { if (CG.registerContent) CG.registerContent(k, M[k]) });
+};
+
 /* 抽象封面：按 id 生成不同色相的 SVG，让作品墙看起来像真的缩略图 */
 CG.makeCover = function (seed, type) {
   let h = 5381;

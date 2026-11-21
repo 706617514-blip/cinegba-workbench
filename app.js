@@ -291,6 +291,7 @@
     st.orders = st.orders || [];
     st.favorites = st.favorites || [];
     CG.state = st;
+    if (CG.applySeedEn) CG.applySeedEn(CG.state);
     CG.recompute();
     loaded = true;
   }
