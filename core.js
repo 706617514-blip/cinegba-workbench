@@ -6,6 +6,46 @@
   'use strict';
   const CG = window.CG;
 
+  /* ------------------------------------------------------------ 品牌母题 */
+  /* 指纹波脊：用种子（内容 ID / 指纹哈希）确定性地画一组同心畸变波纹。
+     同一件素材永远得到同一张图，不同素材互不相同——
+     它不是装饰贴图，而是「这串哈希长这样」的可视化。 */
+  CG.fingerprint = function (seed, size, rings) {
+    size = size || 240;
+    rings = rings || 24;
+    let h = 2166136261;
+    const s = String(seed == null ? 'x' : seed);
+    for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+    const rnd = () => { h ^= h << 13; h ^= h >>> 17; h ^= h << 5; return ((h >>> 0) % 100000) / 100000; };
+
+    const cx = size / 2, cy = size / 2;
+    let out = '';
+    for (let r = 1; r <= rings; r++) {
+      const base = (r / rings) * size * 0.46;
+      const w1 = 0.03 + rnd() * 0.05;
+      const w2 = 0.01 + rnd() * 0.03;
+      const p1 = rnd() * 6.283;
+      const p2 = rnd() * 6.283;
+      const steps = 96;
+      const pts = [];
+      for (let k = 0; k <= steps; k++) {
+        const t = (k / steps) * Math.PI * 2;
+        const rx = base * (1 + w1 * Math.sin(t * 3 + p1) + w2 * Math.sin(t * 7 + p2));
+        const ry = base * 1.26 * (1 + w1 * Math.sin(t * 2.4 + p1 * 1.3));
+        pts.push((k ? 'L' : 'M') + (cx + Math.cos(t) * rx).toFixed(1) + ' ' + (cy + Math.sin(t) * ry).toFixed(1));
+      }
+      out += '<path d="' + pts.join('') + '"/>';
+    }
+    return '<svg viewBox="0 0 ' + size + ' ' + size + '" aria-hidden="true">' + out + '</svg>';
+  };
+
+  /* 印章：「已存證」之类的小方块，朱砂底白字，轻微倾斜 */
+  CG.seal = function (text, cls) {
+    const t = String(text || '已存證');
+    const lines = t.length >= 3 ? t.slice(0, 2) + '<br>' + t.slice(2) : t;
+    return '<span class="seal ' + (cls || '') + '">' + lines + '</span>';
+  };
+
   /* ------------------------------------------------------------ 工具 */
   const U = CG.util = {
     esc(s) {

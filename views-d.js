@@ -10,29 +10,31 @@
   const KINDS = ['ai-training', 'clip', 'adaptation', 'full', 'editorial'];
 
   /* ========================================================== 落地页 */
-  /* 落地页顶部的通栏胶片条：两行封面从右往左流，第二行更慢更淡，
-     让首屏第一眼就有「影视素材库」的质感，而不是纯文字 + 一张 UI 卡片。 */
+  /* 落地页顶部不再是「照片流」，而是「已存证清单」：
+     每一格带印章 + 链上交易号 + 存证日期，一眼看出这些图是被登记过的。 */
   function lpStrip(n, skip) {
-    const types = ['video', 'image', 'audio', 'doc', 'model'];
-    const pools = types.map(t => ((CG.COVER_POOL && CG.COVER_POOL[t]) || []));
-    if (!pools.some(p => p.length)) return '';
-    /* 轮播里已经露脸的图，胶片条就别再用了，免得一屏里重复 */
     const used = skip || [];
-    const out = [];
-    let i = 0;
-    while (out.length < n && i < n * 12) {
-      const p = pools[i % pools.length];
-      if (p.length) {
-        const e = p[Math.floor(i / pools.length) % p.length];
-        if (e && used.indexOf(e.f) < 0 && out.indexOf(e.f) < 0) out.push(e.f);
-      }
-      i++;
-    }
-    if (!out.length) return '';
-    const row = (arr, cls) => `<div class="band-row ${cls}"><div class="band-track">${arr.concat(arr)
-      .map(f => `<span class="band-cell sm"><img src="${f}" alt="" loading="eager" decoding="async"></span>`)
-      .join('')}</div></div>`;
-    return `<div class="lp-strip">${row(out, 'r1')}${row(out.slice().reverse(), 'r2')}</div>`;
+    const list = [].concat(
+      (CG.virtual && CG.virtual.top ? CG.virtual.top(n + 6) : [])
+    ).filter(w => w && used.indexOf(U.cover(w)) < 0);
+    if (!list.length) return '';
+    const picked = list.slice(0, n);
+    if (!picked.length) return '';
+    const cell = (w) => {
+      const tx = (w.evidence && w.evidence.chain && w.evidence.chain.tx) || '0x—';
+      const fp = String((w.fingerprints && w.fingerprints[0] && w.fingerprints[0].hash) || '');
+      return `<div class="lp-evcell">
+        <div class="lp-evph">
+          <img src="${U.cover(w)}" alt="" loading="eager" decoding="async">
+          ${CG.seal('已存證', 'sm')}
+        </div>
+        <div class="lp-evtx">${U.esc(tx)}</div>
+        <div class="lp-evdt">${U.esc(w.createdAt)} · ${U.esc(fp.slice(0, 8))}</div>
+      </div>`;
+    };
+    const row = (arr, cls) => `<div class="band-row ${cls}"><div class="band-track">
+      ${arr.concat(arr).map(cell).join('')}</div></div>`;
+    return `<div class="lp-strip">${row(picked, 'r1')}${row(picked.slice().reverse(), 'r2')}</div>`;
   }
 
   /* 主视觉轮播：一件作品一张卡，左右箭头翻页。

@@ -73,11 +73,19 @@
     return n >= 10000 ? (n / 10000).toFixed(1) + ' 万' : String(n);
   }
 
-  /* ---------------- 素材卡片（市场与消费者中心共用） ---------------- */
+  /* 卡片封面底下那条规格带用哪个口径 */
+  const SPEC_OF = { video: '4K · 24fps', image: '6000×4000', audio: '48k · 24bit', doc: '48 页 · PDF', model: 'PBR · GLB' };
+
+  /* ---------------- 素材卡片（市场与消费者中心共用） ----------------
+     解剖顺序：封面（16:10，下沿一条存证状态带）→ 标题 →
+     指纹 + 链上交易号（等宽小字）→ 授权条款（方形细框）→ 价格（最底一行）。
+     图片和价格都往后放，先让人看到「它被证明过」。 */
   function assetCard(w, opt) {
     opt = opt || {};
     const on = (w.licenses || []).filter(l => l.on);
     const p = minPrice(w);
+    const tx = (w.evidence && w.evidence.chain && w.evidence.chain.tx) || '0x—';
+    const fp = String((w.fingerprints && w.fingerprints[0] && w.fingerprints[0].hash) || '');
     return `<div class="mkt" data-open="${w.id}">
       <div class="mkt-cover">
         <img src="${U.cover(w)}" alt="${U.esc(w.title)}" loading="lazy">
@@ -86,12 +94,17 @@
         <button class="fav ${opt.fav ? 'on' : ''}" data-fav="${w.id}" title="收藏">
           <svg viewBox="0 0 24 24"><path d="M12 21s-8-5-8-11a4.5 4.5 0 018-2.8A4.5 4.5 0 0120 10c0 6-8 11-8 11z"/></svg>
         </button>
+        <div class="mkt-st"><i>${SPEC_OF[w.type] || w.type}</i><i class="v">已存证</i><i>3 路</i></div>
       </div>
       <div class="mkt-body">
         <b>${U.esc(w.title)}</b>
-        <div class="own">${U.esc(w.owner || (CG.state.profile && CG.state.profile.org) || '')}</div>
+        <div class="mkt-fp">
+          <span class="mk">${CG.fingerprint(w.id, 22, 5)}</span>
+          <span class="dt">指纹 <b>${U.esc(fp.slice(0, 12))}</b><br>tx ${U.esc(tx)}</span>
+        </div>
+        <div class="mkt-lic">${on.slice(0, 3).map(l => `<span>${U.licOf(l.kind).short}</span>`).join('')}</div>
         <div class="pr"><b>${U.money(p)}</b><span>起</span>
-          <span style="margin-left:auto;font-size:10px">${fmtViews(w.stats.views)} 浏览</span></div>
+          <span style="margin-left:auto;font-size:9px">${fmtViews(w.stats.views)} 浏览</span></div>
       </div>
     </div>`;
   }
@@ -121,25 +134,40 @@
     const picks = CG.virtual.pick(4, 7);
     const counts = {};
     TYPE_LIST.forEach(t => { counts[t[0]] = CG.virtual.countOf(t[0]) });
+    const licKinds = Object.keys(CG.LICENSE_KINDS || {}).length;
+    const openLeads = ((CG.state && CG.state.leads) || []).filter(l => l.status !== 'signed').length;
 
-    const rowA = bandImages(13);
-    const rowB = rowA.slice().reverse();
-    const strip = (arr, cls) => arr.length
-      ? `<div class="band-row ${cls}"><div class="band-track">
-          ${arr.concat(arr).map(f => `<span class="band-cell"><img src="${f}" alt="" loading="eager" decoding="async"></span>`).join('')}
-        </div></div>`
-      : '';
+    /* 证据条：拿真实作品里的链上交易号 / 指纹 / 存证日期，不是编的装饰 */
+    const evi = CG.virtual.top(9);
+    const evCells = evi.concat(evi).map(function (w) {
+      const tx = (w.evidence && w.evidence.chain && w.evidence.chain.tx) || '0x—';
+      const fp = (w.fingerprints && w.fingerprints[0] && w.fingerprints[0].hash) || '';
+      return `<div class="evcell">
+        <div class="evph">
+          <img src="${U.cover(w)}" alt="" loading="eager" decoding="async">
+          ${CG.seal('已存證', 'sm')}
+        </div>
+        <div class="evhx">${U.esc(tx)}</div>
+        <div class="evts">${U.esc(w.createdAt)} · ${U.esc(String(fp).slice(0, 8))}</div>
+      </div>`;
+    }).join('');
+
+    const sechead = (no, title, more, moreHref) => `
+      <div class="sechead">
+        <div class="slabel">${no} — ${title}</div>
+        ${more ? `<a class="more" href="${moreHref}">${more} ${I.arrow}</a>` : ''}
+      </div>`;
 
     return `
-    <section class="hm-band">
-      <div class="band-media">${strip(rowA, 'r1')}${strip(rowB, 'r2')}</div>
-      <div class="band-scrim"></div>
-      <div class="band-copy">
-        <span class="band-kicker"><i class="pulse"></i> 香港枢纽 · ${total.toLocaleString()} 件素材 · 5 种授权类型</span>
-        <h1>让每一帧素材<br>同时北上与南下</h1>
-        <p class="band-lead">
-          CineGBA IP-Bridge 在香港完成认证、定价与结算。
-          一个剧本经此进入内地市场，也能沿东盟发行网络抵达新加坡、马来西亚。
+    <section class="hero">
+      <div class="hero-fp">${CG.fingerprint('cinegba-hero-2026', 640, 30)}</div>
+      <div class="hero-in">
+        <div class="slabel">01 — 香港 · 粤港澳大湾区 · C2PA 兼容</div>
+        <h1>每一件素材<br>都带着它的<em>证据</em></h1>
+        <p class="lead">
+          上传即生成多模态指纹，同步写入联盟链、版权登记与可信时间戳。
+          授权条款、成交记录、侵权取证 —— 全部挂在这一份证据上，
+          不是挂在截图和聊天记录上。
         </p>
         <div class="hm-search">
           <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
@@ -151,17 +179,26 @@
           ${['国风', '城市空镜', '赛博朋克', '配乐', '角色模型'].map(t =>
       `<button data-kw="${t}">${t}</button>`).join('')}
         </div>
+        <div class="metabar">
+          <div><b>${total.toLocaleString()}</b><span>件已存证素材</span></div>
+          <div><b class="v">3</b><span>路登记并行</span></div>
+          <div><b>${licKinds}</b><span>种授权类型</span></div>
+          <div><b>${openLeads}</b><span>条待处理询价</span></div>
+        </div>
       </div>
     </section>
 
-    <div class="band-rule"></div>
+    <section class="evstrip">
+      <div class="evstrip-hd">
+        <div class="slabel">02 — 最近存证</div>
+        <em>链上写入 · 逐件可查</em>
+      </div>
+      <div class="evrow"><div class="evtrack">${evCells}</div></div>
+    </section>
 
     <section class="hm-sec">
-      <div class="hm-sec-h">
-        <h2>为什么是香港</h2>
-        <a class="more" href="#/whyhk">完整论证 ${I.arrow}</a>
-        <p style="flex-basis:100%">AI 授权的四道门——只有这四道同时开着，这门生意才成立。</p>
-      </div>
+      ${sechead('03', '为什么是香港', '完整论证', '#/whyhk')}
+      <p class="seclead">AI 授权的四道门——只有这四道同时开着，这门生意才成立。</p>
       <div class="hm-gates">
         ${CG.GATES.map(function (g) {
       const active = CG.ui.openGate === g.key;
@@ -186,10 +223,7 @@
     </section>
 
     <section class="hm-sec">
-      <div class="hm-sec-h">
-        <h2>按类型进入</h2>
-        <a class="more" href="#/market">全部素材 ${I.arrow}</a>
-      </div>
+      ${sechead('04', '按类型进入', '全部素材', '#/market')}
       <div class="hm-types">
         ${TYPE_LIST.map(t => `
           <a class="hm-type" href="#/market?type=${t[0]}" data-typego="${t[0]}">
@@ -202,10 +236,8 @@
     </section>
 
     <section class="hm-sec">
-      <div class="hm-sec-h">
-        <h2>精选合集</h2>
-        <p>由编辑按主题挑选，每期更新</p>
-      </div>
+      ${sechead('05', '精选合集', '', '')}
+      <p class="seclead">由编辑按主题挑选，每期更新。</p>
       <div class="hm-coll">
         <a class="coll big" href="#/market?type=video">
           <img src="${U.cover(picks[0])}" alt="">
@@ -223,17 +255,14 @@
     </section>
 
     <section class="hm-sec">
-      <div class="hm-sec-h">
-        <h2>最近热门</h2>
-        <a class="more" href="#/market?sort=popular">查看更多 ${I.arrow}</a>
-      </div>
+      ${sechead('06', '最近热门', '查看更多', '#/market?sort=popular')}
       <div class="mktgrid">${hot.map(w => assetCard(w)).join('')}</div>
     </section>
 
     <section class="hm-cta">
       <div class="hm-cta-in">
         <h2>把你手上的素材登记进来</h2>
-        <p>上传即生成指纹与存证凭证，配置好授权就能进入市场。</p>
+        <p>上传即生成指纹与三路存证，配置好授权就能进入市场。</p>
         <div class="row" style="justify-content:center;gap:10px">
           <a class="btn pri lg" href="#/upload">${I.up}上传作品</a>
           <a class="btn lg" href="#/consumer">去看消费者中心</a>
