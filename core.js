@@ -92,16 +92,40 @@
       if (w && w.cover) return w.cover;
       return CG.coverFor(w ? w.id : 'x', w ? w.type : 'image');
     },
-    licOf(id) { return CG.LICENSE_KINDS[id] || { label: id, short: id, pill: 'm', unitLabel: '' } },
-    typeOf(t) { return CG.TYPE_LABEL[t] || t },
+    /* 授权类型：按当前语言合成一份「拍平」的对象，视图照旧读 it.label / it.short / it.desc */
+    licOf(id) {
+      const k = CG.LICENSE_KINDS[id];
+      if (!k) return { label: id, short: id, pill: 'm', unitLabel: '' };
+      const en = CG.isEn && CG.isEn();
+      return {
+        label: en ? (k.labelEn || k.label) : k.label,
+        short: en ? (k.shortEn || k.short) : k.short,
+        desc: en ? (k.descEn || k.desc) : k.desc,
+        unitLabel: en ? (k.unitLabelEn || k.unitLabel) : k.unitLabel,
+        unit: k.unit, pill: k.pill
+      };
+    },
+    typeOf(t) {
+      const en = CG.isEn && CG.isEn();
+      return (en ? (CG.TYPE_LABEL_EN || {})[t] : null) || CG.TYPE_LABEL[t] || t;
+    },
     statusPill(s) {
-      return ({
+      const zh = {
         draft: ['草稿', 'm'], registered: ['已存证', 'ok'], listed: ['在售', 'c'],
         offline: ['已下架', 'm'], open: ['待确认', 'd'], letter: ['已发函', 'w'],
         takedown: ['已下架', 'ok'], settled: ['已和解', 'ok'],
         pending: ['待处理', 'w'], signed: ['已签约', 'ok'], negotiating: ['议价中', 'c'],
         rejected: ['已驳回', 'm'], auto: ['自动', 'c'], manual: ['人工', 'm']
-      }[s] || [s, 'm']);
+      };
+      const en = {
+        draft: ['Draft', 'm'], registered: ['Registered', 'ok'], listed: ['Listed', 'c'],
+        offline: ['Delisted', 'm'], open: ['Pending', 'd'], letter: ['Notice sent', 'w'],
+        takedown: ['Taken down', 'ok'], settled: ['Settled', 'ok'],
+        pending: ['Pending', 'w'], signed: ['Signed', 'ok'], negotiating: ['Negotiating', 'c'],
+        rejected: ['Rejected', 'm'], auto: ['Auto', 'c'], manual: ['Manual', 'm']
+      };
+      const dict = (CG.isEn && CG.isEn()) ? en : zh;
+      return dict[s] || [s, 'm'];
     }
   };
 
@@ -573,6 +597,9 @@
     if (!fn) { view.innerHTML = '<div class="empty">' + CG.emptyArt('lost') + '<b>页面不存在</b></div>'; return }
     document.getElementById('main').scrollTop = 0;
     view.innerHTML = fn(r.args);
+    /* 视图的双语按 [data-i18n] 在渲染后统一替换：
+       模板里保留中文原文当默认值，不必把每句都写成 CG.t('key') */
+    if (CG.applyShellI18n) CG.applyShellI18n(view);
     CG.updateNav(name);
     if (fn.after) fn.after(r.args);
     CG.syncBadges();

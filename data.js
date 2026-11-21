@@ -3,26 +3,41 @@
    ========================================================================== */
 window.CG = window.CG || {};
 
+/* 授权类型：中英双语字段。U.licOf() 会按当前语言合成一个对象返回，
+   所以视图里继续写 it.label / it.short / it.desc 就自动跟着语言走。 */
 CG.LICENSE_KINDS = {
   'ai-training': { label: 'AI 训练数据授权', short: 'AI 训练', pill: 'c',
+    labelEn: 'AI training licence', shortEn: 'AI training',
     desc: '授权购买方将作品用于机器学习模型的训练、微调与评测。授权不可撤回，需披露训练用途。',
-    unit: 'per-year', unitLabel: '元 / 年 / 模型' },
+    descEn: 'Licenses the buyer to use the work for training, fine-tuning and evaluating machine-learning models. Irrevocable; training use must be disclosed.',
+    unit: 'per-year', unitLabel: '元 / 年 / 模型', unitLabelEn: 'CNY / year / model' },
   'clip':        { label: '片段引用授权', short: '片段引用', pill: 'c',
+    labelEn: 'Clip usage licence', shortEn: 'Clip',
     desc: '授权在正片、广告、短视频等场景中按约定时长引用作品片段，不得单独再分发。',
-    unit: 'per-piece', unitLabel: '元 / 条' },
+    descEn: 'Permits quoting set-length excerpts in features, ads and short-form video. The excerpt may not be redistributed on its own.',
+    unit: 'per-piece', unitLabel: '元 / 条', unitLabelEn: 'CNY / clip' },
   'adaptation':  { label: '改编权授权', short: '改编权', pill: 'w',
+    labelEn: 'Adaptation rights', shortEn: 'Adaptation',
     desc: '授权对人物、世界观、剧情进行改编并开发衍生作品，需保留署名与分成条款。',
-    unit: 'per-project', unitLabel: '元 / 项目' },
+    descEn: 'Permits adapting characters, worldbuilding and plot into derivative works, subject to credit and revenue-share terms.',
+    unit: 'per-project', unitLabel: '元 / 项目', unitLabelEn: 'CNY / project' },
   'full':        { label: '全版权转让', short: '全版权', pill: 'g',
+    labelEn: 'Full copyright assignment', shortEn: 'Full rights',
     desc: '转让著作财产权的全部或指定权利种类。转让后原权利人不再享有对应收益。',
-    unit: 'once', unitLabel: '元 / 一次性' },
+    descEn: 'Assigns all or specified economic rights. After assignment the original holder no longer receives the corresponding revenue.',
+    unit: 'once', unitLabel: '元 / 一次性', unitLabelEn: 'CNY / one-off' },
   'editorial':   { label: '编辑与报道用途', short: '编辑用途', pill: 'm',
+    labelEn: 'Editorial use', shortEn: 'Editorial',
     desc: '仅限新闻、评论、教学等非商业编辑场景使用，不得用于广告与商品化。',
-    unit: 'per-piece', unitLabel: '元 / 条' }
+    descEn: 'Limited to non-commercial editorial contexts such as news, review and teaching. Not for advertising or merchandising.',
+    unit: 'per-piece', unitLabel: '元 / 条', unitLabelEn: 'CNY / item' }
 };
 
 CG.TYPE_LABEL = {
   video: '视频', audio: '音频', image: '图片', doc: '剧本文档', model: '3D 模型'
+};
+CG.TYPE_LABEL_EN = {
+  video: 'Video', audio: 'Audio', image: 'Image', doc: 'Script', model: '3D model'
 };
 
 /* 抽象封面：按 id 生成不同色相的 SVG，让作品墙看起来像真的缩略图 */

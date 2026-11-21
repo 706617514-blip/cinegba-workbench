@@ -120,6 +120,11 @@
   /* 只剩一套「暖石」主题（深色模式按用户要求取消，浅色也压深了一档）。
      这里不再有切换按钮，只负责把主题标记写上，并清掉老版本留在
      localStorage 里的 cg-theme —— 否则老用户带着 dark 进来会看到半旧样式。 */
+  /* 主题 + 语言：语言切换后要重渲染，所以放在启动最前面 */
+  function initLang() {
+    if (CG.initI18n) CG.initI18n();
+  }
+
   function initTheme() {
     try { localStorage.removeItem('cg-theme') } catch (e) { }
     document.documentElement.setAttribute('data-theme', 'stone');
@@ -144,10 +149,18 @@
     const fn = CG.pages[name] || CG.pages.landing;
     lastPublic = CG.pages[name] ? name : 'landing';
     pub.innerHTML = fn();
+    if (CG.applyShellI18n) CG.applyShellI18n(pub);
     window.scrollTo(0, 0);
     if (fn.after) fn.after();
     CG.closeModal(); CG.closeDrawer();
   }
+
+  /* 切语言：公开页与工作台走的是两条渲染路径，这里各重画一次 */
+  document.addEventListener('cg:lang', function () {
+    const pub = document.getElementById('public');
+    if (pub && !pub.hidden) { showPublic(lastPublic); return; }
+    CG.render();
+  });
 
   function showApp() {
     const app = document.getElementById('app');
@@ -381,6 +394,7 @@
 
   /* ---------------- 启动 ---------------- */
   async function boot() {
+    initLang();
     initTheme();
     await CG.store.detect();
     CG.showMode();

@@ -49,58 +49,59 @@
     const todo = [];
     m.openDisputes && todo.push({
       ic: 'r', act: 'goDispute',
-      t: `新侵权线索 ${m.openDisputes} 条`,
+      t: CG.t('dash.todo1', { n: m.openDisputes }),
       d: (st.disputes.find(d => d.status === 'open') || {}).note || '',
-      go: '去维权'
+      go: CG.isEn() ? 'Enforce' : '去维权'
     });
     const pendLeads = (st.leads || []).filter(l => l.status === 'pending');
     pendLeads.length && todo.push({
       ic: 'w', act: 'goLeads',
-      t: `待确认询价 ${pendLeads.length} 条`,
-      d: `最高一单 ${U.money(Math.max.apply(null, pendLeads.map(l => l.price)))}，等待你回签`,
-      go: '去处理'
+      t: CG.t('dash.todo2', { n: pendLeads.length }),
+      d: CG.t('dash.todo2d', { p: U.money(Math.max.apply(null, pendLeads.map(l => l.price))) }),
+      go: CG.isEn() ? 'Review' : '去处理'
     });
     m.pendingSettle > 0 && todo.push({
       ic: 'g', act: 'goRevenue',
-      t: `待结算 ${U.money(m.pendingSettle)}`,
-      d: '已确认收益，可提现至香港对公账户',
-      go: '去提现'
+      t: CG.t('dash.todo3', { p: U.money(m.pendingSettle) }),
+      d: CG.t('dash.todo3d'),
+      go: CG.isEn() ? 'Withdraw' : '去提现'
     });
     m.draft > 0 && todo.push({
       ic: 'c', act: 'goDraft',
-      t: `${m.draft} 件作品还没有存证`,
-      d: '草稿状态的作品无法上架，也不能发起授权',
-      go: '去补全'
+      t: CG.t('dash.todo4', { n: m.draft }),
+      d: CG.t('dash.todo4d'),
+      go: CG.isEn() ? 'Fix' : '去补全'
     });
 
     return `
     <div class="ph">
       <div>
-        <h1>下午好，${U.esc(st.profile.name)}</h1>
-        <p>你有 <b style="color:var(--danger)">${m.openDisputes}</b> 条待确认侵权线索，
-           <b style="color:var(--gold)">${m.pendingLeads}</b> 条询价等待回签。</p>
+        <h1>${CG.t('dash.hello', { name: U.esc(st.profile.name) })}</h1>
+        <p>${CG.isEn()
+        ? `You have <b style="color:var(--danger)">${m.openDisputes}</b> infringement leads to confirm and <b style="color:var(--gold)">${m.pendingLeads}</b> quotes awaiting your countersignature.`
+        : `你有 <b style="color:var(--danger)">${m.openDisputes}</b> 条待确认侵权线索，<b style="color:var(--gold)">${m.pendingLeads}</b> 条询价等待回签。`}</p>
       </div>
       <div class="ph-r">
-        <a class="btn" href="#/library">作品库</a>
-        <a class="btn pri" href="#/upload">${I.up}上传并存证</a>
+        <a class="btn" href="#/library" data-i18n="side.library">作品库</a>
+        <a class="btn pri" href="#/upload">${I.up}<span data-i18n="dash.upload">上传并存证</span></a>
       </div>
     </div>
 
     <div class="kpis">
-      <div class="kpi cy"><div class="lb">已存证作品</div><div class="vl">${m.registered}</div>
-        <div class="dl">共 ${m.workCount} 件 · 在售 ${m.listed} 件</div></div>
-      <div class="kpi dg"><div class="lb">疑似侵权线索</div><div class="vl">${m.disputes}</div>
-        <div class="dl">待确认 ${m.openDisputes} · 已处置 ${m.disputes - m.openDisputes}</div></div>
-      <div class="kpi gold"><div class="lb">本月授权收入</div><div class="vl">${U.money(m.monthRev)}</div>
-        <div class="dl">已扣除平台佣金</div></div>
-      <div class="kpi"><div class="lb">累计收入</div><div class="vl">${U.money(m.totalRev)}</div>
-        <div class="dl">含待结算 ${U.money(m.pendingSettle)}</div></div>
+      <div class="kpi cy"><div class="lb" data-i18n="dash.k1">已存证作品</div><div class="vl">${m.registered}</div>
+        <div class="dl">${CG.t('dash.k1d', { n: m.workCount, l: m.listed })}</div></div>
+      <div class="kpi dg"><div class="lb" data-i18n="dash.k2">疑似侵权线索</div><div class="vl">${m.disputes}</div>
+        <div class="dl">${CG.t('dash.k2d', { a: m.openDisputes, b: m.disputes - m.openDisputes })}</div></div>
+      <div class="kpi gold"><div class="lb" data-i18n="dash.k3">本月授权收入</div><div class="vl">${U.money(m.monthRev)}</div>
+        <div class="dl" data-i18n="dash.k3d">已扣除平台佣金</div></div>
+      <div class="kpi"><div class="lb" data-i18n="dash.k4">累计收入</div><div class="vl">${U.money(m.totalRev)}</div>
+        <div class="dl">${CG.t('dash.k4d', { p: U.money(m.pendingSettle) })}</div></div>
     </div>
 
     <div class="g2">
       <div class="card">
-        <div class="card-h"><h3>待处理事项</h3>
-          <span class="more">共 ${todo.length} 项</span></div>
+        <div class="card-h"><h3 data-i18n="dash.todo">待处理事项</h3>
+          <span class="more">${CG.t('dash.todoN', { n: todo.length })}</span></div>
         ${todo.length ? `<div class="todo">${todo.map(t => `
           <div class="srow" data-act="${t.act}" style="cursor:pointer">
             <div class="ci ci-${t.ic}"><span>${t.ic === 'r' ? I.warn : t.ic === 'w' ? I.cart : t.ic === 'g' ? I.chart : I.file}</span></div>
@@ -111,19 +112,19 @@
       </div>
 
       <div class="card">
-        <div class="card-h"><h3>近 12 天收入</h3><span class="more">按日</span></div>
+        <div class="card-h"><h3 data-i18n="dash.chart">近 12 天收入</h3><span class="more" data-i18n="dash.byday">按日</span></div>
         <div class="bars">
           ${days.map(d => `<div class="b${d.v ? "" : " zero"}" style="height:${Math.max(4, d.v / maxV * 100)}%"
             title="${d.k}：${U.money(d.v)}"></div>`).join('')}
         </div>
         <div class="bars-x">${days.map(d => `<span>${d.label}</span>`).join('')}</div>
-        <div class="hint mt8">合计 ${U.money(days.reduce((s, d) => s + d.v, 0))} · 已扣除平台佣金</div>
+        <div class="hint mt8">${CG.t('dash.chartFoot', { p: U.money(days.reduce((s, d) => s + d.v, 0)) })}</div>
       </div>
     </div>
 
     <div class="g2e">
       <div class="card">
-        <div class="card-h"><h3>作品被授权 Top 5</h3><a class="more" href="#/library">全部 →</a></div>
+        <div class="card-h"><h3 data-i18n="dash.top">作品被授权 Top 5</h3><a class="more" href="#/library">全部 →</a></div>
         ${top.length ? `<div class="rank-list">${top.map((w, i) => `
           <div class="rk" data-act="openWork" data-id="${w.id}" style="cursor:pointer">
             <span class="no">${i + 1}</span>
@@ -132,11 +133,11 @@
             <span class="bar"><i style="width:${Math.round((w.stats.revenue || 0) / topMax * 100)}%"></i></span>
             <span class="vv">${U.money(w.stats.revenue || 0)}</span>
           </div>`).join('')}</div>` : '<p class="hint">还没有授权记录</p>'}
-        <div class="hint mt12">口径：按已结算 + 待结算的授权收入统计</div>
+        <div class="hint mt12" data-i18n="dash.note">口径：按已结算 + 待结算的授权收入统计</div>
       </div>
 
       <div class="card">
-        <div class="card-h"><h3>平台动态</h3><span class="more">${(st.notices || []).length} 条</span></div>
+        <div class="card-h"><h3 data-i18n="dash.feed">平台动态</h3><span class="more">${(st.notices || []).length} 条</span></div>
         <div>
           ${(st.notices || []).slice(0, 4).map(n => `
             <div class="fd">

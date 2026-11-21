@@ -59,7 +59,8 @@
     ['doc', '剧本文档', '剧本、分镜'],
     ['model', '3D 模型', '角色、场景、道具']
   ];
-  const SORTS = [['popular', '最热'], ['new', '最新'], ['cheap', '价格低'], ['expensive', '价格高']];
+  const SORTS = [['popular', '最热', 'mk.sortHot'], ['new', '最新', 'mk.sortNew'],
+    ['cheap', '价格低', 'mk.sortCheap'], ['expensive', '价格高', 'mk.sortExp']];
   const PAGE = 24;
 
   function minPrice(w) {
@@ -70,7 +71,10 @@
   function statusPill(s) { const p = U.statusPill(s); return `<span class="pill ${p[1]}">${p[0]}</span>` }
   function fmtViews(n) {
     n = Number(n) || 0;
-    return n >= 10000 ? (n / 10000).toFixed(1) + ' 万' : String(n);
+    const en = CG.isEn && CG.isEn();
+    if (n >= 10000) return (n / 10000).toFixed(1) + (en ? 'k' : ' 万');
+    if (en && n >= 1000) return (n / 1000).toFixed(1) + 'k';
+    return String(n);
   }
 
   /* 卡片封面底下那条规格带用哪个口径 */
@@ -94,17 +98,17 @@
         <button class="fav ${opt.fav ? 'on' : ''}" data-fav="${w.id}" title="收藏">
           <svg viewBox="0 0 24 24"><path d="M12 21s-8-5-8-11a4.5 4.5 0 018-2.8A4.5 4.5 0 0120 10c0 6-8 11-8 11z"/></svg>
         </button>
-        <div class="mkt-st"><i>${SPEC_OF[w.type] || w.type}</i><i class="v">已存证</i><i>3 路</i></div>
+        <div class="mkt-st"><i>${SPEC_OF[w.type] || w.type}</i><i class="v" data-i18n="mk.verified">已存证</i><i data-i18n="mk.rails">3 路</i></div>
       </div>
       <div class="mkt-body">
         <b>${U.esc(w.title)}</b>
         <div class="mkt-fp">
           <span class="mk">${CG.fingerprint(w.id, 22, 5)}</span>
-          <span class="dt">指纹 <b>${U.esc(fp.slice(0, 12))}</b><br>tx ${U.esc(tx)}</span>
+          <span class="dt"><span data-i18n="mk.fp">指纹</span> <b>${U.esc(fp.slice(0, 12))}</b><br>tx ${U.esc(tx)}</span>
         </div>
         <div class="mkt-lic">${on.slice(0, 3).map(l => `<span>${U.licOf(l.kind).short}</span>`).join('')}</div>
-        <div class="pr"><b>${U.money(p)}</b><span>起</span>
-          <span style="margin-left:auto;font-size:9px">${fmtViews(w.stats.views)} 浏览</span></div>
+        <div class="pr"><b>${U.money(p)}</b><span data-i18n="common.start">起</span>
+          <span style="margin-left:auto;font-size:9px">${fmtViews(w.stats.views)} <span data-i18n="common.views">浏览</span></span></div>
       </div>
     </div>`;
   }
@@ -152,9 +156,9 @@
       </div>`;
     }).join('');
 
-    const sechead = (no, title, more, moreHref) => `
+    const sechead = (no, zh, key, more, moreHref) => `
       <div class="sechead">
-        <div class="slabel">${no} — ${title}</div>
+        <div class="slabel" data-i18n="${key}">${no} — ${zh}</div>
         ${more ? `<a class="more" href="${moreHref}">${more} ${I.arrow}</a>` : ''}
       </div>`;
 
@@ -162,43 +166,44 @@
     <section class="hero">
       <div class="hero-fp">${CG.fingerprint('cinegba-hero-2026', 640, 30)}</div>
       <div class="hero-in">
-        <div class="slabel">01 — 香港 · 粤港澳大湾区 · C2PA 兼容</div>
-        <h1>每一件素材<br>都带着它的<em>证据</em></h1>
-        <p class="lead">
+        <div class="slabel" data-i18n="hm.sec1">01 — 香港 · 粤港澳大湾区 · C2PA 兼容</div>
+        <h1 data-i18n="hm.h1">每一件素材<br>都带着它的<em>证据</em></h1>
+        <p class="lead" data-i18n="hm.lead">
           上传即生成多模态指纹，同步写入联盟链、版权登记与可信时间戳。
           授权条款、成交记录、侵权取证 —— 全部挂在这一份证据上，
           不是挂在截图和聊天记录上。
         </p>
         <div class="hm-search">
           <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
-          <input id="hmQ" placeholder="搜索素材：国风动画、城市空镜、配乐…">
-          <button class="btn pri" id="hmGo">搜索</button>
+          <input id="hmQ" data-i18n-ph="hm.searchPh" placeholder="搜索素材：国风动画、城市空镜、配乐…">
+          <button class="btn pri" id="hmGo" data-i18n="common.search">搜索</button>
         </div>
         <div class="hm-chips">
-          <span>热门：</span>
-          ${['国风', '城市空镜', '赛博朋克', '配乐', '角色模型'].map(t =>
-      `<button data-kw="${t}">${t}</button>`).join('')}
+          <span data-i18n="hm.hot">热门：</span>
+          ${[['国风', 'Guofeng'], ['城市空镜', 'City plates'], ['赛博朋克', 'Cyberpunk'],
+      ['配乐', 'Score'], ['角色模型', 'Characters']].map(t =>
+      `<button data-kw="${t[0]}">${CG.isEn() ? t[1] : t[0]}</button>`).join('')}
         </div>
         <div class="metabar">
-          <div><b>${total.toLocaleString()}</b><span>件已存证素材</span></div>
-          <div><b class="v">3</b><span>路登记并行</span></div>
-          <div><b>${licKinds}</b><span>种授权类型</span></div>
-          <div><b>${openLeads}</b><span>条待处理询价</span></div>
+          <div><b>${total.toLocaleString()}</b><span data-i18n="hm.m1">件已存证素材</span></div>
+          <div><b class="v">3</b><span data-i18n="hm.m2">路登记并行</span></div>
+          <div><b>${licKinds}</b><span data-i18n="hm.m3">种授权类型</span></div>
+          <div><b>${openLeads}</b><span data-i18n="hm.m4">条待处理询价</span></div>
         </div>
       </div>
     </section>
 
     <section class="evstrip">
       <div class="evstrip-hd">
-        <div class="slabel">02 — 最近存证</div>
-        <em>链上写入 · 逐件可查</em>
+        <div class="slabel" data-i18n="hm.evH">02 — 最近存证</div>
+        <em data-i18n="hm.evSub">链上写入 · 逐件可查</em>
       </div>
       <div class="evrow"><div class="evtrack">${evCells}</div></div>
     </section>
 
     <section class="hm-sec">
-      ${sechead('03', '为什么是香港', '完整论证', '#/whyhk')}
-      <p class="seclead">AI 授权的四道门——只有这四道同时开着，这门生意才成立。</p>
+      ${sechead('03', '为什么是香港', 'hm.sec3', '完整论证', '#/whyhk')}
+      <p class="seclead" data-i18n="hm.sec3Lead">AI 授权的四道门——只有这四道同时开着，这门生意才成立。</p>
       <div class="hm-gates">
         ${CG.GATES.map(function (g) {
       const active = CG.ui.openGate === g.key;
@@ -206,8 +211,8 @@
           aria-expanded="${active ? 'true' : 'false'}" aria-controls="gatePanel">
           <span class="gi">${gateIcon(g.key)}</span>
           <div class="hm-g-tx">
-            <b>${U.esc(g.title)}</b>
-            <span>${U.esc(g.short || g.lead)}</span>
+            <b>${CG.t('gate.' + g.key)}</b>
+            <span>${CG.t('gate.' + g.key + 'Short')}</span>
           </div>
           <span class="hm-g-arrow">${active ? '收起' : '展开'}<svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span>
         </button>`;
@@ -223,7 +228,7 @@
     </section>
 
     <section class="hm-sec">
-      ${sechead('04', '按类型进入', '全部素材', '#/market')}
+      ${sechead('04', '按类型进入', 'hm.sec4', '全部素材', '#/market')}
       <div class="hm-types">
         ${TYPE_LIST.map(t => `
           <a class="hm-type" href="#/market?type=${t[0]}" data-typego="${t[0]}">
@@ -236,36 +241,36 @@
     </section>
 
     <section class="hm-sec">
-      ${sechead('05', '精选合集', '', '')}
-      <p class="seclead">由编辑按主题挑选，每期更新。</p>
+      ${sechead('05', '精选合集', 'hm.sec5', '', '')}
+      <p class="seclead" data-i18n="hm.sec5Lead">由编辑按主题挑选，每期更新。</p>
       <div class="hm-coll">
         <a class="coll big" href="#/market?type=video">
           <img src="${U.cover(picks[0])}" alt="">
-          <div class="coll-ov"><b>城市与夜</b><span>都市空镜 · 霓虹色调 · 4K</span></div>
+          <div class="coll-ov"><b data-i18n="hm.coll1">城市与夜</b><span data-i18n="hm.coll1Sub">都市空镜 · 霓虹色调 · 4K</span></div>
         </a>
         <a class="coll" href="#/market?type=image">
           <img src="${U.cover(picks[1])}" alt="">
-          <div class="coll-ov"><b>概念设定</b><span>美术参考 · 设定集</span></div>
+          <div class="coll-ov"><b data-i18n="hm.coll2">概念设定</b><span data-i18n="hm.coll2Sub">美术参考 · 设定集</span></div>
         </a>
         <a class="coll" href="#/market?type=audio">
           <img src="${U.cover(picks[2])}" alt="">
-          <div class="coll-ov"><b>氛围音景</b><span>配乐 · 环境声</span></div>
+          <div class="coll-ov"><b data-i18n="hm.coll3">氛围音景</b><span data-i18n="hm.coll3Sub">配乐 · 环境声</span></div>
         </a>
       </div>
     </section>
 
     <section class="hm-sec">
-      ${sechead('06', '最近热门', '查看更多', '#/market?sort=popular')}
+      ${sechead('06', '最近热门', 'hm.sec6', '查看更多', '#/market?sort=popular')}
       <div class="mktgrid">${hot.map(w => assetCard(w)).join('')}</div>
     </section>
 
     <section class="hm-cta">
       <div class="hm-cta-in">
-        <h2>把你手上的素材登记进来</h2>
-        <p>上传即生成指纹与三路存证，配置好授权就能进入市场。</p>
+        <h2 data-i18n="hm.ctaH">把你手上的素材登记进来</h2>
+        <p data-i18n="hm.ctaP">上传即生成指纹与三路存证，配置好授权就能进入市场。</p>
         <div class="row" style="justify-content:center;gap:10px">
-          <a class="btn pri lg" href="#/upload">${I.up}上传作品</a>
-          <a class="btn lg" href="#/consumer">去看消费者中心</a>
+          <a class="btn pri lg" href="#/upload">${I.up}<span data-i18n="hm.ctaBtn">上传作品</span></a>
+          <a class="btn lg" href="#/consumer" data-i18n="hm.ctaBtn2">去看消费者中心</a>
         </div>
       </div>
     </section>`;
@@ -461,7 +466,7 @@
     });
 
     const fg = (title, key, items, cnt) => `
-      <div class="fgroup"><h4>${title}</h4>
+      <div class="fgroup"><h4 data-i18n="mk.f-${key}">${title}</h4>
         ${items.map(it => `<label>
           <input type="checkbox" ${f[key].indexOf(it[0]) >= 0 ? 'checked' : ''} data-fg="${key}" value="${it[0]}">
           <span>${it[1]}</span>
@@ -471,21 +476,21 @@
 
     const pageNav = pages > 1 ? `
       <div class="pager">
-        <button class="btn sm" data-pg="${page - 1}" ${page <= 1 ? 'disabled' : ''}>上一页</button>
-        <span class="pg-info">第 <b>${page}</b> / ${pages} 页 · 共 ${total.toLocaleString()} 件</span>
-        <button class="btn sm" data-pg="${page + 1}" ${page >= pages ? 'disabled' : ''}>下一页</button>
+        <button class="btn sm" data-pg="${page - 1}" ${page <= 1 ? 'disabled' : ''} data-i18n="mk.prev">上一页</button>
+        <span class="pg-info"><b>${page}</b> / ${pages} · ${total.toLocaleString()} <span data-i18n="mk.assets">件</span></span>
+        <button class="btn sm" data-pg="${page + 1}" ${page >= pages ? 'disabled' : ''} data-i18n="mk.next">下一页</button>
       </div>` : '';
 
     return `
     <div class="ph">
-      <div><h1>素材市场</h1>
-        <p>${total.toLocaleString()} 件可采购素材 · 预览带水印 · 采购后交付无水印原件</p></div>
+      <div><h1 data-i18n="mk.title">素材市场</h1>
+        <p><span>${total.toLocaleString()}</span> <span data-i18n="mk.subTail">件可采购素材 · 预览带水印 · 采购后交付无水印原件</span></p></div>
       <div class="ph-r">
         <div class="seg">
-          ${SORTS.map(s => `<button class="${sort === s[0] ? 'on' : ''}" data-sort="${s[0]}">${s[1]}</button>`).join('')}
+          ${SORTS.map(s => `<button class="${sort === s[0] ? 'on' : ''}" data-sort="${s[0]}">${CG.t(s[2] || s[1])}</button>`).join('')}
         </div>
         <button class="btn sm clr-filter" data-act="clrf"
-          ${(f.type.length || f.lic.length || f.price !== 'all' || q) ? '' : 'disabled'}>清空筛选</button>
+          ${(f.type.length || f.lic.length || f.price !== 'all' || q) ? '' : 'disabled'} data-i18n="mk.clear">清空筛选</button>
       </div>
     </div>
 
@@ -494,23 +499,22 @@
 
     <div class="mkt-wrap">
       <aside class="mkt-side">
-        ${fg('类型', 'type', TYPE_LIST.map(t => [t[0], t[1]]), typeCnt)}
-        ${fg('授权方式', 'lic', [
-      ['ai-training', 'AI 训练'], ['clip', '片段引用'], ['adaptation', '改编权'],
-      ['full', '全版权'], ['editorial', '编辑用途']
-    ], licCnt)}
-        <div class="fgroup"><h4>价格</h4>
-          ${[['all', '全部'], ['low', '100 元以下'], ['mid', '100 – 1000 元'], ['high', '1000 元以上']]
+        ${fg('类型', 'type', TYPE_LIST.map(t => [t[0], U.typeOf(t[0])]), typeCnt)}
+        ${fg('授权方式', 'lic', ['ai-training', 'clip', 'adaptation', 'full', 'editorial']
+      .map(k => [k, U.licOf(k).short]), licCnt)}
+        <div class="fgroup"><h4 data-i18n="mk.f-price">价格</h4>
+          ${[['all', 'mk.priceAll', '全部'], ['low', 'mk.price1', '100 元以下'],
+      ['mid', 'mk.price2', '100 – 1000 元'], ['high', 'mk.price3', '1000 元以上']]
         .map(p => `<label><input type="radio" name="pz" ${f.price === p[0] ? 'checked' : ''}
-          data-price="${p[0]}"><span>${p[1]}</span></label>`).join('')}
+          data-price="${p[0]}"><span data-i18n="${p[1]}">${p[2]}</span></label>`).join('')}
         </div>
       </aside>
 
       <div>
         ${slice.length ? `<div class="mktgrid">${slice.map(w => assetCard(w)).join('')}</div>`
-        : `<div class="empty">${CG.emptyArt('search')}<b>没有匹配的素材</b>
-           <p>换关键词，或清空筛选看全部 ${CG.virtual.count().toLocaleString()} 件</p>
-           <button class="btn" data-act="clrf">清空筛选</button></div>`}
+        : `<div class="empty">${CG.emptyArt('search')}<b data-i18n="mk.empty">没有匹配的素材</b>
+           <p data-i18n="mk.emptySub">换个筛选条件，或直接清空。</p>
+           <button class="btn" data-act="clrf" data-i18n="mk.clear">清空筛选</button></div>`}
         ${pageNav}
       </div>
     </div>`;
