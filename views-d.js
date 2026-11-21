@@ -40,11 +40,11 @@
   /* 主视觉轮播：一件作品一张卡，左右箭头翻页。
      每类的展示口径（规格 / 后缀 / 授权标签 / 起价）按类型给，避免所有卡长得一样。 */
   const CAR_CFG = {
-    video: { kind: '视频', spec: '4K · 24fps', suffix: '· 全片', price: '1,200', lic: ['AI 训练授权', '片段引用', '改编权'] },
-    image: { kind: '图片', spec: '6000×4000', suffix: '· 设定集', price: '680', lic: ['AI 训练授权', '片段引用'] },
-    audio: { kind: '音频', spec: '48k · 24bit', suffix: '· 配乐', price: '360', lic: ['片段引用', '改编权'] },
-    doc: { kind: '剧本文档', spec: '48 页 · PDF', suffix: '· 剧本', price: '2,400', lic: ['改编权', '片段引用'] },
-    model: { kind: '3D 模型', spec: 'PBR · GLB', suffix: '· 角色模型', price: '1,900', lic: ['AI 训练授权', '片段引用'] }
+    video: { kind: '视频', spec: '4K · 24fps', suffix: '· 全片', price: '1,200', lic: ['ai-training', 'clip', 'adaptation'] },
+    image: { kind: '图片', spec: '6000×4000', suffix: '· 设定集', price: '680', lic: ['ai-training', 'clip'] },
+    audio: { kind: '音频', spec: '48k · 24bit', suffix: '· 配乐', price: '360', lic: ['clip', 'adaptation'] },
+    doc: { kind: '剧本文档', spec: '48 页 · PDF', suffix: '· 剧本', price: '2,400', lic: ['adaptation', 'clip'] },
+    model: { kind: '3D 模型', spec: 'PBR · GLB', suffix: '· 角色模型', price: '1,900', lic: ['ai-training', 'clip'] }
   };
   const CAR_OWNERS = ['星野影像（香港）', '北岸概念艺术', '雾港声音设计', '孤山剧作社', '纸鸢三维工作室', '潮汐视觉数字科技'];
 
@@ -60,7 +60,7 @@
       const c = CAR_CFG[t];
       out.push({
         f: e.f, subject: e.s || '未命名素材',
-        kind: c.kind, spec: c.spec, suffix: c.suffix, price: c.price, lic: c.lic,
+        t, kind: c.kind, spec: c.spec, suffix: c.suffix, price: c.price, lic: c.lic,
         owner: CAR_OWNERS[i % CAR_OWNERS.length]
       });
     }
@@ -84,15 +84,15 @@
             <div class="lp-show-body">
               <div class="lp-show-h">
                 <b>${U.esc(it.subject)} ${U.esc(it.suffix)}</b>
-                <span class="pill ok">在售</span>
+                <span class="pill ok">${U.statusPill('listed')[0]}</span>
               </div>
-              <div class="lp-show-own">${U.esc(it.owner)} · ${U.esc(it.kind)} · 入库 2026-09-24</div>
+              <div class="lp-show-own">${U.esc(it.owner)} · ${U.esc(U.typeOf(it.t))} · ${CG.t('lp.stocked')} 2026-09-24</div>
               <div class="lp-show-badges">
-                ${it.lic.map(l => `<span>${U.esc(l)}</span>`).join('')}
+                ${it.lic.map(l => `<span>${U.esc(U.licOf(l).short)}</span>`).join('')}
               </div>
               <div class="lp-show-foot">
-                <b>¥${U.esc(it.price)}</b><span>起</span>
-                <em>询价 →</em>
+                <b>¥${U.esc(it.price)}</b><span>${CG.t('common.start')}</span>
+                <em>${CG.t('mk.inq')}</em>
               </div>
             </div>
           </div>

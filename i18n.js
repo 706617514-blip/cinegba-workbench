@@ -299,6 +299,8 @@
   def('dash.feed', '平台动态', 'Activity');
   def('dash.note', '口径：按已结算 + 待结算的授权收入统计', 'Basis: settled plus pending licence revenue');
 
+  def('lp.stocked', '入库', 'Ingested');
+
   CG.I18N = { zh: ZH, en: EN };
 
   const LS = 'cg-lang';
